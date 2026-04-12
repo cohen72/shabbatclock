@@ -176,15 +176,32 @@ struct CitySearchView: View {
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
-        let name: String
-        if let address = item.address {
-            name = address.shortAddress ?? address.fullAddress
-        } else {
-            name = item.name ?? "Selected Location"
+        // Re-geocode with the app's locale so the saved name matches the app language,
+        // not the device's system locale.
+        Task {
+            let geocoder = CLGeocoder()
+            let locale = AppLanguage.current.effectiveLocale
+            let name: String
+            if let placemarks = try? await geocoder.reverseGeocodeLocation(location, preferredLocale: locale),
+               let placemark = placemarks.first {
+                let city = placemark.locality
+                let country = placemark.country
+                if let city, let country {
+                    name = "\(city), \(country)"
+                } else if let city {
+                    name = city
+                } else {
+                    name = placemark.name ?? item.name ?? "Selected Location"
+                }
+            } else if let address = item.address {
+                name = address.shortAddress ?? address.fullAddress
+            } else {
+                name = item.name ?? "Selected Location"
+            }
+            locationManager.setManualLocation(location, name: name)
+            ZmanimService.shared.calculateTodayZmanim()
+            dismiss()
         }
-        locationManager.setManualLocation(location, name: name)
-        ZmanimService.shared.calculateTodayZmanim()
-        dismiss()
     }
 }
 

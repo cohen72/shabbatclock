@@ -42,26 +42,23 @@ struct PremiumView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 12)
 
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 20) {
-                        // Hero section
-                        heroSection
-
-                        // Features
-                        featuresSection
-
-                        // Plan selection
-                        planSelectionSection
-
-                        // Subscribe button
-                        subscribeButton
-
-                        // Fine print
-                        finePrintSection
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 20)
+                // Top content
+                VStack(spacing: 14) {
+                    heroSection
+                    featuresSection
                 }
+                .padding(.horizontal, 24)
+
+                Spacer(minLength: 12)
+
+                // Bottom-aligned: plans + subscribe + restore + fine print
+                VStack(spacing: 10) {
+                    planSelectionSection
+                    subscribeButton
+                    finePrintSection
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 12)
             }
         }
         .alert("Error", isPresented: $showingError) {
@@ -79,25 +76,23 @@ struct PremiumView: View {
     // MARK: - Hero Section
 
     private var heroSection: some View {
-        VStack(spacing: 10) {
-            // Animated star icon
+        VStack(spacing: 6) {
+            // Animated crown icon
             ZStack {
-                // Outer glow
                 Circle()
                     .fill(
                         RadialGradient(
                             colors: [Color.goldAccent.opacity(0.3), Color.clear],
                             center: .center,
-                            startRadius: 16,
-                            endRadius: 44
+                            startRadius: 12,
+                            endRadius: 34
                         )
                     )
-                    .frame(width: 88, height: 88)
+                    .frame(width: 64, height: 64)
                     .scaleEffect(pulseAnimation ? 1.1 : 0.9)
 
-                // Icon
                 Image(systemName: "crown.fill")
-                    .font(.system(size: 34))
+                    .font(.system(size: 28))
                     .foregroundStyle(
                         LinearGradient(
                             colors: [Color.goldAccent, Color(hex: "E8B04A")],
@@ -108,11 +103,11 @@ struct PremiumView: View {
             }
 
             Text("Go Premium")
-                .font(AppFont.header(26))
+                .font(AppFont.header(24))
                 .foregroundStyle(.textPrimary)
 
             Text("Unlock the full Shabbat Clock experience")
-                .font(AppFont.body(15))
+                .font(AppFont.body(14))
                 .foregroundStyle(.textSecondary)
                 .multilineTextAlignment(.center)
         }
@@ -123,35 +118,35 @@ struct PremiumView: View {
     private var featuresSection: some View {
         VStack(spacing: 0) {
             ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
-                HStack(spacing: 14) {
-                    // Icon circle
+                HStack(spacing: 12) {
                     Image(systemName: feature.icon)
-                        .font(.system(size: 18))
+                        .font(.system(size: 15))
                         .foregroundStyle(.goldAccent)
-                        .frame(width: 40, height: 40)
+                        .frame(width: 32, height: 32)
                         .background(
                             Circle()
                                 .fill(Color.goldAccent.opacity(0.12))
                         )
 
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 1) {
                         Text(feature.title)
-                            .font(AppFont.body(15))
+                            .font(AppFont.body(14))
                             .fontWeight(.semibold)
                             .foregroundStyle(.textPrimary)
 
                         Text(feature.subtitle)
-                            .font(AppFont.caption(12))
+                            .font(AppFont.caption(11))
                             .foregroundStyle(.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     Spacer()
 
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(.goldAccent)
                 }
-                .padding(.vertical, 10)
+                .padding(.vertical, 8)
 
                 if index < features.count - 1 {
                     Divider()
@@ -159,8 +154,8 @@ struct PremiumView: View {
                 }
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 2)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.surfaceCard)
@@ -174,37 +169,33 @@ struct PremiumView: View {
     // MARK: - Plan Selection
 
     private var planSelectionSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
             // Yearly plan (recommended)
-            if let yearly = store.yearlyProduct {
-                planCard(
-                    product: yearly,
-                    title: String(localized: "Yearly"),
-                    pricePerPeriod: yearly.displayPrice + String(localized: "/year"),
-                    subtitle: weeklyEquivalentLabel(for: yearly),
-                    badge: savingsBadge,
-                    isSelected: selectedPlan == StoreManager.yearlyID
-                )
-                .onTapGesture { selectedPlan = StoreManager.yearlyID }
-            }
+            planCard(
+                title: String(localized: "Yearly"),
+                pricePerPeriod: store.yearlyProduct.map { $0.displayPrice + String(localized: "/year") }
+                    ?? String(localized: "$14.99/year"),
+                subtitle: store.yearlyProduct.flatMap { weeklyEquivalentLabel(for: $0) }
+                    ?? String(localized: "Just $0.29/week"),
+                badge: savingsBadge ?? String(localized: "SAVE 71%"),
+                isSelected: selectedPlan == StoreManager.yearlyID
+            )
+            .onTapGesture { selectedPlan = StoreManager.yearlyID }
 
             // Weekly plan
-            if let weekly = store.weeklyProduct {
-                planCard(
-                    product: weekly,
-                    title: String(localized: "Weekly"),
-                    pricePerPeriod: weekly.displayPrice + String(localized: "/week"),
-                    subtitle: nil,
-                    badge: nil,
-                    isSelected: selectedPlan == StoreManager.weeklyID
-                )
-                .onTapGesture { selectedPlan = StoreManager.weeklyID }
-            }
+            planCard(
+                title: String(localized: "Weekly"),
+                pricePerPeriod: store.weeklyProduct.map { $0.displayPrice + String(localized: "/week") }
+                    ?? String(localized: "$0.99/week"),
+                subtitle: nil,
+                badge: nil,
+                isSelected: selectedPlan == StoreManager.weeklyID
+            )
+            .onTapGesture { selectedPlan = StoreManager.weeklyID }
         }
     }
 
     private func planCard(
-        product: Product,
         title: String,
         pricePerPeriod: String,
         subtitle: String?,
@@ -266,8 +257,8 @@ struct PremiumView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(isSelected ? .goldAccent : .textSecondary)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color.surfaceCard)
@@ -284,7 +275,7 @@ struct PremiumView: View {
     // MARK: - Subscribe Button
 
     private var subscribeButton: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
             Button {
                 purchaseSelected()
             } label: {
@@ -300,7 +291,7 @@ struct PremiumView: View {
                 }
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
+                .padding(.vertical, 14)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(
@@ -339,7 +330,7 @@ struct PremiumView: View {
     // MARK: - Fine Print
 
     private var finePrintSection: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             Text("Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. You can manage and cancel your subscriptions in your App Store account settings.")
                 .font(.system(size: 10))
                 .foregroundStyle(.textSecondary.opacity(0.6))

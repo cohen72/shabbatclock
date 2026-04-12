@@ -111,9 +111,10 @@ struct SettingsView: View {
                             .font(AppFont.body())
                             .foregroundStyle(.textPrimary)
 
-                        Text("Tap to allow alarms in Shabbat Clock settings for full features.")
+                        Text("Allow in Settings for full alarm features")
                             .font(AppFont.caption(12))
                             .foregroundStyle(.textSecondary)
+                            .lineLimit(1)
                     }
 
                     Spacer()
@@ -123,14 +124,7 @@ struct SettingsView: View {
                         .foregroundStyle(.goldAccent)
                 }
                 .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.goldAccent.opacity(0.08))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.goldAccent.opacity(0.2), lineWidth: 0.5)
-                        )
-                )
+                .settingsCard()
             }
         }
     }

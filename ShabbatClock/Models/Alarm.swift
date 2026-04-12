@@ -17,6 +17,12 @@ final class Alarm {
     var snoozeEnabledValue: Bool?
     var alarmDurationSecondsValue: Int?
 
+    // MARK: - Zman Linkage
+    /// Raw value of ZmanimService.ZmanType (e.g., "shma", "netz"). Nil for manually created alarms.
+    var zmanTypeRawValue: String?
+    /// How many minutes before the zman this alarm is set (0, 5, 10, 15, 30). Nil for manually created alarms.
+    var zmanMinutesBefore: Int?
+
     /// Snooze duration in seconds (defaults to 300 / 5 min for migrated alarms).
     var snoozeDurationSeconds: Int {
         get { snoozeDurationSecondsValue ?? 300 }

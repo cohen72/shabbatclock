@@ -132,22 +132,25 @@ final class LocationManager: NSObject, ObservableObject {
     private func reverseGeocode(_ location: CLLocation) {
         Task {
             do {
-                guard let request = MKReverseGeocodingRequest(location: location) else {
-                    self.locationName = "__unknown__"
-                    return
-                }
-                let mapItems = try await request.mapItems
-                if let item = mapItems.first {
-                    // Use item.address (iOS 26+) instead of addressRepresentations to avoid placemark deprecation
-                    if let address = item.address {
-                        self.locationName = address.shortAddress ?? address.fullAddress
-                    } else if let name = item.name {
+                // Use CLGeocoder with preferredLocale so the result matches the app's language,
+                // not the device's system locale (MKReverseGeocodingRequest doesn't support locale).
+                let geocoder = CLGeocoder()
+                let locale = AppLanguage.current.effectiveLocale
+                let placemarks = try await geocoder.reverseGeocodeLocation(location, preferredLocale: locale)
+                if let placemark = placemarks.first {
+                    let city = placemark.locality
+                    let country = placemark.country
+                    if let city, let country {
+                        self.locationName = "\(city), \(country)"
+                    } else if let city {
+                        self.locationName = city
+                    } else if let name = placemark.name {
                         self.locationName = name
                     } else {
                         self.locationName = "__unknown__"
                     }
-                    // Use the location's native timezone
-                    if let tz = item.timeZone {
+                    // Use the placemark's timezone
+                    if let tz = placemark.timeZone {
                         self.locationTimeZone = tz
                     }
                 }

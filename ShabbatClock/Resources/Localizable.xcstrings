@@ -54,6 +54,12 @@
         }
       }
     },
+    "$0.99/week" : {
+
+    },
+    "$14.99/year" : {
+
+    },
     "1.0.0" : {
 
     },
@@ -187,6 +193,16 @@
         }
       }
     },
+    "Accurate zmanim\nfor your location." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמנים מדויקים\nלמיקום שלך."
+          }
+        }
+      }
+    },
     "Actions" : {
       "localizations" : {
         "he" : {
@@ -303,8 +319,25 @@
         }
       }
     },
-    "Alarms are limited to 30 seconds. Allow alarms in Settings for full features." : {
-
+    "Alarms Enabled" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות מופעלות"
+          }
+        }
+      }
+    },
+    "Alerts Enabled" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות מאושרות"
+          }
+        }
+      }
     },
     "All 47 Sounds" : {
       "extractionState" : "manual",
@@ -328,7 +361,6 @@
       }
     },
     "Allow alarms in Settings for longer durations" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -337,6 +369,19 @@
           }
         }
       }
+    },
+    "Allow Critical Alerts" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אישור התראות קריטיות"
+          }
+        }
+      }
+    },
+    "Allow in Settings for full alarm features" : {
+
     },
     "Ana Bekoach" : {
       "extractionState" : "manual",
@@ -380,6 +425,16 @@
       }
     },
     "Auto-Stop" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כיבוי אוטומטי"
+          }
+        }
+      }
+    },
+    "Auto-Stop Alarms" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -761,6 +816,7 @@
       }
     },
     "Enable \"Alarms & Timers\" in Settings for longer durations" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -785,7 +841,7 @@
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "אפשור מיקום"
+            "value" : "הפעלת מיקום"
           }
         }
       }
@@ -942,6 +998,26 @@
         }
       }
     },
+    "Get precise candle lighting and havdalah times based on where you are. You can also choose your city manually." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קבלו זמני הדלקת נרות והבדלה מדויקים לפי המיקום שלכם. אפשר גם לבחור עיר ידנית."
+          }
+        }
+      }
+    },
+    "Get Started" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בואו נתחיל"
+          }
+        }
+      }
+    },
     "Go Premium" : {
       "localizations" : {
         "he" : {
@@ -1047,6 +1123,9 @@
           }
         }
       }
+    },
+    "Just $0.29/week" : {
+
     },
     "Just A Bit Annoying" : {
       "extractionState" : "manual",
@@ -1199,6 +1278,16 @@
     },
     "Location Access Disabled" : {
 
+    },
+    "Location Enabled" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מיקום מופעל"
+          }
+        }
+      }
     },
     "Location Required" : {
       "localizations" : {
@@ -1421,6 +1510,16 @@
         }
       }
     },
+    "No need to touch\nyour phone." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין צורך לגעת\nבטלפון."
+          }
+        }
+      }
+    },
     "No previous purchases found" : {
       "localizations" : {
         "he" : {
@@ -1490,6 +1589,19 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "אישור"
+          }
+        }
+      }
+    },
+    "Onboarding" : {
+
+    },
+    "One quick permission and your Shabbat alarm works like the built-in Clock app — loud, on time, every time." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרשאה אחת קצרה והשעון מעורר לשבת שלך עובד כמו אפליקציית השעון המובנית — חזק, בזמן, בכל פעם."
           }
         }
       }
@@ -1610,6 +1722,16 @@
         }
       }
     },
+    "Prayer Times" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמני תפילה"
+          }
+        }
+      }
+    },
     "Preferable time for Mincha" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1690,6 +1812,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "דרגו את האפליקציה"
+          }
+        }
+      }
+    },
+    "Reliable Alarms" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות אמינות"
           }
         }
       }
@@ -1832,6 +1964,9 @@
         }
       }
     },
+    "SAVE 71%" : {
+
+    },
     "Search city..." : {
       "localizations" : {
         "he" : {
@@ -1964,6 +2099,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שבת שלום!"
+          }
+        }
+      }
+    },
+    "Silent mode? Do Not Disturb?\nWe ring anyway." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצב שקט? נא לא להפריע?\nאנחנו מצלצלים בכל זאת."
           }
         }
       }
@@ -2157,6 +2302,16 @@
         }
       }
     },
+    "Tap \"Allow\" on the next prompt" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחצו \"אפשר\" בהודעה הבאה"
+          }
+        }
+      }
+    },
     "Tap + to create\nyour first Shabbat alarm" : {
       "localizations" : {
         "he" : {
@@ -2183,6 +2338,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "תודה על התמיכה!"
+          }
+        }
+      }
+    },
+    "The alarm clock designed\nfor Shabbat." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השעון המעורר שתוכנן\nלשבת."
           }
         }
       }
@@ -2214,6 +2379,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ערב שבת הקרוב"
+          }
+        }
+      }
+    },
+    "This lets your alarm sound through silent mode." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זה מאפשר להתראה לצלצל גם במצב שקט."
           }
         }
       }
@@ -2418,6 +2593,16 @@
         }
       }
     },
+    "Wake up for tefilah with traditional melodies. Put your phone down — we'll handle the rest." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התעוררו לתפילה עם ניגונים מסורתיים. שימו את הטלפון בצד — אנחנו נדאג לשאר."
+          }
+        }
+      }
+    },
     "Wednesday" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2509,6 +2694,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שנתי"
+          }
+        }
+      }
+    },
+    "You will see this system alert" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תראו את ההודעה הזו מהמערכת"
+          }
+        }
+      }
+    },
+    "Your alarm stops automatically after the time you choose. This requires Critical Alert permission." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה נכבית אוטומטית אחרי הזמן שבחרת. נדרשת הרשאת התראה קריטית."
           }
         }
       }

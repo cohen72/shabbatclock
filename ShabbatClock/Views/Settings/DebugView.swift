@@ -48,23 +48,27 @@ struct DebugView: View {
                 onContinue: { showingLocationPrompt = false },
                 onSkip: { showingLocationPrompt = false }
             )
+            .applyLanguageOverride(AppLanguage.current)
         }
         .fullScreenCover(isPresented: $showingAlarmPrompt) {
             PermissionPromptView.alarms(
                 onContinue: { showingAlarmPrompt = false },
                 onSkip: { showingAlarmPrompt = false }
             )
+            .applyLanguageOverride(AppLanguage.current)
         }
         .fullScreenCover(isPresented: $showingNotificationPrompt) {
             PermissionPromptView.notifications(
                 onContinue: { showingNotificationPrompt = false },
                 onSkip: { showingNotificationPrompt = false }
             )
+            .applyLanguageOverride(AppLanguage.current)
         }
         .fullScreenCover(isPresented: $showingOnboarding) {
             OnboardingView {
                 showingOnboarding = false
             }
+            .applyLanguageOverride(AppLanguage.current)
         }
     }
 
@@ -78,7 +82,7 @@ struct DebugView: View {
                 debugButton("Preview Onboarding") {
                     showingOnboarding = true
                 }
-                debugButton("Reset Onboarding (show on next launch)") {
+                debugButton("Reset Onboarding") {
                     hasCompletedOnboarding = false
                 }
                 stateRow("Completed", value: hasCompletedOnboarding ? "Yes" : "No")
@@ -142,6 +146,7 @@ struct DebugView: View {
             SectionHeader(title: "AlarmKit", icon: "alarm.fill")
 
             VStack(spacing: 1) {
+                stateRow("Fallback Mode", value: alarmService.isFallbackMode ? "Yes (30s)" : "No")
                 stateRow("Active Alarms", value: "\(alarmService.activeAlarms.count)")
                 stateRow("Next Alarm", value: alarmService.nextAlarmDate.map { dateString($0) } ?? "None")
 
@@ -194,14 +199,16 @@ struct DebugView: View {
         Button(action: action) {
             HStack {
                 Text(title)
-                    .font(AppFont.body())
+                    .font(.system(size: 13))
                     .foregroundStyle(.textPrimary)
+                    .lineLimit(1)
                 Spacer()
                 Image(systemName: "chevron.forward")
-                    .font(.system(size: 14))
+                    .font(.system(size: 11))
                     .foregroundStyle(.textSecondary)
             }
-            .padding(16)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 11)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.surfaceCard)
         }
@@ -211,14 +218,15 @@ struct DebugView: View {
     private func stateRow(_ label: String, value: String) -> some View {
         HStack {
             Text(label)
-                .font(AppFont.body())
+                .font(.system(size: 13))
                 .foregroundStyle(.textPrimary)
             Spacer()
             Text(value)
-                .font(AppFont.caption(12))
+                .font(.system(size: 12, weight: .medium, design: .monospaced))
                 .foregroundStyle(.textSecondary)
         }
-        .padding(16)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.surfaceCard)
     }

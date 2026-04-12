@@ -21,12 +21,13 @@ ShabbatClock is a Swift/SwiftUI iOS app that combines alarm functionality with J
 ShabbatClock/
 ├── App/
 │   ├── ShabbatClockApp.swift     # App entry point with SwiftData container + language override
-│   └── ContentView.swift          # Root view container with theme/language/tab management
+│   └── ContentView.swift          # Root view container with theme/language/tab/onboarding management
 ├── Models/
 │   ├── Alarm.swift                # SwiftData model for alarms
 │   ├── AlarmSound.swift           # Alarm sound configurations with localized display names
-│   └── ShabbatAlarmMetadata.swift # Metadata for AlarmKit integration
+│   └── ShabbatAlarmMetadata.swift # Metadata for AlarmKit integration (shared with widget target)
 ├── Views/
+│   ├── Onboarding/                # First-launch onboarding flow (OnboardingView)
 │   ├── MainView/                  # Main clock display (MainClockView, AnalogClockView)
 │   ├── AlarmList/                 # Alarm list (AlarmListView, AlarmRowView)
 │   ├── AlarmEdit/                 # Alarm creation/editing (AlarmEditView, RepeatDaysPicker, SoundPickerView)
@@ -34,19 +35,26 @@ ShabbatClock/
 │   ├── Settings/                  # App settings (SettingsView, PremiumView, DebugView)
 │   └── Components/                # Reusable UI (NightSkyBackground, LocationRow, CitySearchView, PermissionPromptView)
 ├── Services/
-│   ├── AlarmKitService.swift     # AlarmKit integration (iOS 26+) — main alarm scheduling
-│   ├── StopAlarmIntent.swift     # App Intent for stopping alarms
+│   ├── AlarmKitService.swift     # AlarmKit integration (iOS 26+) — main alarm scheduling + auto-stop
+│   ├── StopAlarmIntent.swift     # App Intent for stopping alarms via Live Activity
 │   ├── ZmanimService.swift        # Jewish prayer time + Shabbat dashboard calculations
 │   ├── LocationManager.swift     # Location services with CLGeocoder locale support
-│   ├── AudioManager.swift        # Audio playback
+│   ├── AudioManager.swift        # Audio playback (preview only — AlarmKit handles alarm audio)
 │   └── StoreManager.swift        # StoreKit 2 subscription manager (singleton)
 ├── Products.storekit              # StoreKit testing configuration (weekly + yearly plans)
 ├── Utilities/
 │   └── Theme.swift                # Adaptive theme + AppearanceMode + AppLanguage + Bundle override
-└── Resources/
-    ├── Localizable.xcstrings      # String Catalog with English + Hebrew translations
-    ├── Sounds/                    # Alarm sound files organized by category
-    └── Media.xcassets/            # App icon, accent color, launch screen background
+├── Resources/
+│   ├── Localizable.xcstrings      # String Catalog with English + Hebrew translations (270+ strings)
+│   ├── InfoPlist.xcstrings        # Localized Info.plist keys (system dialog strings)
+│   ├── Sounds/                    # Alarm sound files organized by category
+│   └── Media.xcassets/            # App icon, accent color, launch screen background
+└── widgets/                       # Widget extension target (Live Activity for Dynamic Island)
+    ├── widgetsBundle.swift        # Widget bundle entry point
+    ├── widgetsLiveActivity.swift  # AlarmKit Live Activity UI (Lock Screen + Dynamic Island)
+    ├── ShabbatAlarmMetadata.swift # Shared metadata (copy of Models/ version)
+    ├── widgets.entitlements       # App Groups entitlement
+    └── Info.plist                 # Widget extension Info.plist
 ```
 
 ## Key Features
@@ -62,8 +70,12 @@ ShabbatClock/
   - Shabbat detection
   - `alarmKitID` - links to AlarmKit system alarm
 - **Service**: `AlarmKitService.swift` - AlarmKit integration (iOS 26+) for system-level alarm scheduling
-- **Intent**: `StopAlarmIntent.swift` - App Intent for dismissing alarms via Live Activity / Dynamic Island
-- **Audio**: `AudioManager.shared` - Plays custom alarm sounds with preview support
+  - Layered auto-stop: local notification (primary, works when app killed) + in-process Task.sleep (backup)
+  - Fallback mode: if AlarmKit denied, uses critical alert notifications (30s max)
+  - Auto-migration: when user grants AlarmKit later, migrates from fallback to AlarmKit
+  - Custom alarm sounds via `AlertConfiguration.AlertSound.named()`
+- **Intent**: `StopAlarmIntent.swift` - LiveActivityIntent for stopping alarms
+- **Audio**: `AudioManager.shared` - Sound preview only (AlarmKit handles alarm audio)
 
 ### 2. Zmanim (Prayer Times)
 - **Service**: `ZmanimService.swift`
@@ -92,7 +104,8 @@ ShabbatClock/
 - Timezone resolution for manual locations
 
 ### 5. Localization (English + Hebrew)
-- **String Catalog**: `Resources/Localizable.xcstrings` — 100+ strings with Hebrew translations
+- **String Catalog**: `Resources/Localizable.xcstrings` — 270+ strings with Hebrew translations
+- **Info.plist localization**: `Resources/InfoPlist.xcstrings` — system dialog strings (location, alarms)
 - **In-app language switching**: System / English / עברית picker in Settings
 - **Bundle override**: `OverriddenBundle` swizzles `Bundle.main` for immediate language switching
   - `AppLanguage.applyBundleOverride()` called on app init and language change
@@ -117,7 +130,25 @@ ShabbatClock/
 - **Appearance setting**: `AppearanceMode` enum (system/light/dark) in `@AppStorage("appearanceMode")`
 - **Tab bar**: Uses system material (floating tab bar in iOS 18+), `.preferredColorScheme()` ensures dark materials
 
-### 7. Premium / Subscription System
+### 7. Onboarding (First Launch)
+- **View**: `OnboardingView.swift` — 4-page paged TabView with dot indicators
+- **Flow**: Welcome → Alarms → Notifications → Location (ordered by importance)
+- **Gating**: `@AppStorage("hasCompletedOnboarding")` — shows once, set to true on completion
+- **Permission pages**: Each educates then triggers the system dialog; "Not Now" skips
+- **Already-granted detection**: Button turns green with checkmark if permission already approved
+- **Notifications page**: Custom layout with red warning card previewing the Critical Alerts dialog
+- **RTL**: Inherits language override from ContentView fullScreenCover
+- **Debug**: Previewable and resettable from Settings > Debug > Onboarding
+
+### 8. Permission System
+- **Pre-permission prompts**: `PermissionPromptView.swift` — full-screen education before system dialogs
+- **Just-in-time**: Permissions are NEVER requested at launch; always contextual
+- **Onboarding**: Primary path — handles alarms, notifications, location during first launch
+- **Fallback**: `AlarmEditView` catches missing permissions when saving first alarm
+- **Location**: `LocationRow` shows pre-permission prompt when tapped without authorization
+- **Denied handling**: Settings deep-link offered when permission was previously denied
+
+### 9. Premium / Subscription System
 - **StoreManager**: `StoreManager.shared` - Centralized StoreKit 2 subscription manager
 - **Plans**: Weekly ($0.99/week) and Yearly ($14.99/year, ~71% savings)
 - **Product IDs**: `com.shabbatclock.app.premium.weekly`, `com.shabbatclock.app.premium.yearly`
@@ -155,6 +186,9 @@ final class Alarm {
     var alarmKitID: UUID?
     var snoozeDurationSecondsValue: Int?
     var snoozeEnabledValue: Bool?
+    var alarmDurationSecondsValue: Int?
+    var zmanTypeRawValue: String?
+    var zmanMinutesBefore: Int?
 }
 ```
 
@@ -196,7 +230,9 @@ Supported zmanim (prayer times):
 - **SoundPickerView** - Categorized alarm sound selection with preview
 - **LocationRow** - Tappable location display (resolves `"__unknown__"` sentinel to localized text)
 - **CitySearchView** - MapKit-powered city search
-- **PermissionPromptView** - Permission request UI
+- **PermissionPromptView** - Pre-permission education (location, alarms, notifications variants)
+- **OnboardingView** - First-launch paged flow with permission requests
+- **DebugView** - DEBUG-only tools: permission previews, onboarding reset, AlarmKit state
 - **SectionHeader** - Settings section header (uses `LocalizedStringKey`)
 - **ShabbatTimeCard** - Compact candle lighting / havdalah time display
 
@@ -220,8 +256,11 @@ Supported zmanim (prayer times):
 1. Alarms use SwiftData for persistence
 2. Access via `@Query` in views or `AlarmKitService.shared`
 3. Alarm scheduling is handled by AlarmKit (iOS 26+) — never use UNUserNotificationCenter for alarm delivery
-4. Repeat days use 0-based week indexing (0=Sunday, 6=Saturday)
-5. Default alarm label uses `String(localized: "Alarm")` for locale-aware defaults
+4. Auto-stop uses a layered approach: local notification (primary, works when app killed) + in-process Task.sleep (backup)
+5. If AlarmKit denied, fallback mode uses critical alert notifications (30s max duration)
+6. Repeat days use 0-based week indexing (0=Sunday, 6=Saturday)
+7. Default alarm label uses `String(localized: "Alarm")` for locale-aware defaults
+8. New SwiftData properties must use optional backing (`propertyValue: Type?`) with computed getters for defaults — required for lightweight migration
 
 ### Zmanim Calculations
 1. `ZmanimService.shared` is the main interface
@@ -290,7 +329,20 @@ xcodebuild -project ShabbatClock.xcodeproj -scheme ShabbatClock -destination 'pl
 - Alarms are scheduled via AlarmKit (iOS 26+), which provides system-level alarm behavior
 - AlarmKit alarms override Do Not Disturb and work without the app running
 - `AlarmKitService.shared` is the main interface for scheduling/canceling alarms
-- Live Activity / Dynamic Island support via widget extension
+- Live Activity / Dynamic Island support via widget extension (`widgets/` target)
+- Auto-stop: layered approach — UNNotification at `fireTime + duration` (works when app killed) + in-process Task.sleep
+- Fallback mode: if user denies AlarmKit, uses critical alert notifications (limited to 30s sound)
+- Custom sounds: `AlertConfiguration.AlertSound.named("FileName.m4a")`
+- Widget extension requires App Groups (`group.com.shabbatclock.app`) for shared data
+- `ShabbatAlarmMetadata` must be kept in sync between `ShabbatClock/Models/` and `widgets/`
+
+### Permissions (Just-in-Time)
+- **Never request permissions at launch** — always contextual
+- Onboarding handles first-launch permissions (Alarms → Notifications → Location)
+- AlarmEditView catches missing permissions as fallback when saving
+- LocationRow shows pre-permission prompt when location not authorized
+- `AlarmKitService.configure()` only checks existing state, never prompts
+- Info.plist system dialog strings localized via `Resources/InfoPlist.xcstrings`
 
 ### In-App Language Switching
 - `OverriddenBundle` class swizzles `Bundle.main` to intercept `localizedString(forKey:value:table:)`
@@ -314,7 +366,9 @@ xcodebuild -project ShabbatClock.xcodeproj -scheme ShabbatClock -destination 'pl
 
 ### Planned Features
 - [x] Full KosherSwift integration for precise zmanim
-- [x] AlarmKit migration (iOS 26+)
+- [x] AlarmKit migration (iOS 26+) with auto-stop and fallback mode
+- [x] Onboarding flow with contextual permissions
+- [x] Live Activity / Dynamic Island support via widget extension
 - [x] Light/dark mode support with user override
 - [x] Custom location selection (CitySearchView)
 - [x] Premium/subscription tier system
