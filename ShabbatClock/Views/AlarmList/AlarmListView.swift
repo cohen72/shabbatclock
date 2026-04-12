@@ -16,22 +16,16 @@ struct AlarmListView: View {
     @AppStorage("isPremium") private var isPremium = false
 
     var body: some View {
-        ZStack {
-            LinearGradient.nightSky
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                LinearGradient.nightSky
+                    .ignoresSafeArea()
 
-            VStack(spacing: 0) {
                 if alarms.isEmpty {
                     emptyStateView
                 } else {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 0) {
-                            // Title + add button
-                            headerSection
-                                .padding(.horizontal, 24)
-                                .padding(.top, 16)
-                                .padding(.bottom, 20)
-
                             // Alarm list
                             LazyVStack(spacing: 12) {
                                 ForEach(alarms) { alarm in
@@ -52,12 +46,32 @@ struct AlarmListView: View {
                                 }
                             }
                             .padding(.horizontal, 20)
+                            .padding(.bottom, 120)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Alarms")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 8) {
+                        if !isPremium {
+                            Text("\(alarms.count)/\(freeAlarmLimit)")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(.goldAccent)
+                        }
 
-                            // Halakhic compliance banner
-                            halakhicBanner
-                                .padding(.horizontal, 20)
-                                .padding(.top, 24)
-                                .padding(.bottom, 120)
+                        Button {
+                            if canAddAlarm {
+                                newAlarm = Alarm()
+                            } else {
+                                showingPremiumAlert = true
+                            }
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundStyle(.goldAccent)
                         }
                     }
                 }
@@ -65,9 +79,11 @@ struct AlarmListView: View {
         }
         .sheet(item: $selectedAlarm) { alarm in
             AlarmEditView(alarm: alarm, isNew: false)
+                .applyLanguageOverride(AppLanguage.current)
         }
         .sheet(item: $newAlarm) { alarm in
             AlarmEditView(alarm: alarm, isNew: true)
+                .applyLanguageOverride(AppLanguage.current)
         }
         .alert("Upgrade to Premium", isPresented: $showingPremiumAlert) {
             Button("Maybe Later", role: .cancel) {}
@@ -77,58 +93,10 @@ struct AlarmListView: View {
         }
     }
 
-    // MARK: - Header Section
-
-    private var headerSection: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Alarms")
-                    .font(.system(size: 34, weight: .bold, design: .default))
-                    .foregroundStyle(.white)
-
-                Text("RITUAL WAKING SCHEDULE")
-                    .font(.system(size: 11, weight: .semibold, design: .default))
-                    .foregroundStyle(.textSecondary.opacity(0.6))
-                    .tracking(2)
-            }
-
-            Spacer()
-
-            VStack(spacing: 8) {
-                Button {
-                    if canAddAlarm {
-                        newAlarm = Alarm()
-                    } else {
-                        showingPremiumAlert = true
-                    }
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 40, height: 40)
-                        .background(
-                            Circle()
-                                .fill(Color.accentPurple)
-                        )
-                }
-
-                if !isPremium {
-                    Text("\(alarms.count)/\(freeAlarmLimit)")
-                        .font(.system(size: 11, weight: .semibold, design: .default))
-                        .foregroundStyle(.goldAccent)
-                }
-            }
-        }
-    }
-
     // MARK: - Empty State
 
     private var emptyStateView: some View {
         VStack(spacing: 0) {
-            headerSection
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-
             Spacer()
 
             VStack(spacing: 24) {
@@ -151,37 +119,6 @@ struct AlarmListView: View {
             Spacer()
             Spacer()
         }
-    }
-
-    // MARK: - Halakhic Compliance Banner
-
-    private var halakhicBanner: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "info.circle.fill")
-                .font(.system(size: 18))
-                .foregroundStyle(.accentPurple)
-                .padding(.top, 2)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Halakhic Compliance")
-                    .font(.system(size: 14, weight: .semibold, design: .default))
-                    .foregroundStyle(.textPrimary)
-
-                Text("All Shabbat alarms are programmed to automatically silence after 30 seconds to ensure no forbidden manual interaction is required.")
-                    .font(.system(size: 12, weight: .regular, design: .default))
-                    .foregroundStyle(.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.accentPurple.opacity(0.2), lineWidth: 0.5)
-                )
-        )
     }
 
     // MARK: - Actions

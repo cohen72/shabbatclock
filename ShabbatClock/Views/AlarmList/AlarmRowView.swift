@@ -13,17 +13,17 @@ struct AlarmRowView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(alarm.timeString)
                         .font(.system(size: 38, weight: .bold, design: .default))
-                        .foregroundStyle(alarm.isEnabled ? .white : Color.white.opacity(0.4))
+                        .foregroundStyle(alarm.isEnabled ? .textPrimary : .textSecondary.opacity(0.6))
 
                     Text(alarm.periodString)
                         .font(.system(size: 16, weight: .medium, design: .default))
-                        .foregroundStyle(Color.white.opacity(alarm.isEnabled ? 0.5 : 0.3))
+                        .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.7 : 0.4))
                 }
 
                 // Label
                 Text(alarm.label)
                     .font(.system(size: 14, weight: .regular, design: .default))
-                    .foregroundStyle(Color.white.opacity(alarm.isEnabled ? 0.6 : 0.3))
+                    .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.85 : 0.4))
 
                 // Repeat days
                 if !alarm.repeatDays.isEmpty {
@@ -47,11 +47,11 @@ struct AlarmRowView: View {
         .padding(.vertical, 18)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.white.opacity(alarm.isEnabled ? 0.07 : 0.03))
+                .fill(alarm.isEnabled ? Color.surfaceCard : Color.surfaceSubtle)
                 .overlay(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .stroke(
-                            Color.white.opacity(alarm.isEnabled ? 0.1 : 0.05),
+                            Color.surfaceBorder.opacity(alarm.isEnabled ? 1 : 0.5),
                             lineWidth: 0.5
                         )
                 )
@@ -109,7 +109,7 @@ struct AlarmRowCompact: View {
                     minute: 30,
                     isEnabled: true,
                     label: "Shacharis",
-                    repeatDays: [6] // Saturday
+                    repeatDays: [6]
                 )
             )
 

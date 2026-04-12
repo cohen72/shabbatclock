@@ -6,18 +6,14 @@ struct ZmanimView: View {
     @StateObject private var locationManager = LocationManager.shared
 
     @State private var showingAlarmSheet = false
+    @State private var showingCitySearch = false
     @State private var selectedZman: ZmanimService.Zman?
 
     var body: some View {
-        ZStack {
-            LinearGradient.nightSky
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                // Header
-                headerView
-                    .padding(.horizontal, 24)
-                    .padding(.top, 16)
+        NavigationStack {
+            ZStack {
+                LinearGradient.nightSky
+                    .ignoresSafeArea()
 
                 if zmanimService.isLoading {
                     loadingView
@@ -26,24 +22,68 @@ struct ZmanimView: View {
                 } else {
                     // Zmanim list
                     ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(zmanimService.todayZmanim) { zman in
-                                ZmanRowView(zman: zman) {
-                                    selectedZman = zman
-                                    showingAlarmSheet = true
+                        VStack(spacing: 0) {
+                            locationInfoView
+                                .padding(.horizontal, 24)
+                                .padding(.bottom, 8)
+
+                            let nextZmanId = zmanimService.todayZmanim.first(where: { $0.time > Date() })?.id
+                            LazyVStack(spacing: 6) {
+                                ForEach(zmanimService.todayZmanim) { zman in
+                                    ZmanRowView(zman: zman, isNext: zman.id == nextZmanId) {
+                                        selectedZman = zman
+                                        showingAlarmSheet = true
+                                    }
                                 }
                             }
+                            .padding(.horizontal, 16)
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.top, 16)
                         .padding(.bottom, 120)
                     }
+                    .refreshable {
+                        if !locationManager.isUsingManualLocation {
+                            locationManager.requestLocation()
+                        }
+                        zmanimService.calculateTodayZmanim()
+                    }
                 }
+            }
+            .navigationTitle("Zmanim")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingCitySearch = true
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: "location.fill")
+                                .font(.system(size: 10))
+                            if locationManager.locationName == "__unknown__" {
+                                Text("Unknown Location")
+                                    .font(.system(size: 13, weight: .medium))
+                            } else {
+                                Text(locationManager.locationName)
+                                    .font(.system(size: 13, weight: .medium))
+                            }
+                        }
+                        .foregroundStyle(.textSecondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .sheet(isPresented: $showingCitySearch) {
+                CitySearchView()
+                    .applyLanguageOverride(AppLanguage.current)
             }
         }
         .onAppear {
             if zmanimService.todayZmanim.isEmpty {
-                locationManager.requestLocation()
+                if !locationManager.isUsingManualLocation {
+                    locationManager.requestLocation()
+                }
+                zmanimService.calculateTodayZmanim()
             }
         }
         .onChange(of: locationManager.location) { _, _ in
@@ -52,45 +92,18 @@ struct ZmanimView: View {
         .sheet(isPresented: $showingAlarmSheet) {
             if let zman = selectedZman {
                 CreateAlarmFromZmanSheet(zman: zman)
+                    .applyLanguageOverride(AppLanguage.current)
             }
         }
     }
 
     // MARK: - Subviews
 
-    private var headerView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Zmanim")
-                    .font(AppFont.header(28))
-                    .foregroundStyle(.textPrimary)
-
-                Spacer()
-
-                // Refresh button
-                Button {
-                    locationManager.requestLocation()
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 16))
-                        .foregroundStyle(.textSecondary)
-                }
-            }
-
-            // Location
-            HStack(spacing: 6) {
-                Image(systemName: "location.fill")
-                    .font(.system(size: 12))
-                Text(locationManager.locationName)
-                    .font(AppFont.body(14))
-            }
-            .foregroundStyle(.textSecondary)
-
-            // Date
-            Text(dateString)
-                .font(AppFont.caption(12))
-                .foregroundStyle(.textSecondary.opacity(0.7))
-        }
+    private var locationInfoView: some View {
+        Text(dateString)
+            .font(AppFont.caption(12))
+            .foregroundStyle(.textSecondary.opacity(0.7))
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var loadingView: some View {
@@ -143,7 +156,8 @@ struct ZmanimView: View {
 
     private var dateString: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE, MMMM d, yyyy"
+        formatter.locale = AppLanguage.current.effectiveLocale
+        formatter.dateStyle = .full
         return formatter.string(from: Date())
     }
 }
@@ -152,62 +166,69 @@ struct ZmanimView: View {
 
 struct ZmanRowView: View {
     let zman: ZmanimService.Zman
+    var isNext: Bool = false
     let onCreateAlarm: () -> Void
 
     @State private var showingInfo = false
 
-    private var isPast: Bool {
-        zman.time < Date()
-    }
-
     var body: some View {
-        HStack(spacing: 16) {
-            // Time
-            VStack(alignment: .leading, spacing: 2) {
-                Text(zman.timeString)
-                    .font(AppFont.header(20))
-                    .foregroundStyle(isPast ? .textSecondary.opacity(0.5) : .textPrimary)
+        HStack(spacing: 8) {
+            // Hebrew name
+            Text(zman.hebrewName)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.goldAccent)
+                .lineLimit(1)
 
-                Text(zman.englishName)
-                    .font(AppFont.body(14))
-                    .foregroundStyle(isPast ? .textSecondary.opacity(0.4) : .textSecondary)
+            // English name
+            Text(zman.englishName)
+                .font(.system(size: 13))
+                .foregroundStyle(.textSecondary)
+                .lineLimit(1)
+
+            // "Next" badge
+            if isNext {
+                Text("Next")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(Color.goldAccent)
+                    )
             }
 
             Spacer()
 
-            // Hebrew name
-            Text(zman.hebrewName)
-                .font(.system(size: 14))
-                .foregroundStyle(isPast ? .goldAccent.opacity(0.4) : .goldAccent)
+            // Time
+            Text(zman.timeString)
+                .font(.system(size: 16, weight: .semibold, design: .monospaced))
+                .foregroundStyle(.textPrimary)
 
             // Create alarm button
             Button(action: onCreateAlarm) {
                 Image(systemName: "alarm.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(isPast ? .accentPurple.opacity(0.4) : .accentPurple)
-                    .frame(width: 36, height: 36)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.accentPurple)
+                    .frame(width: 28, height: 28)
                     .background(
                         Circle()
-                            .fill(Color.white.opacity(isPast ? 0.05 : 0.1))
+                            .fill(Color.surfaceSubtle)
                     )
             }
-            .disabled(isPast)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(isPast ? 0.03 : 0.07))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.white.opacity(isPast ? 0.05 : 0.1), lineWidth: 0.5)
-                )
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.surfaceCard)
         )
         .onTapGesture {
             showingInfo = true
         }
         .sheet(isPresented: $showingInfo) {
             ZmanInfoSheet(zman: zman)
+                .applyLanguageOverride(AppLanguage.current)
         }
     }
 }
@@ -226,7 +247,7 @@ struct ZmanInfoSheet: View {
             VStack(spacing: 24) {
                 // Handle
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.white.opacity(0.3))
+                    .fill(Color.textSecondary.opacity(0.4))
                     .frame(width: 40, height: 4)
                     .padding(.top, 12)
 

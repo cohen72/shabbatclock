@@ -1,5 +1,6 @@
 import CoreLocation
 import Combine
+import MapKit
 
 /// Manages location services for Zmanim calculations.
 @MainActor
@@ -7,13 +8,13 @@ final class LocationManager: NSObject, ObservableObject {
     static let shared = LocationManager()
 
     @Published var location: CLLocation?
-    @Published var locationName: String = "Unknown Location"
+    @Published var locationName: String = "__unknown__"
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published var isLoading: Bool = false
     @Published var error: LocationError?
+    @Published var isUsingManualLocation: Bool = false
 
     private let locationManager = CLLocationManager()
-    private let geocoder = CLGeocoder()
 
     enum LocationError: LocalizedError {
         case denied
@@ -40,6 +41,7 @@ final class LocationManager: NSObject, ObservableObject {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
         authorizationStatus = locationManager.authorizationStatus
+        loadManualLocation()
     }
 
     // MARK: - Public Methods
@@ -66,22 +68,65 @@ final class LocationManager: NSObject, ObservableObject {
         location ?? CLLocation(latitude: 40.7128, longitude: -74.0060) // NYC default
     }
 
+    /// Set a manual location override (from city search).
+    func setManualLocation(_ newLocation: CLLocation, name: String) {
+        location = newLocation
+        locationName = name
+        isUsingManualLocation = true
+        error = nil
+
+        UserDefaults.standard.set(newLocation.coordinate.latitude, forKey: "manualLatitude")
+        UserDefaults.standard.set(newLocation.coordinate.longitude, forKey: "manualLongitude")
+        UserDefaults.standard.set(name, forKey: "manualLocationName")
+        UserDefaults.standard.set(true, forKey: "isUsingManualLocation")
+    }
+
+    /// Clear the manual override and use device location.
+    func clearManualLocation() {
+        isUsingManualLocation = false
+        UserDefaults.standard.removeObject(forKey: "manualLatitude")
+        UserDefaults.standard.removeObject(forKey: "manualLongitude")
+        UserDefaults.standard.removeObject(forKey: "manualLocationName")
+        UserDefaults.standard.set(false, forKey: "isUsingManualLocation")
+        requestLocation()
+    }
+
+    /// Whether location permission has been granted.
+    var isAuthorized: Bool {
+        authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways
+    }
+
     // MARK: - Private Methods
 
+    private func loadManualLocation() {
+        guard UserDefaults.standard.bool(forKey: "isUsingManualLocation") else { return }
+        let lat = UserDefaults.standard.double(forKey: "manualLatitude")
+        let lon = UserDefaults.standard.double(forKey: "manualLongitude")
+        let name = UserDefaults.standard.string(forKey: "manualLocationName") ?? "__unknown__"
+        guard lat != 0 || lon != 0 else { return }
+        location = CLLocation(latitude: lat, longitude: lon)
+        locationName = name
+        isUsingManualLocation = true
+    }
+
     private func reverseGeocode(_ location: CLLocation) {
-        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
-            Task { @MainActor in
-                if let error = error {
-                    print("[LocationManager] Geocoding error: \(error)")
-                    self?.locationName = "Unknown Location"
+        Task {
+            do {
+                guard let request = MKReverseGeocodingRequest(location: location) else {
+                    self.locationName = "__unknown__"
                     return
                 }
-
-                if let placemark = placemarks?.first {
-                    let city = placemark.locality ?? placemark.administrativeArea ?? "Unknown"
-                    let country = placemark.country ?? ""
-                    self?.locationName = country.isEmpty ? city : "\(city), \(country)"
+                let mapItems = try await request.mapItems
+                if let mapItem = mapItems.first {
+                    if let address = mapItem.address {
+                        self.locationName = address.shortAddress ?? address.fullAddress
+                    } else {
+                        self.locationName = mapItem.name ?? "__unknown__"
+                    }
                 }
+            } catch {
+                print("[LocationManager] Geocoding error: \(error)")
+                self.locationName = "__unknown__"
             }
         }
     }

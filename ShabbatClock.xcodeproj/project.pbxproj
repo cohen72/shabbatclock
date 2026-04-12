@@ -32,6 +32,9 @@
 		AAA00200 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = BBB00200 /* Sounds */; };
 		EDF6A1E02F23A6860052797F /* KosherSwift in Frameworks */ = {isa = PBXBuildFile; productRef = EDF6A1DF2F23A6860052797F /* KosherSwift */; };
 		EDF6A1E52F23BA5C0052797F /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDF6A1E42F23BA5C0052797F /* Media.xcassets */; };
+		DD8859E3 /* LocationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBA /* LocationRow.swift */; };
+		DDAB2E76 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4824B /* CitySearchView.swift */; };
+		DD112234 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112233 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +64,9 @@
 		BBB00201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CCC00001 /* ShabbatClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShabbatClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDF6A1E42F23BA5C0052797F /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = Resources/Media.xcassets; sourceTree = "<group>"; };
+		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
+		CCE4824B /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
+		DD112233 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				BBB00200 /* Sounds */,
+				DD112233 /* Localizable.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -162,6 +169,8 @@
 			isa = PBXGroup;
 			children = (
 				BBB00040 /* NightSkyBackground.swift */,
+				CCE4824B /* CitySearchView.swift */,
+				CC27FEBA /* LocationRow.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -271,6 +280,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				he,
 				Base,
 			);
 			mainGroup = EEE00000;
@@ -293,6 +303,7 @@
 			files = (
 				EDF6A1E52F23BA5C0052797F /* Media.xcassets in Resources */,
 				AAA00200 /* Sounds in Resources */,
+				DD112234 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,6 +325,8 @@
 				AAA00024 /* ZmanimService.swift in Sources */,
 				AAA00030 /* Theme.swift in Sources */,
 				AAA00040 /* NightSkyBackground.swift in Sources */,
+				DDAB2E76 /* CitySearchView.swift in Sources */,
+				DD8859E3 /* LocationRow.swift in Sources */,
 				AAA00050 /* AnalogClockView.swift in Sources */,
 				AAA00051 /* MainClockView.swift in Sources */,
 				AAA00060 /* AlarmListView.swift in Sources */,

@@ -1,7 +1,10 @@
 import SwiftUI
 
-/// Beautiful night sky background with moon, stars, and clouds.
+/// Beautiful background that adapts to color scheme.
+/// Dark: night sky with moon, stars, and clouds.
+/// Light: clean gradient background.
 struct NightSkyBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
     @State private var starOpacities: [Double] = (0..<20).map { _ in Double.random(in: 0.3...1.0) }
     @State private var animateTwinkle = false
 
@@ -11,33 +14,35 @@ struct NightSkyBackground: View {
             LinearGradient.nightSky
                 .ignoresSafeArea()
 
-            // Stars
-            GeometryReader { geometry in
-                ForEach(0..<20, id: \.self) { index in
-                    StarView(size: CGFloat.random(in: 2...6))
-                        .opacity(animateTwinkle ? starOpacities[index] : starOpacities[(index + 1) % 20])
+            if colorScheme == .dark {
+                // Stars
+                GeometryReader { geometry in
+                    ForEach(0..<20, id: \.self) { index in
+                        StarView(size: CGFloat.random(in: 2...6))
+                            .opacity(animateTwinkle ? starOpacities[index] : starOpacities[(index + 1) % 20])
+                            .position(
+                                x: starPositions[index].x * geometry.size.width,
+                                y: starPositions[index].y * geometry.size.height
+                            )
+                    }
+                }
+
+                // Moon with glow
+                GeometryReader { geometry in
+                    MoonView()
+                        .frame(width: 100, height: 100)
                         .position(
-                            x: starPositions[index].x * geometry.size.width,
-                            y: starPositions[index].y * geometry.size.height
+                            x: geometry.size.width - 50,
+                            y: 80
                         )
                 }
-            }
 
-            // Moon with glow - positioned in top right corner
-            GeometryReader { geometry in
-                MoonView()
-                    .frame(width: 100, height: 100)
-                    .position(
-                        x: geometry.size.width - 50,
-                        y: 80
-                    )
-            }
-
-            // Cloud at bottom
-            VStack {
-                Spacer()
-                CloudView()
-                    .offset(y: 50)
+                // Cloud at bottom
+                VStack {
+                    Spacer()
+                    CloudView()
+                        .offset(y: 50)
+                }
             }
         }
         .onAppear {
@@ -144,7 +149,6 @@ struct MoonView: View {
 struct CloudView: View {
     var body: some View {
         ZStack {
-            // Main cloud shape using circles
             HStack(spacing: -30) {
                 Circle()
                     .fill(Color.white.opacity(0.08))
@@ -171,46 +175,44 @@ struct CloudView: View {
 
 // MARK: - Night Sky Decorations (without background gradient)
 
-/// Just the stars, moon, and clouds without the gradient background.
-/// Use this when you need to manage the background separately.
 struct NightSkyDecorations: View {
+    @Environment(\.colorScheme) private var colorScheme
     @State private var starOpacities: [Double] = (0..<20).map { _ in Double.random(in: 0.3...1.0) }
     @State private var animateTwinkle = false
 
     var body: some View {
-        ZStack {
-            // Stars
-            GeometryReader { geometry in
-                ForEach(0..<20, id: \.self) { index in
-                    StarView(size: CGFloat.random(in: 2...6))
-                        .opacity(animateTwinkle ? starOpacities[index] : starOpacities[(index + 1) % 20])
+        if colorScheme == .dark {
+            ZStack {
+                GeometryReader { geometry in
+                    ForEach(0..<20, id: \.self) { index in
+                        StarView(size: CGFloat.random(in: 2...6))
+                            .opacity(animateTwinkle ? starOpacities[index] : starOpacities[(index + 1) % 20])
+                            .position(
+                                x: starPositions[index].x * geometry.size.width,
+                                y: starPositions[index].y * geometry.size.height
+                            )
+                    }
+                }
+
+                GeometryReader { geometry in
+                    MoonView()
+                        .frame(width: 100, height: 100)
                         .position(
-                            x: starPositions[index].x * geometry.size.width,
-                            y: starPositions[index].y * geometry.size.height
+                            x: geometry.size.width - 50,
+                            y: 80
                         )
                 }
-            }
 
-            // Moon with glow - positioned in top right corner
-            GeometryReader { geometry in
-                MoonView()
-                    .frame(width: 100, height: 100)
-                    .position(
-                        x: geometry.size.width - 50,
-                        y: 80
-                    )
+                VStack {
+                    Spacer()
+                    CloudView()
+                        .offset(y: 50)
+                }
             }
-
-            // Cloud at bottom
-            VStack {
-                Spacer()
-                CloudView()
-                    .offset(y: 50)
-            }
-        }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                animateTwinkle = true
+            .onAppear {
+                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                    animateTwinkle = true
+                }
             }
         }
     }
@@ -241,65 +243,47 @@ struct NightSkyDecorations: View {
     }
 }
 
-// MARK: - Stars Only Background (no moon/clouds)
+// MARK: - Stars Only Background
 
-/// Simple stars-only background for cleaner layouts.
 struct StarsOnlyBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
     @State private var starOpacities: [Double] = (0..<30).map { _ in Double.random(in: 0.2...0.8) }
     @State private var animateTwinkle = false
 
     var body: some View {
-        GeometryReader { geometry in
-            ForEach(0..<30, id: \.self) { index in
-                Circle()
-                    .fill(index % 3 == 0 ? Color.goldAccent : Color.white)
-                    .frame(width: CGFloat.random(in: 1...3), height: CGFloat.random(in: 1...3))
-                    .opacity(animateTwinkle ? starOpacities[index] : starOpacities[(index + 1) % 30])
-                    .position(
-                        x: starPositions[index].x * geometry.size.width,
-                        y: starPositions[index].y * geometry.size.height
-                    )
+        if colorScheme == .dark {
+            GeometryReader { geometry in
+                ForEach(0..<30, id: \.self) { index in
+                    Circle()
+                        .fill(index % 3 == 0 ? Color.goldAccent : Color.white)
+                        .frame(width: CGFloat.random(in: 1...3), height: CGFloat.random(in: 1...3))
+                        .opacity(animateTwinkle ? starOpacities[index] : starOpacities[(index + 1) % 30])
+                        .position(
+                            x: starPositions[index].x * geometry.size.width,
+                            y: starPositions[index].y * geometry.size.height
+                        )
+                }
             }
-        }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
-                animateTwinkle = true
+            .onAppear {
+                withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+                    animateTwinkle = true
+                }
             }
         }
     }
 
     private var starPositions: [CGPoint] {
         [
-            CGPoint(x: 0.08, y: 0.08),
-            CGPoint(x: 0.22, y: 0.05),
-            CGPoint(x: 0.38, y: 0.10),
-            CGPoint(x: 0.55, y: 0.06),
-            CGPoint(x: 0.72, y: 0.12),
-            CGPoint(x: 0.88, y: 0.08),
-            CGPoint(x: 0.12, y: 0.18),
-            CGPoint(x: 0.32, y: 0.15),
-            CGPoint(x: 0.48, y: 0.20),
-            CGPoint(x: 0.68, y: 0.16),
-            CGPoint(x: 0.85, y: 0.22),
-            CGPoint(x: 0.05, y: 0.32),
-            CGPoint(x: 0.18, y: 0.28),
-            CGPoint(x: 0.42, y: 0.35),
-            CGPoint(x: 0.62, y: 0.30),
-            CGPoint(x: 0.78, y: 0.38),
-            CGPoint(x: 0.92, y: 0.33),
-            CGPoint(x: 0.10, y: 0.48),
-            CGPoint(x: 0.28, y: 0.52),
-            CGPoint(x: 0.45, y: 0.45),
-            CGPoint(x: 0.58, y: 0.55),
-            CGPoint(x: 0.75, y: 0.48),
-            CGPoint(x: 0.90, y: 0.52),
-            CGPoint(x: 0.15, y: 0.65),
-            CGPoint(x: 0.35, y: 0.68),
-            CGPoint(x: 0.52, y: 0.72),
-            CGPoint(x: 0.70, y: 0.65),
-            CGPoint(x: 0.82, y: 0.70),
-            CGPoint(x: 0.25, y: 0.82),
-            CGPoint(x: 0.65, y: 0.85),
+            CGPoint(x: 0.08, y: 0.08), CGPoint(x: 0.22, y: 0.05), CGPoint(x: 0.38, y: 0.10),
+            CGPoint(x: 0.55, y: 0.06), CGPoint(x: 0.72, y: 0.12), CGPoint(x: 0.88, y: 0.08),
+            CGPoint(x: 0.12, y: 0.18), CGPoint(x: 0.32, y: 0.15), CGPoint(x: 0.48, y: 0.20),
+            CGPoint(x: 0.68, y: 0.16), CGPoint(x: 0.85, y: 0.22), CGPoint(x: 0.05, y: 0.32),
+            CGPoint(x: 0.18, y: 0.28), CGPoint(x: 0.42, y: 0.35), CGPoint(x: 0.62, y: 0.30),
+            CGPoint(x: 0.78, y: 0.38), CGPoint(x: 0.92, y: 0.33), CGPoint(x: 0.10, y: 0.48),
+            CGPoint(x: 0.28, y: 0.52), CGPoint(x: 0.45, y: 0.45), CGPoint(x: 0.58, y: 0.55),
+            CGPoint(x: 0.75, y: 0.48), CGPoint(x: 0.90, y: 0.52), CGPoint(x: 0.15, y: 0.65),
+            CGPoint(x: 0.35, y: 0.68), CGPoint(x: 0.52, y: 0.72), CGPoint(x: 0.70, y: 0.65),
+            CGPoint(x: 0.82, y: 0.70), CGPoint(x: 0.25, y: 0.82), CGPoint(x: 0.65, y: 0.85),
         ]
     }
 }

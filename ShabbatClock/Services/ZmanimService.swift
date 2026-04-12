@@ -12,8 +12,8 @@ final class ZmanimService: ObservableObject {
   @Published var lastUpdated: Date?
   @Published var candleLightingTime: Date?
   @Published var havdalahTime: Date?
-  @Published var candleLightingDateLabel: String = "Friday Evening"
-  @Published var havdalahDateLabel: String = "Saturday Night"
+  @Published var candleLightingDateLabel: String = "__friday_evening__"
+  @Published var havdalahDateLabel: String = "__saturday_night__"
   @Published var sunriseTime: Date?
   @Published var sunsetTime: Date?
 
@@ -85,17 +85,17 @@ final class ZmanimService: ObservableObject {
     
     var description: String {
       switch self {
-      case .alotHashachar: return "72 minutes before sunrise"
-      case .misheyakir: return "Earliest time for tallit and tefillin"
-      case .netz: return "Sunrise - ideal start of Shacharit"
-      case .sofZmanShma: return "Latest time for morning Shema (GRA)"
-      case .sofZmanTefila: return "Latest time for Shacharit Amidah"
-      case .chatzot: return "Halachic midday"
-      case .minchaGedola: return "Earliest time for Mincha"
-      case .minchaKetana: return "Preferable time for Mincha"
-      case .plagHamincha: return "1.25 hours before sunset"
-      case .shkia: return "Sunset - start of evening"
-      case .tzeitHakochavim: return "Nightfall - 3 stars visible"
+      case .alotHashachar: return AppLanguage.localized("72 minutes before sunrise")
+      case .misheyakir: return AppLanguage.localized("Earliest time for tallit and tefillin")
+      case .netz: return AppLanguage.localized("Sunrise - ideal start of Shacharit")
+      case .sofZmanShma: return AppLanguage.localized("Latest time for morning Shema (GRA)")
+      case .sofZmanTefila: return AppLanguage.localized("Latest time for Shacharit Amidah")
+      case .chatzot: return AppLanguage.localized("Halachic midday")
+      case .minchaGedola: return AppLanguage.localized("Earliest time for Mincha")
+      case .minchaKetana: return AppLanguage.localized("Preferable time for Mincha")
+      case .plagHamincha: return AppLanguage.localized("1.25 hours before sunset")
+      case .shkia: return AppLanguage.localized("Sunset - start of evening")
+      case .tzeitHakochavim: return AppLanguage.localized("Nightfall - 3 stars visible")
       }
     }
   }
@@ -300,10 +300,8 @@ final class ZmanimService: ObservableObject {
     havdalahTime = saturdayCalendar.getTzais()
 
     // Date labels
-    let formatter = DateFormatter()
-    formatter.dateFormat = "EEEE"
-    candleLightingDateLabel = formatter.string(from: nextFriday) + " Evening"
-    havdalahDateLabel = formatter.string(from: nextSaturday) + " Night"
+    candleLightingDateLabel = "__friday_evening__"
+    havdalahDateLabel = "__saturday_night__"
   }
 
   // MARK: - Helper Methods

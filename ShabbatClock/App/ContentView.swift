@@ -6,7 +6,26 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var alarmScheduler: AlarmScheduler
 
+    @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
+    @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
+
     @State private var selectedTab: Int = 0
+
+    private var resolvedColorScheme: ColorScheme? {
+        AppearanceMode(rawValue: appearanceMode)?.colorScheme
+    }
+
+    private var resolvedLanguage: AppLanguage {
+        AppLanguage(rawValue: appLanguage) ?? .system
+    }
+
+    init() {
+        let navAppearance = UINavigationBarAppearance()
+        navAppearance.configureWithTransparentBackground()
+        UINavigationBar.appearance().standardAppearance = navAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
+        UINavigationBar.appearance().compactAppearance = navAppearance
+    }
 
     var body: some View {
         ZStack {
@@ -28,8 +47,6 @@ struct ContentView: View {
                 }
             }
             .tint(.accentPurple)
-            .toolbarBackgroundVisibility(.visible, for: .tabBar)
-            .toolbarBackground(Color.black.opacity(0.8), for: .tabBar)
 
             // Alarm firing overlay
             if alarmScheduler.isAlarmFiring {
@@ -38,10 +55,27 @@ struct ContentView: View {
                     .zIndex(100)
             }
         }
+        .preferredColorScheme(resolvedColorScheme)
+        .applyLanguageOverride(resolvedLanguage)
         .onAppear {
             alarmScheduler.configure(with: modelContext)
         }
         .animation(.easeInOut(duration: 0.3), value: alarmScheduler.isAlarmFiring)
+    }
+}
+
+// MARK: - Language Override Modifier
+
+extension View {
+    @ViewBuilder
+    func applyLanguageOverride(_ language: AppLanguage) -> some View {
+        if let locale = language.locale, let direction = language.layoutDirection {
+            self
+                .environment(\.locale, locale)
+                .environment(\.layoutDirection, direction)
+        } else {
+            self
+        }
     }
 }
 

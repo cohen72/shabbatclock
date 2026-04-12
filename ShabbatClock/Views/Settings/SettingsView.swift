@@ -1,32 +1,35 @@
 import SwiftUI
-import StoreKit
 
 /// App settings view.
 struct SettingsView: View {
+    @Environment(\.requestReview) private var requestReview
     @AppStorage("isPremium") private var isPremium = false
     @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
+    @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
+    @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
 
+    @StateObject private var locationManager = LocationManager.shared
     @State private var showingPremium = false
     @State private var showingAbout = false
+    @State private var showingCitySearch = false
 
     var body: some View {
         NavigationStack {
-        ZStack {
-            LinearGradient.nightSky
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                // Header
-                Text("Settings")
-                    .font(AppFont.header(28))
-                    .foregroundStyle(.textPrimary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 24)
-                    .padding(.top, 16)
-                    .padding(.bottom, 24)
+            ZStack {
+                LinearGradient.nightSky
+                    .ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // Location section
+                        locationSection
+
+                        // Appearance section
+                        appearanceSection
+
+                        // Language section
+                        languageSection
+
                         // Premium section
                         premiumSection
 
@@ -40,15 +43,120 @@ struct SettingsView: View {
                     .padding(.bottom, 120)
                 }
             }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.large)
+            .sheet(isPresented: $showingPremium) {
+                PremiumView()
+                    .applyLanguageOverride(AppLanguage.current)
+            }
+            .sheet(isPresented: $showingAbout) {
+                AboutView()
+                    .applyLanguageOverride(AppLanguage.current)
+            }
+            .sheet(isPresented: $showingCitySearch) {
+                CitySearchView()
+                    .applyLanguageOverride(AppLanguage.current)
+            }
         }
-        .sheet(isPresented: $showingPremium) {
-            PremiumView()
+    }
+
+    // MARK: - Location Section
+
+    private var locationSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Location", icon: "location.fill")
+
+            Button {
+                showingCitySearch = true
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: locationManager.isUsingManualLocation ? "mappin.circle.fill" : "location.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.accentPurple)
+                        .frame(width: 32)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Current City")
+                            .font(AppFont.body())
+                            .foregroundStyle(.textPrimary)
+
+                        Group {
+                            if locationManager.locationName == "__unknown__" {
+                                Text("Unknown Location")
+                            } else {
+                                Text(locationManager.locationName)
+                            }
+                        }
+                        .font(AppFont.caption(12))
+                        .foregroundStyle(.textSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.forward")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.textSecondary)
+                }
+                .padding(16)
+                .settingsCard()
+            }
         }
-        .sheet(isPresented: $showingAbout) {
-            AboutView()
+    }
+
+    // MARK: - Appearance Section
+
+    private var appearanceSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Appearance", icon: "circle.lefthalf.filled")
+
+            VStack(spacing: 0) {
+                HStack {
+                    Text("Theme")
+                        .font(AppFont.body())
+                        .foregroundStyle(.textPrimary)
+
+                    Spacer()
+
+                    Picker("Theme", selection: $appearanceMode) {
+                        Text("System").tag(AppearanceMode.system.rawValue)
+                        Text("Light").tag(AppearanceMode.light.rawValue)
+                        Text("Dark").tag(AppearanceMode.dark.rawValue)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 200)
+                }
+                .padding(16)
+            }
+            .settingsCard()
         }
-        .toolbar(.hidden)
-        } // NavigationStack
+    }
+
+    // MARK: - Language Section
+
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Language", icon: "globe")
+
+            VStack(spacing: 0) {
+                HStack {
+                    Text("Language")
+                        .font(AppFont.body())
+                        .foregroundStyle(.textPrimary)
+
+                    Spacer()
+
+                    Picker("Language", selection: $appLanguage) {
+                        Text("System").tag(AppLanguage.system.rawValue)
+                        Text(verbatim: "English").tag(AppLanguage.english.rawValue)
+                        Text(verbatim: "עברית").tag(AppLanguage.hebrew.rawValue)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 220)
+                }
+                .padding(16)
+            }
+            .settingsCard()
+        }
     }
 
     // MARK: - Premium Section
@@ -96,7 +204,7 @@ struct SettingsView: View {
                             .font(AppFont.body())
                             .foregroundStyle(.goldAccent)
 
-                        Image(systemName: "chevron.right")
+                        Image(systemName: "chevron.forward")
                             .font(.system(size: 14))
                             .foregroundStyle(.textSecondary)
                     }
@@ -114,7 +222,7 @@ struct SettingsView: View {
             SectionHeader(title: "Defaults", icon: "slider.horizontal.3")
 
             NavigationLink {
-                DefaultSoundPicker(selectedSound: $defaultSound)
+                SoundPickerView(selectedSoundName: $defaultSound)
             } label: {
                 HStack {
                     Text("Default Sound")
@@ -123,11 +231,11 @@ struct SettingsView: View {
 
                     Spacer()
 
-                    Text(defaultSound)
+                    Text(AlarmSound.sound(named: defaultSound)?.displayName ?? defaultSound)
                         .font(AppFont.body(14))
                         .foregroundStyle(.textSecondary)
 
-                    Image(systemName: "chevron.right")
+                    Image(systemName: "chevron.forward")
                         .font(.system(size: 14))
                         .foregroundStyle(.textSecondary)
                 }
@@ -144,7 +252,6 @@ struct SettingsView: View {
             SectionHeader(title: "About", icon: "info.circle")
 
             VStack(spacing: 1) {
-                // Version
                 settingsRow {
                     Text("Version")
                     Spacer()
@@ -153,7 +260,6 @@ struct SettingsView: View {
                         .foregroundStyle(.textSecondary)
                 }
 
-                // About
                 settingsRow {
                     Button {
                         showingAbout = true
@@ -161,14 +267,13 @@ struct SettingsView: View {
                         HStack {
                             Text("About Shabbat Clock")
                             Spacer()
-                            Image(systemName: "chevron.right")
+                            Image(systemName: "chevron.forward")
                                 .font(.system(size: 14))
                                 .foregroundStyle(.textSecondary)
                         }
                     }
                 }
 
-                // Contact
                 settingsRow {
                     Link(destination: URL(string: "mailto:support@shabbatclock.app")!) {
                         HStack {
@@ -181,7 +286,6 @@ struct SettingsView: View {
                     }
                 }
 
-                // Rate app
                 settingsRow {
                     Button {
                         requestReview()
@@ -199,7 +303,7 @@ struct SettingsView: View {
             .clipShape(RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
             )
         }
     }
@@ -213,20 +317,15 @@ struct SettingsView: View {
         .foregroundStyle(.textPrimary)
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.07))
+        .background(Color.surfaceCard)
     }
 
-    private func requestReview() {
-        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            SKStoreReviewController.requestReview(in: scene)
-        }
-    }
 }
 
 // MARK: - Section Header
 
 struct SectionHeader: View {
-    let title: String
+    let title: LocalizedStringKey
     let icon: String
 
     var body: some View {
@@ -238,51 +337,6 @@ struct SectionHeader: View {
                 .font(AppFont.caption(12))
                 .foregroundStyle(.textSecondary)
         }
-    }
-}
-
-// MARK: - Default Sound Picker
-
-struct DefaultSoundPicker: View {
-    @Environment(\.dismiss) private var dismiss
-    @Binding var selectedSound: String
-    @AppStorage("isPremium") private var isPremium = false
-
-    var body: some View {
-        ZStack {
-            LinearGradient.nightSky
-                .ignoresSafeArea()
-
-            ScrollView {
-                LazyVStack(spacing: 1) {
-                    ForEach(AlarmSound.allSounds.filter { isPremium || !$0.isPremium }) { sound in
-                        Button {
-                            selectedSound = sound.name
-                            dismiss()
-                        } label: {
-                            HStack {
-                                Text(sound.name)
-                                    .font(AppFont.body())
-                                    .foregroundStyle(.textPrimary)
-
-                                Spacer()
-
-                                if selectedSound == sound.name {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(.accentPurple)
-                                }
-                            }
-                            .padding(16)
-                            .background(Color.white.opacity(0.05))
-                        }
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding(24)
-            }
-        }
-        .navigationTitle("Default Sound")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -299,7 +353,7 @@ struct AboutView: View {
             VStack(spacing: 24) {
                 // Handle
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.white.opacity(0.3))
+                    .fill(Color.textSecondary.opacity(0.4))
                     .frame(width: 40, height: 4)
                     .padding(.top, 12)
 
@@ -321,11 +375,11 @@ struct AboutView: View {
                 Spacer()
 
                 VStack(spacing: 8) {
-                    Text("Built with ❤️ for the Jewish community")
+                    Text("Built with ❤️")
                         .font(AppFont.caption(13))
                         .foregroundStyle(.textSecondary)
 
-                    Text("© 2024 Shabbat Clock")
+                    Text("© \(currentYear) Shabbat Clock")
                         .font(AppFont.caption(12))
                         .foregroundStyle(.textSecondary.opacity(0.6))
                 }
@@ -333,6 +387,10 @@ struct AboutView: View {
             }
         }
         .presentationDetents([.medium])
+    }
+
+    private var currentYear: String {
+        String(Calendar.current.component(.year, from: Date()))
     }
 }
 

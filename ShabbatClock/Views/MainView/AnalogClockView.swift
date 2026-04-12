@@ -29,27 +29,25 @@ struct AnalogClockView: View {
             height: radius * 2
         )
 
-        // Subtle filled circle
         context.fill(
             Circle().path(in: faceRect),
-            with: .color(.white.opacity(0.06))
+            with: .color(.clockFaceFill)
         )
 
-        // Very faint border
         context.stroke(
             Circle().path(in: faceRect),
-            with: .color(.white.opacity(0.1)),
+            with: .color(.clockFaceBorder),
             lineWidth: 0.5
         )
     }
 
     private func drawTickMarks(context: GraphicsContext, center: CGPoint, radius: CGFloat) {
-        for i in 0..<12 {
+        // Only draw cardinal marks (12, 3, 6, 9)
+        for i in [0, 3, 6, 9] {
             let angle = Angle(degrees: Double(i) * 30 - 90)
-            let isCardinal = i % 3 == 0
 
             let outerR = radius - 8
-            let innerR = isCardinal ? radius - 20 : radius - 14
+            let innerR = radius - 20
 
             let outer = CGPoint(
                 x: center.x + outerR * cos(CGFloat(angle.radians)),
@@ -66,8 +64,8 @@ struct AnalogClockView: View {
 
             context.stroke(
                 path,
-                with: .color(.white.opacity(isCardinal ? 0.5 : 0.25)),
-                lineWidth: isCardinal ? 2 : 1
+                with: .color(.clockTickCardinal.opacity(0.4)),
+                lineWidth: 1.5
             )
         }
     }
@@ -87,14 +85,14 @@ struct AnalogClockView: View {
         drawHand(
             context: context, center: center,
             length: radius * 0.5, width: 4,
-            angle: hourAngle, color: .white
+            angle: hourAngle, color: .clockHand
         )
 
         // Minute hand
         drawHand(
             context: context, center: center,
             length: radius * 0.72, width: 2.5,
-            angle: minuteAngle, color: .white
+            angle: minuteAngle, color: .clockHand
         )
 
         // Second hand
@@ -106,18 +104,24 @@ struct AnalogClockView: View {
         )
     }
 
+    private let centerDotRadius: CGFloat = 5
+
     private func drawHand(
         context: GraphicsContext, center: CGPoint,
         length: CGFloat, width: CGFloat,
         angle: Angle, color: Color
     ) {
+        let start = CGPoint(
+            x: center.x + centerDotRadius * cos(CGFloat(angle.radians)),
+            y: center.y + centerDotRadius * sin(CGFloat(angle.radians))
+        )
         let end = CGPoint(
             x: center.x + length * cos(CGFloat(angle.radians)),
             y: center.y + length * sin(CGFloat(angle.radians))
         )
 
         var path = Path()
-        path.move(to: center)
+        path.move(to: start)
         path.addLine(to: end)
 
         var ctx = context
@@ -126,9 +130,9 @@ struct AnalogClockView: View {
     }
 
     private func drawCenterDot(context: GraphicsContext, center: CGPoint) {
-        let dotSize: CGFloat = 10
-        let rect = CGRect(x: center.x - dotSize / 2, y: center.y - dotSize / 2, width: dotSize, height: dotSize)
-        context.stroke(Circle().path(in: rect), with: .color(.white), lineWidth: 2)
+        let dotSize = centerDotRadius * 2
+        let rect = CGRect(x: center.x - centerDotRadius, y: center.y - centerDotRadius, width: dotSize, height: dotSize)
+        context.stroke(Circle().path(in: rect), with: .color(.clockHand), lineWidth: 2)
     }
 }
 
@@ -148,18 +152,18 @@ struct MiniClockView: View {
                 x: center.x - radius, y: center.y - radius,
                 width: radius * 2, height: radius * 2
             )
-            context.fill(Circle().path(in: faceRect), with: .color(.white.opacity(0.1)))
-            context.stroke(Circle().path(in: faceRect), with: .color(.white.opacity(0.2)), lineWidth: 0.5)
+            context.fill(Circle().path(in: faceRect), with: .color(.clockFaceFill))
+            context.stroke(Circle().path(in: faceRect), with: .color(.clockFaceBorder), lineWidth: 0.5)
 
             // Hands
             let hourAngle = Angle(degrees: Double(hour % 12) * 30 + Double(minute) / 60 * 30 - 90)
             let minuteAngle = Angle(degrees: Double(minute) * 6 - 90)
 
-            drawMiniHand(context: context, center: center, length: radius * 0.45, angle: hourAngle, color: .white)
-            drawMiniHand(context: context, center: center, length: radius * 0.65, angle: minuteAngle, color: .white)
+            drawMiniHand(context: context, center: center, length: radius * 0.45, angle: hourAngle, color: .clockHand)
+            drawMiniHand(context: context, center: center, length: radius * 0.65, angle: minuteAngle, color: .clockHand)
 
             let dotRect = CGRect(x: center.x - 2, y: center.y - 2, width: 4, height: 4)
-            context.fill(Circle().path(in: dotRect), with: .color(.white))
+            context.fill(Circle().path(in: dotRect), with: .color(.clockHand))
         }
         .frame(width: size, height: size)
     }

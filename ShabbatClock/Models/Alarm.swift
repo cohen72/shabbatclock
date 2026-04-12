@@ -18,7 +18,7 @@ final class Alarm {
         hour: Int = 7,
         minute: Int = 0,
         isEnabled: Bool = true,
-        label: String = "Alarm",
+        label: String = String(localized: "Alarm"),
         soundName: String = "Lecha Dodi",
         repeatDays: [Int] = [],
         createdAt: Date = Date(),
@@ -54,21 +54,25 @@ final class Alarm {
 
     var repeatDaysString: String {
         if repeatDays.isEmpty {
-            return "One time"
+            return String(localized: "One time")
         }
         if repeatDays.count == 7 {
-            return "Every day"
+            return String(localized: "Every day")
         }
         if repeatDays == [0, 6] || repeatDays == [6, 0] {
-            return "Weekends"
+            return String(localized: "Weekends")
         }
         if Set(repeatDays) == Set([1, 2, 3, 4, 5]) {
-            return "Weekdays"
+            return String(localized: "Weekdays")
         }
-        // Show abbreviated days
-        let dayAbbreviations = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        // Use locale-aware day names — very short for Hebrew (א, ב, ג), short for English (Sun, Mon)
+        let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.effectiveLocale
+        let isHebrew = formatter.locale.language.languageCode?.identifier == "he"
+        let symbols = (isHebrew ? formatter.veryShortWeekdaySymbols : formatter.shortWeekdaySymbols)
+            ?? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         let sortedDays = repeatDays.sorted()
-        return sortedDays.map { dayAbbreviations[$0] }.joined(separator: ", ")
+        return sortedDays.map { symbols[$0] }.joined(separator: ", ")
     }
 
     var isShabbatAlarm: Bool {

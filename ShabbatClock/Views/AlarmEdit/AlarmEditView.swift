@@ -7,21 +7,23 @@ struct AlarmEditView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var alarmScheduler: AlarmScheduler
 
-    @Bindable var alarm: Alarm
+    let alarm: Alarm
     let isNew: Bool
 
+    // Draft state — only written back on Save
+    @State private var draftHour: Int = 0
+    @State private var draftMinute: Int = 0
+    @State private var draftLabel: String = ""
+    @State private var draftSoundName: String = ""
+    @State private var draftRepeatDays: [Int] = []
+
     @State private var showingDeleteConfirmation = false
-    @State private var showingSoundPicker = false
-    @State private var showingRepeatPicker = false
 
     var body: some View {
-        ZStack {
-            LinearGradient.nightSky
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                // Header
-                headerView
+        NavigationStack {
+            ZStack {
+                LinearGradient.nightSky
+                    .ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 16) {
@@ -33,7 +35,7 @@ struct AlarmEditView: View {
                         labelSection
 
                         // Sound
-                        InlineSoundPicker(selectedSoundName: $alarm.soundName)
+                        soundSection
 
                         // Repeat days
                         repeatSection
@@ -49,12 +51,33 @@ struct AlarmEditView: View {
                     .padding(.bottom, 40)
                 }
             }
+            .navigationTitle(isNew ? "New Alarm" : "Edit Alarm")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.textSecondary)
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        saveAlarm()
+                    }
+                    .foregroundStyle(.accentPurple)
+                    .fontWeight(.bold)
+                }
+            }
         }
-        .sheet(isPresented: $showingSoundPicker) {
-            SoundPickerView(selectedSoundName: $alarm.soundName)
-        }
-        .sheet(isPresented: $showingRepeatPicker) {
-            RepeatDaysPickerView(selectedDays: $alarm.repeatDays)
+        .onAppear {
+            draftHour = alarm.hour
+            draftMinute = alarm.minute
+            draftLabel = alarm.label
+            draftSoundName = alarm.soundName
+            draftRepeatDays = alarm.repeatDays
         }
         .scrollDismissesKeyboard(.interactively)
         .onTapGesture {
@@ -70,32 +93,6 @@ struct AlarmEditView: View {
         }
     }
 
-    // MARK: - Header
-
-    private var headerView: some View {
-        HStack {
-            Button("Cancel") {
-                dismiss()
-            }
-            .foregroundStyle(.textSecondary)
-
-            Spacer()
-
-            Text(isNew ? "New Alarm" : "Edit Alarm")
-                .font(AppFont.header(18))
-                .foregroundStyle(.textPrimary)
-
-            Spacer()
-
-            Button("Save") {
-                saveAlarm()
-            }
-            .foregroundStyle(.accentPurple)
-            .fontWeight(.bold)
-        }
-        .padding()
-    }
-
     // MARK: - Time Picker
 
     private var timePickerSection: some View {
@@ -103,12 +100,12 @@ struct AlarmEditView: View {
             "",
             selection: Binding(
                 get: {
-                    Calendar.current.date(from: DateComponents(hour: alarm.hour, minute: alarm.minute)) ?? Date()
+                    Calendar.current.date(from: DateComponents(hour: draftHour, minute: draftMinute)) ?? Date()
                 },
                 set: { newDate in
                     let components = Calendar.current.dateComponents([.hour, .minute], from: newDate)
-                    alarm.hour = components.hour ?? 0
-                    alarm.minute = components.minute ?? 0
+                    draftHour = components.hour ?? 0
+                    draftMinute = components.minute ?? 0
                 }
             ),
             displayedComponents: .hourAndMinute
@@ -116,7 +113,6 @@ struct AlarmEditView: View {
         .datePickerStyle(.wheel)
         .labelsHidden()
         .frame(height: 160)
-        .environment(\.colorScheme, .dark)
     }
 
     // MARK: - Label Section
@@ -128,28 +124,55 @@ struct AlarmEditView: View {
                 .foregroundStyle(.textSecondary)
                 .padding(.leading, 4)
 
-            TextField("Alarm", text: $alarm.label)
+            TextField("Alarm", text: $draftLabel)
                 .font(AppFont.body())
                 .foregroundStyle(.textPrimary)
                 .submitLabel(.done)
                 .padding(16)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.white.opacity(0.07))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                        )
-                )
+                .themeCard(cornerRadius: 14)
                 .tint(.accentPurple)
+        }
+    }
+
+    // MARK: - Sound Section
+
+    private var soundSection: some View {
+        NavigationLink {
+            SoundPickerView(selectedSoundName: $draftSoundName)
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Sound")
+                        .font(AppFont.caption(12))
+                        .foregroundStyle(.textSecondary)
+
+                    HStack(spacing: 8) {
+                        Image(systemName: "music.note")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.accentPurple)
+
+                        Text(draftSoundName)
+                            .font(AppFont.body())
+                            .foregroundStyle(.textPrimary)
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 14))
+                    .foregroundStyle(.textSecondary)
+            }
+            .padding(16)
+            .themeCard(cornerRadius: 14)
         }
     }
 
     // MARK: - Repeat Section
 
     private var repeatSection: some View {
-        Button {
-            showingRepeatPicker = true
+        NavigationLink {
+            RepeatDaysPickerView(selectedDays: $draftRepeatDays)
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -157,38 +180,41 @@ struct AlarmEditView: View {
                         .font(AppFont.caption(12))
                         .foregroundStyle(.textSecondary)
 
-                    Text(alarm.repeatDaysString)
+                    Text(repeatDaysDisplayString)
                         .font(AppFont.body())
                         .foregroundStyle(.textPrimary)
                 }
 
                 Spacer()
 
-                if !alarm.repeatDays.isEmpty {
-                    HStack(spacing: 4) {
-                        ForEach([0, 1, 2, 3, 4, 5, 6], id: \.self) { day in
-                            Circle()
-                                .fill(alarm.repeatDays.contains(day) ?
-                                      Color.goldAccent : Color.white.opacity(0.15))
-                                .frame(width: 6, height: 6)
-                        }
-                    }
-                }
-
-                Image(systemName: "chevron.right")
+                Image(systemName: "chevron.forward")
                     .font(.system(size: 14))
                     .foregroundStyle(.textSecondary)
             }
             .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color.white.opacity(0.07))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                    )
-            )
+            .themeCard(cornerRadius: 14)
         }
+    }
+
+    private var repeatDaysDisplayString: String {
+        if draftRepeatDays.isEmpty {
+            return String(localized: "One time")
+        }
+        if draftRepeatDays.count == 7 {
+            return String(localized: "Every day")
+        }
+        if Set(draftRepeatDays) == Set([0, 6]) {
+            return String(localized: "Weekends")
+        }
+        if Set(draftRepeatDays) == Set([1, 2, 3, 4, 5]) {
+            return String(localized: "Weekdays")
+        }
+        let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.effectiveLocale
+        let isHebrew = formatter.locale.language.languageCode?.identifier == "he"
+        let symbols = (isHebrew ? formatter.veryShortWeekdaySymbols : formatter.shortWeekdaySymbols)
+            ?? ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        return draftRepeatDays.sorted().map { symbols[$0] }.joined(separator: ", ")
     }
 
     // MARK: - Delete Button
@@ -219,6 +245,11 @@ struct AlarmEditView: View {
     // MARK: - Actions
 
     private func saveAlarm() {
+        alarm.hour = draftHour
+        alarm.minute = draftMinute
+        alarm.label = draftLabel
+        alarm.soundName = draftSoundName
+        alarm.repeatDays = draftRepeatDays
         alarm.isEnabled = true
         if isNew {
             modelContext.insert(alarm)

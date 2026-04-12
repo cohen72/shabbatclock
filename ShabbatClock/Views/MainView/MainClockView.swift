@@ -15,7 +15,7 @@ struct MainClockView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let clockSize = min(geometry.size.width - 64, 260)
+            let clockSize = min(geometry.size.width - 48, 280)
 
             ZStack {
                 LinearGradient.nightSky
@@ -27,14 +27,14 @@ struct MainClockView: View {
                         .font(.system(size: 13, weight: .semibold, design: .default))
                         .foregroundStyle(.textSecondary)
                         .tracking(3)
-                        .padding(.top, 12)
+                        .padding(.top, 8)
 
-                    Spacer().frame(height: 20)
+                    Spacer()
 
                     // Analog clock
                     AnalogClockView(size: clockSize)
 
-                    Spacer().frame(height: 20)
+                    Spacer().frame(height: 24)
 
                     // Digital time
                     Text(timeString)
@@ -50,25 +50,20 @@ struct MainClockView: View {
 
                     // Shabbat info cards
                     shabbatCardsView
-                        .padding(.horizontal, 20)
 
                     // Location
-                    HStack(spacing: 6) {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10, weight: .medium))
-                        Text(locationManager.locationName)
-                            .font(.system(size: 14, weight: .medium, design: .default))
-                    }
-                    .foregroundStyle(.textSecondary)
-                    .padding(.top, 12)
-                    .padding(.bottom, 16)
+                    LocationRow(locationManager: locationManager)
+                        .padding(.top, 24)
+                        .padding(.bottom, 24)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
             }
         }
         .onAppear {
             zmanimService.calculateTodayZmanim()
-            locationManager.requestLocation()
+            if !locationManager.isUsingManualLocation {
+                locationManager.requestLocation()
+            }
         }
         .onReceive(timer) { _ in
             currentTime = Date()
@@ -80,10 +75,14 @@ struct MainClockView: View {
     private var nextAlarmLabel: some View {
         Group {
             if let nextAlarm = alarmScheduler.nextAlarmDate {
-                Text("NEXT ALARM: \(nextAlarmTimeString(nextAlarm))")
-                    .font(.system(size: 12, weight: .medium, design: .default))
-                    .foregroundStyle(.textSecondary)
-                    .tracking(2)
+                HStack(spacing: 0) {
+                    Text("NEXT ALARM: ")
+                        .foregroundStyle(.textSecondary)
+                    Text(nextAlarmTimeString(nextAlarm))
+                        .foregroundStyle(.goldAccent)
+                }
+                .font(.system(size: 12, weight: .medium, design: .default))
+                .tracking(2)
             } else {
                 Text("NO ALARMS SET")
                     .font(.system(size: 12, weight: .medium, design: .default))
@@ -97,7 +96,6 @@ struct MainClockView: View {
 
     private var shabbatCardsView: some View {
         HStack(spacing: 12) {
-            // Candle Lighting card
             ShabbatInfoCard(
                 icon: "flame.fill",
                 iconColor: .goldAccent,
@@ -106,7 +104,6 @@ struct MainClockView: View {
                 subtitle: zmanimService.candleLightingDateLabel
             )
 
-            // Havdalah card
             ShabbatInfoCard(
                 icon: "moon.stars.fill",
                 iconColor: Color(hex: "8B9DC3"),
@@ -142,38 +139,43 @@ struct ShabbatInfoCard: View {
     let subtitle: String
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundStyle(iconColor)
+        VStack(alignment: .leading, spacing: 0) {
+            // Icon + title row — top aligned
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                    .foregroundStyle(iconColor)
 
-            VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 10, weight: .semibold, design: .default))
                     .foregroundStyle(.textSecondary)
                     .tracking(1)
-
-                Text(time)
-                    .font(.system(size: 22, weight: .bold, design: .default))
-                    .foregroundStyle(.textPrimary)
-
-                Text(subtitle)
-                    .font(.system(size: 11, weight: .medium, design: .default))
-                    .foregroundStyle(.textSecondary.opacity(0.7))
             }
 
-            Spacer()
+            // Time — right under the title
+            Text(time)
+                .font(.system(size: 28, weight: .bold, design: .default))
+                .foregroundStyle(.textPrimary)
+                .padding(.top, 6)
+
+            Spacer(minLength: 8)
+
+            // Subtitle — bottom aligned
+            Group {
+                switch subtitle {
+                case "__friday_evening__": Text("Friday Evening")
+                case "__saturday_night__": Text("Saturday Night")
+                default: Text(subtitle)
+                }
+            }
+            .font(.system(size: 11, weight: .medium, design: .default))
+            .foregroundStyle(.textSecondary.opacity(0.7))
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                )
-        )
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 100)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .themeCard(cornerRadius: 16)
     }
 }
 

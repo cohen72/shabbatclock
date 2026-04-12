@@ -2,7 +2,6 @@ import SwiftUI
 
 /// Sound picker view with categories and preview functionality.
 struct SoundPickerView: View {
-    @Environment(\.dismiss) private var dismiss
     @Binding var selectedSoundName: String
 
     @State private var previewingSound: AlarmSound?
@@ -13,60 +12,30 @@ struct SoundPickerView: View {
             LinearGradient.nightSky
                 .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // Header
-                headerView
-
-                // Sound list
-                ScrollView {
-                    LazyVStack(spacing: 24) {
-                        ForEach(AlarmSound.Category.allCases, id: \.self) { category in
-                            if let sounds = AlarmSound.byCategory[category], !sounds.isEmpty {
-                                SoundCategorySection(
-                                    category: category,
-                                    sounds: sounds,
-                                    selectedSoundName: $selectedSoundName,
-                                    previewingSound: $previewingSound,
-                                    isPremium: isPremium
-                                )
-                            }
+            ScrollView {
+                LazyVStack(spacing: 24) {
+                    ForEach(AlarmSound.Category.allCases, id: \.self) { category in
+                        if let sounds = AlarmSound.byCategory[category], !sounds.isEmpty {
+                            SoundCategorySection(
+                                category: category,
+                                sounds: sounds,
+                                selectedSoundName: $selectedSoundName,
+                                previewingSound: $previewingSound,
+                                isPremium: isPremium
+                            )
                         }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, 40)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 40)
             }
         }
+        .navigationTitle("Alarm Sound")
+        .navigationBarTitleDisplayMode(.inline)
         .onDisappear {
             AudioManager.shared.stopPreview()
         }
-    }
-
-    private var headerView: some View {
-        HStack {
-            Button("Cancel") {
-                AudioManager.shared.stopPreview()
-                dismiss()
-            }
-            .foregroundStyle(.textSecondary)
-
-            Spacer()
-
-            Text("Alarm Sound")
-                .font(AppFont.header(18))
-                .foregroundStyle(.textPrimary)
-
-            Spacer()
-
-            Button("Done") {
-                AudioManager.shared.stopPreview()
-                dismiss()
-            }
-            .foregroundStyle(.accentPurple)
-            .fontWeight(.semibold)
-        }
-        .padding()
     }
 }
 
@@ -87,7 +56,7 @@ struct SoundCategorySection: View {
                     .font(.system(size: 14))
                     .foregroundStyle(.accentPurple)
 
-                Text(category.rawValue)
+                Text(category.displayName)
                     .font(AppFont.body(15))
                     .fontWeight(.semibold)
                     .foregroundStyle(.textPrimary)
@@ -159,7 +128,7 @@ struct SoundRow: View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 // Sound name
-                Text(sound.name)
+                Text(sound.displayName)
                     .font(AppFont.body())
                     .foregroundColor(isLocked ? .textSecondary.opacity(0.5) : .textPrimary)
 
@@ -180,7 +149,7 @@ struct SoundRow: View {
                         .frame(width: 32, height: 32)
                         .background(
                             Circle()
-                                .fill(Color.white.opacity(0.1))
+                                .fill(Color.surfaceSubtle)
                         )
                 }
                 .disabled(isLocked)
@@ -194,7 +163,7 @@ struct SoundRow: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(Color.white.opacity(isSelected ? 0.1 : 0.05))
+            .background(isSelected ? Color.surfaceSelected : Color.surfaceSubtle)
         }
         .disabled(isLocked)
     }
@@ -220,57 +189,10 @@ struct PremiumBadge: View {
     }
 }
 
-// MARK: - Inline Sound Picker (for alarm edit view)
-
-struct InlineSoundPicker: View {
-    @Binding var selectedSoundName: String
-    @State private var showingPicker = false
-
-    var body: some View {
-        Button {
-            showingPicker = true
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Sound")
-                        .font(AppFont.caption(12))
-                        .foregroundStyle(.textSecondary)
-
-                    HStack(spacing: 8) {
-                        Image(systemName: "music.note")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.accentPurple)
-
-                        Text(selectedSoundName)
-                            .font(AppFont.body())
-                            .foregroundStyle(.textPrimary)
-                    }
-                }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14))
-                    .foregroundStyle(.textSecondary)
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color.white.opacity(0.07))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                    )
-            )
-        }
-        .sheet(isPresented: $showingPicker) {
-            SoundPickerView(selectedSoundName: $selectedSoundName)
-        }
-    }
-}
-
 // MARK: - Preview
 
 #Preview {
-    SoundPickerView(selectedSoundName: .constant("Lecha Dodi"))
+    NavigationStack {
+        SoundPickerView(selectedSoundName: .constant("Lecha Dodi"))
+    }
 }

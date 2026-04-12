@@ -126,7 +126,7 @@ struct QuickSelectButton: View {
                 .padding(.vertical, 6)
                 .background(
                     Capsule()
-                        .fill(Color.white.opacity(0.1))
+                        .fill(Color.surfaceSubtle)
                 )
         }
     }
@@ -135,87 +135,66 @@ struct QuickSelectButton: View {
 // MARK: - Full Screen Repeat Picker (for navigation)
 
 struct RepeatDaysPickerView: View {
-    @Environment(\.dismiss) private var dismiss
     @Binding var selectedDays: [Int]
 
-    private let days = [
-        (0, "Sunday"),
-        (1, "Monday"),
-        (2, "Tuesday"),
-        (3, "Wednesday"),
-        (4, "Thursday"),
-        (5, "Friday"),
-        (6, "Saturday (Shabbat)")
-    ]
+    private var days: [(Int, String)] {
+        let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.effectiveLocale
+        let names = formatter.weekdaySymbols ?? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        return (0..<7).map { index in
+            if index == 6 {
+                let isHebrew = formatter.locale.language.languageCode?.identifier == "he"
+                return (index, isHebrew ? names[index] : "\(names[index]) (\(String(localized: "Shabbat")))")
+            }
+            return (index, names[index])
+        }
+    }
 
     var body: some View {
         ZStack {
             LinearGradient.nightSky
                 .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .foregroundStyle(.textSecondary)
+            ScrollView {
+                VStack(spacing: 1) {
+                    ForEach(days, id: \.0) { day in
+                        Button {
+                            toggleDay(day.0)
+                        } label: {
+                            HStack {
+                                Text(day.1)
+                                    .font(AppFont.body())
+                                    .foregroundStyle(day.0 == 6 ? .goldAccent : .textPrimary)
 
-                    Spacer()
+                                Spacer()
 
-                    Text("Repeat")
-                        .font(AppFont.header(18))
-                        .foregroundStyle(.textPrimary)
-
-                    Spacer()
-
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .foregroundStyle(.accentPurple)
-                    .fontWeight(.semibold)
-                }
-                .padding()
-
-                // Days list
-                ScrollView {
-                    VStack(spacing: 1) {
-                        ForEach(days, id: \.0) { day in
-                            Button {
-                                toggleDay(day.0)
-                            } label: {
-                                HStack {
-                                    Text(day.1)
-                                        .font(AppFont.body())
-                                        .foregroundStyle(day.0 == 6 ? .goldAccent : .textPrimary)
-
-                                    Spacer()
-
-                                    if selectedDays.contains(day.0) {
-                                        Image(systemName: "checkmark")
-                                            .foregroundStyle(.accentPurple)
-                                            .fontWeight(.semibold)
-                                    }
+                                if selectedDays.contains(day.0) {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.accentPurple)
+                                        .fontWeight(.semibold)
                                 }
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 16)
-                                .background(Color.white.opacity(0.05))
                             }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 16)
+                            .background(Color.surfaceSubtle)
                         }
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .padding(.horizontal, 20)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
 
-                    // Summary
-                    if !selectedDays.isEmpty {
-                        Text(repeatSummary)
-                            .font(AppFont.caption(13))
-                            .foregroundStyle(.textSecondary)
-                            .padding(.top, 16)
-                    }
+                // Summary
+                if !selectedDays.isEmpty {
+                    Text(repeatSummary)
+                        .font(AppFont.caption(13))
+                        .foregroundStyle(.textSecondary)
+                        .padding(.top, 16)
                 }
             }
         }
+        .navigationTitle("Repeat")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func toggleDay(_ day: Int) {

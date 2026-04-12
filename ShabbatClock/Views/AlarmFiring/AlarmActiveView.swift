@@ -75,7 +75,7 @@ struct AlarmActiveView: View {
         ZStack {
             // Background ring
             Circle()
-                .stroke(Color.white.opacity(0.1), lineWidth: 8)
+                .stroke(Color.surfaceBorder, lineWidth: 8)
                 .frame(width: 180, height: 180)
 
             // Progress ring
@@ -116,7 +116,7 @@ struct AlarmActiveView: View {
             Text("Stop Alarm")
                 .font(AppFont.body(16))
                 .fontWeight(.semibold)
-                .foregroundStyle(.white)
+                .foregroundStyle(.white) // Always white on accent background
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
                 .background(

@@ -34,7 +34,7 @@ struct PremiumView: View {
                             .frame(width: 32, height: 32)
                             .background(
                                 Circle()
-                                    .fill(Color.white.opacity(0.1))
+                                    .fill(Color.surfaceSubtle)
                             )
                     }
 

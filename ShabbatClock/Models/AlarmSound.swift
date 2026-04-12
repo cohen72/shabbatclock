@@ -8,6 +8,11 @@ struct AlarmSound: Identifiable, Hashable {
     let fileExtension: String
     let isPremium: Bool
 
+    /// Localized display name for the sound.
+    var displayName: String {
+        AppLanguage.localized(name)
+    }
+
     enum Category: String, CaseIterable {
         case shabbatMelodies = "Shabbat Melodies"
         case nature = "Nature"
@@ -17,9 +22,14 @@ struct AlarmSound: Identifiable, Hashable {
         case synthesized = "Synthesized"
         case annoying = "Just A Bit Annoying"
 
+        /// Localized display name for the category.
+        var displayName: String {
+            AppLanguage.localized(rawValue)
+        }
+
         var icon: String {
             switch self {
-            case .shabbatMelodies: return "star.of.david"
+            case .shabbatMelodies: return "flame.fill"
             case .nature: return "leaf"
             case .chimesAndBells: return "bell"
             case .jazzy: return "music.note"
