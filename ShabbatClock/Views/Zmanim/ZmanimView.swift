@@ -7,6 +7,7 @@ struct ZmanimView: View {
 
     @State private var showingAlarmSheet = false
     @State private var showingCitySearch = false
+    @State private var showingLocationPrompt = false
     @State private var selectedZman: ZmanimService.Zman?
 
     var body: some View {
@@ -80,7 +81,8 @@ struct ZmanimView: View {
         }
         .onAppear {
             if zmanimService.todayZmanim.isEmpty {
-                if !locationManager.isUsingManualLocation {
+                // Only request location if already authorized — don't prompt on tab switch
+                if locationManager.isAuthorized && !locationManager.isUsingManualLocation {
                     locationManager.requestLocation()
                 }
                 zmanimService.calculateTodayZmanim()
@@ -94,6 +96,17 @@ struct ZmanimView: View {
                 CreateAlarmFromZmanSheet(zman: zman)
                     .applyLanguageOverride(AppLanguage.current)
             }
+        }
+        .fullScreenCover(isPresented: $showingLocationPrompt) {
+            PermissionPromptView.location(
+                onContinue: {
+                    showingLocationPrompt = false
+                    locationManager.requestPermission()
+                },
+                onSkip: {
+                    showingLocationPrompt = false
+                }
+            )
         }
     }
 
@@ -136,7 +149,7 @@ struct ZmanimView: View {
                 .multilineTextAlignment(.center)
 
             Button {
-                locationManager.requestPermission()
+                showingLocationPrompt = true
             } label: {
                 Text("Enable Location")
                     .font(AppFont.body(14))
@@ -283,7 +296,7 @@ struct ZmanInfoSheet: View {
 struct CreateAlarmFromZmanSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var alarmScheduler: AlarmScheduler
+    @Environment(AlarmKitService.self) private var alarmService
 
     let zman: ZmanimService.Zman
 
@@ -386,8 +399,12 @@ struct CreateAlarmFromZmanSheet: View {
         )
 
         modelContext.insert(alarm)
-        alarmScheduler.scheduleNotification(for: alarm)
-        alarmScheduler.updateNextAlarmDate()
+        Task {
+            if let newID = await alarmService.scheduleAlarm(for: alarm) {
+                alarm.alarmKitID = newID
+            }
+            alarmService.updateNextAlarmDate()
+        }
 
         dismiss()
     }
@@ -398,5 +415,5 @@ struct CreateAlarmFromZmanSheet: View {
 #Preview {
     ZmanimView()
         .modelContainer(for: Alarm.self, inMemory: true)
-        .environmentObject(AlarmScheduler.shared)
+        .environment(AlarmKitService.shared)
 }

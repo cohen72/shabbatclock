@@ -9,6 +9,7 @@ final class LocationManager: NSObject, ObservableObject {
 
     @Published var location: CLLocation?
     @Published var locationName: String = "__unknown__"
+    @Published var locationTimeZone: TimeZone = .current
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published var isLoading: Bool = false
     @Published var error: LocationError?
@@ -79,6 +80,24 @@ final class LocationManager: NSObject, ObservableObject {
         UserDefaults.standard.set(newLocation.coordinate.longitude, forKey: "manualLongitude")
         UserDefaults.standard.set(name, forKey: "manualLocationName")
         UserDefaults.standard.set(true, forKey: "isUsingManualLocation")
+
+        // Resolve timezone for the manual location
+        reverseGeocodeForTimeZone(newLocation)
+    }
+
+    /// Resolve only the timezone for a location (used for manual locations where name is already known).
+    private func reverseGeocodeForTimeZone(_ location: CLLocation) {
+        Task {
+            do {
+                guard let request = MKReverseGeocodingRequest(location: location) else { return }
+                let mapItems = try await request.mapItems
+                if let tz = mapItems.first?.timeZone {
+                    self.locationTimeZone = tz
+                }
+            } catch {
+                print("[LocationManager] Timezone geocoding error: \(error)")
+            }
+        }
     }
 
     /// Clear the manual override and use device location.
@@ -102,11 +121,12 @@ final class LocationManager: NSObject, ObservableObject {
         guard UserDefaults.standard.bool(forKey: "isUsingManualLocation") else { return }
         let lat = UserDefaults.standard.double(forKey: "manualLatitude")
         let lon = UserDefaults.standard.double(forKey: "manualLongitude")
-        let name = UserDefaults.standard.string(forKey: "manualLocationName") ?? "__unknown__"
         guard lat != 0 || lon != 0 else { return }
-        location = CLLocation(latitude: lat, longitude: lon)
-        locationName = name
+        let loc = CLLocation(latitude: lat, longitude: lon)
+        location = loc
         isUsingManualLocation = true
+        // Re-geocode with current app locale to get localized name
+        reverseGeocode(loc)
     }
 
     private func reverseGeocode(_ location: CLLocation) {
@@ -117,11 +137,18 @@ final class LocationManager: NSObject, ObservableObject {
                     return
                 }
                 let mapItems = try await request.mapItems
-                if let mapItem = mapItems.first {
-                    if let address = mapItem.address {
+                if let item = mapItems.first {
+                    // Use item.address (iOS 26+) instead of addressRepresentations to avoid placemark deprecation
+                    if let address = item.address {
                         self.locationName = address.shortAddress ?? address.fullAddress
+                    } else if let name = item.name {
+                        self.locationName = name
                     } else {
-                        self.locationName = mapItem.name ?? "__unknown__"
+                        self.locationName = "__unknown__"
+                    }
+                    // Use the location's native timezone
+                    if let tz = item.timeZone {
+                        self.locationTimeZone = tz
                     }
                 }
             } catch {

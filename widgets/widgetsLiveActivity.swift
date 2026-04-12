@@ -1,80 +1,132 @@
-//
-//  widgetsLiveActivity.swift
-//  widgets
-//
-//  Created by Yehuda Oren Cohen on 4/12/26.
-//
-
-import ActivityKit
 import WidgetKit
 import SwiftUI
+import AlarmKit
 
-struct widgetsAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
-    }
-
-    // Fixed non-changing properties about your activity go here!
-    var name: String
-}
-
-struct widgetsLiveActivity: Widget {
+/// Live Activity widget for AlarmKit alarms.
+/// Shows alarm info in Dynamic Island and on Lock Screen.
+/// AlarmKit manages the lifecycle — this just provides the UI.
+struct ShabbatClockLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: widgetsAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
-            }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
-
+        ActivityConfiguration(for: AlarmAttributes<ShabbatAlarmMetadata>.self) { context in
+            // Lock Screen / StandBy presentation
+            lockScreenView(context: context)
         } dynamicIsland: { context in
-            DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
+            let metadata = context.attributes.metadata
+            let isShabbat = metadata?.isShabbatAlarm ?? false
+            let label = metadata?.label ?? String(localized: context.attributes.presentation.alert.title)
+            let soundCategory = metadata?.soundCategory ?? ""
+
+            return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    HStack(spacing: 6) {
+                        Image(systemName: isShabbat ? "flame.fill" : "alarm.fill")
+                            .font(.system(size: 14))
+                            .foregroundStyle(Color(hex: "D4A548"))
+
+                        Text(label)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                    }
                 }
+
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    Text(context.attributes.presentation.alert.title)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.7))
                 }
+
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    HStack {
+                        if !soundCategory.isEmpty {
+                            Text(soundCategory)
+                                .font(.system(size: 12))
+                                .foregroundStyle(.white.opacity(0.5))
+                        }
+
+                        Spacer()
+
+                        if isShabbat {
+                            Text("Shabbat Alarm")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Color(hex: "D4A548"))
+                        }
+                    }
                 }
             } compactLeading: {
-                Text("L")
+                Image(systemName: isShabbat ? "flame.fill" : "alarm.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color(hex: "D4A548"))
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                Text(label)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
             } minimal: {
-                Text(context.state.emoji)
+                Image(systemName: "alarm.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color(hex: "D4A548"))
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
         }
     }
-}
 
-extension widgetsAttributes {
-    fileprivate static var preview: widgetsAttributes {
-        widgetsAttributes(name: "World")
+    // MARK: - Lock Screen View
+
+    @ViewBuilder
+    private func lockScreenView(context: ActivityViewContext<AlarmAttributes<ShabbatAlarmMetadata>>) -> some View {
+        let metadata = context.attributes.metadata
+        let isShabbat = metadata?.isShabbatAlarm ?? false
+        let label = metadata?.label ?? String(localized: context.attributes.presentation.alert.title)
+
+        HStack(spacing: 16) {
+            Image(systemName: isShabbat ? "flame.fill" : "alarm.fill")
+                .font(.system(size: 28))
+                .foregroundStyle(Color(hex: "D4A548"))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white)
+
+                if isShabbat {
+                    Text("Shabbat Alarm")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color(hex: "D4A548").opacity(0.8))
+                }
+            }
+
+            Spacer()
+        }
+        .padding(16)
+        .background(
+            LinearGradient(
+                colors: [
+                    Color(hex: "0D0D2B"),
+                    Color(hex: "1A1A40")
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
     }
 }
 
-extension widgetsAttributes.ContentState {
-    fileprivate static var smiley: widgetsAttributes.ContentState {
-        widgetsAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: widgetsAttributes.ContentState {
-         widgetsAttributes.ContentState(emoji: "🤩")
-     }
-}
+// MARK: - Color Hex Extension (Widget-local, matches Theme.swift)
 
-#Preview("Notification", as: .content, using: widgetsAttributes.preview) {
-   widgetsLiveActivity()
-} contentStates: {
-    widgetsAttributes.ContentState.smiley
-    widgetsAttributes.ContentState.starEyes
+private extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let r, g, b: Double
+        switch hex.count {
+        case 6:
+            r = Double((int >> 16) & 0xFF) / 255.0
+            g = Double((int >> 8) & 0xFF) / 255.0
+            b = Double(int & 0xFF) / 255.0
+        default:
+            r = 1; g = 1; b = 1
+        }
+        self.init(red: r, green: g, blue: b)
+    }
 }

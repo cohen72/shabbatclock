@@ -4,19 +4,23 @@ import SwiftData
 /// Main content view with tab navigation.
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var alarmScheduler: AlarmScheduler
+    @Environment(AlarmKitService.self) private var alarmService
 
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
     @State private var selectedTab: Int = 0
+    @State private var showingOnboarding = false
 
     private var resolvedColorScheme: ColorScheme? {
         AppearanceMode(rawValue: appearanceMode)?.colorScheme
     }
 
     private var resolvedLanguage: AppLanguage {
-        AppLanguage(rawValue: appLanguage) ?? .system
+        // Ensure bundle override is applied before views resolve strings
+        AppLanguage.applyBundleOverride()
+        return AppLanguage(rawValue: appLanguage) ?? .system
     }
 
     init() {
@@ -28,39 +32,41 @@ struct ContentView: View {
     }
 
     var body: some View {
-        ZStack {
-            TabView(selection: $selectedTab) {
-                SwiftUI.Tab("Clock", systemImage: "clock.fill", value: 0) {
-                    MainClockView()
-                }
-
-                SwiftUI.Tab("Alarms", systemImage: "alarm.fill", value: 1) {
-                    AlarmListView()
-                }
-
-                SwiftUI.Tab("Zmanim", systemImage: "sun.horizon.fill", value: 2) {
-                    ZmanimView()
-                }
-
-                SwiftUI.Tab("Settings", systemImage: "gearshape.fill", value: 3) {
-                    SettingsView()
-                }
+        TabView(selection: $selectedTab) {
+            SwiftUI.Tab("Clock", systemImage: "clock.fill", value: 0) {
+                MainClockView()
             }
-            .tint(.accentPurple)
 
-            // Alarm firing overlay
-            if alarmScheduler.isAlarmFiring {
-                AlarmActiveView()
-                    .transition(.opacity)
-                    .zIndex(100)
+            SwiftUI.Tab("Alarms", systemImage: "alarm.fill", value: 1) {
+                AlarmListView()
+            }
+
+            SwiftUI.Tab("Zmanim", systemImage: "sun.horizon.fill", value: 2) {
+                ZmanimView()
+            }
+
+            SwiftUI.Tab("Settings", systemImage: "gearshape.fill", value: 3) {
+                SettingsView()
             }
         }
+        .tint(.accentPurple)
         .preferredColorScheme(resolvedColorScheme)
         .applyLanguageOverride(resolvedLanguage)
+        .id("lang-\(appLanguage)") // Force full view rebuild when language changes
         .onAppear {
-            alarmScheduler.configure(with: modelContext)
+            alarmService.configure(with: modelContext)
+            if !hasCompletedOnboarding {
+                showingOnboarding = true
+            }
         }
-        .animation(.easeInOut(duration: 0.3), value: alarmScheduler.isAlarmFiring)
+        .fullScreenCover(isPresented: $showingOnboarding) {
+            OnboardingView {
+                hasCompletedOnboarding = true
+                showingOnboarding = false
+            }
+            .environment(alarmService)
+            .applyLanguageOverride(resolvedLanguage)
+        }
     }
 }
 
@@ -84,5 +90,5 @@ extension View {
 #Preview {
     ContentView()
         .modelContainer(for: Alarm.self, inMemory: true)
-        .environmentObject(AlarmScheduler.shared)
+        .environment(AlarmKitService.shared)
 }

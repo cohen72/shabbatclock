@@ -8,10 +8,14 @@ struct SettingsView: View {
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
 
+    @Environment(AlarmKitService.self) private var alarmService
     @StateObject private var locationManager = LocationManager.shared
     @State private var showingPremium = false
     @State private var showingAbout = false
     @State private var showingCitySearch = false
+    #if DEBUG
+    @State private var showingDebug = false
+    #endif
 
     var body: some View {
         NavigationStack {
@@ -21,6 +25,14 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // Premium section (top for visibility)
+                        premiumSection
+
+                        // Alarm permission warning (only in fallback mode)
+                        if alarmService.isFallbackMode && alarmService.hasBeenAskedForAuthorization {
+                            alarmPermissionSection
+                        }
+
                         // Location section
                         locationSection
 
@@ -30,9 +42,6 @@ struct SettingsView: View {
                         // Language section
                         languageSection
 
-                        // Premium section
-                        premiumSection
-
                         // Defaults section
                         defaultsSection
 
@@ -40,6 +49,7 @@ struct SettingsView: View {
                         aboutSection
                     }
                     .padding(.horizontal, 24)
+                    .padding(.top, 8)
                     .padding(.bottom, 120)
                 }
             }
@@ -56,6 +66,71 @@ struct SettingsView: View {
             .sheet(isPresented: $showingCitySearch) {
                 CitySearchView()
                     .applyLanguageOverride(AppLanguage.current)
+            }
+            #if DEBUG
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingDebug = true
+                    } label: {
+                        Image(systemName: "ladybug.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.goldAccent)
+                    }
+                }
+            }
+            .sheet(isPresented: $showingDebug) {
+                NavigationStack {
+                    DebugView()
+                        .applyLanguageOverride(AppLanguage.current)
+                }
+            }
+            #endif
+        }
+    }
+
+    // MARK: - Alarm Permission Section
+
+    private var alarmPermissionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Alarms", icon: "alarm.fill")
+
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(.goldAccent)
+                        .frame(width: 32)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Limited Alarm Mode")
+                            .font(AppFont.body())
+                            .foregroundStyle(.textPrimary)
+
+                        Text("Tap to allow alarms in Shabbat Clock settings for full features.")
+                            .font(AppFont.caption(12))
+                            .foregroundStyle(.textSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "arrow.up.forward")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.goldAccent)
+                }
+                .padding(16)
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(Color.goldAccent.opacity(0.08))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.goldAccent.opacity(0.2), lineWidth: 0.5)
+                        )
+                )
             }
         }
     }
@@ -162,54 +237,97 @@ struct SettingsView: View {
     // MARK: - Premium Section
 
     private var premiumSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Premium", icon: "star.fill")
-
+        Group {
             if isPremium {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Premium Active")
-                            .font(AppFont.body())
-                            .foregroundStyle(.textPrimary)
-                        Text("Thank you for your support!")
-                            .font(AppFont.caption(12))
-                            .foregroundStyle(.textSecondary)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "checkmark.seal.fill")
-                        .font(.system(size: 24))
-                        .foregroundStyle(.goldAccent)
-                }
-                .padding(16)
-                .settingsCard()
-            } else {
-                Button {
-                    showingPremium = true
-                } label: {
+                VStack(spacing: 0) {
                     HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Upgrade to Premium")
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.goldAccent)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Premium Active")
                                 .font(AppFont.body())
                                 .foregroundStyle(.textPrimary)
-                            Text("Unlimited alarms, all sounds")
+                            Text("Thank you for your support!")
                                 .font(AppFont.caption(12))
                                 .foregroundStyle(.textSecondary)
                         }
 
                         Spacer()
 
-                        Text("$4.99")
-                            .font(AppFont.body())
+                        Image(systemName: "checkmark.seal.fill")
+                            .font(.system(size: 24))
                             .foregroundStyle(.goldAccent)
-
-                        Image(systemName: "chevron.forward")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.textSecondary)
                     }
                     .padding(16)
-                    .settingsCard()
+
+                    Divider().overlay(Color.surfaceBorder)
+
+                    // Manage subscription link
+                    Button {
+                        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        HStack {
+                            Text("Manage Subscription")
+                                .font(AppFont.caption(13))
+                                .foregroundStyle(.textSecondary)
+                            Spacer()
+                            Image(systemName: "arrow.up.forward")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.textSecondary)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                    }
+                }
+                .settingsCard()
+            } else {
+                Button {
+                    showingPremium = true
+                } label: {
+                    VStack(spacing: 0) {
+                        // Gradient banner
+                        HStack(spacing: 10) {
+                            Image(systemName: "crown.fill")
+                                .font(.system(size: 18))
+                                .foregroundStyle(.white)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Upgrade to Premium")
+                                    .font(AppFont.body(16))
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.white)
+
+                                Text("Unlimited alarms • All sounds")
+                                    .font(AppFont.caption(12))
+                                    .foregroundStyle(.white.opacity(0.85))
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "chevron.forward")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.white.opacity(0.8))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                        .background(
+                            LinearGradient(
+                                colors: [
+                                    Color.goldAccent,
+                                    Color.goldAccent.opacity(0.8),
+                                    Color.accentPurple
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .shadow(color: .goldAccent.opacity(0.3), radius: 8, y: 4)
                 }
             }
         }
@@ -319,6 +437,7 @@ struct SettingsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.surfaceCard)
     }
+
 
 }
 

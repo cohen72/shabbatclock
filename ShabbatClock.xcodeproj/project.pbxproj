@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,11 +11,13 @@
 		AAA00002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00002 /* ContentView.swift */; };
 		AAA00010 /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00010 /* Alarm.swift */; };
 		AAA00011 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00011 /* AlarmSound.swift */; };
-		AAA00020 /* BackgroundKeepAlive.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00020 /* BackgroundKeepAlive.swift */; };
+		AAA00012 /* ShabbatAlarmMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00012 /* ShabbatAlarmMetadata.swift */; };
 		AAA00021 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00021 /* AudioManager.swift */; };
-		AAA00022 /* AlarmScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00022 /* AlarmScheduler.swift */; };
 		AAA00023 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00023 /* LocationManager.swift */; };
 		AAA00024 /* ZmanimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00024 /* ZmanimService.swift */; };
+		AAA00025 /* AlarmKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00025 /* AlarmKitService.swift */; };
+		AAA00026 /* StopAlarmIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00026 /* StopAlarmIntent.swift */; };
+		AAA00027 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00027 /* StoreManager.swift */; };
 		AAA00030 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00030 /* Theme.swift */; };
 		AAA00040 /* NightSkyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00040 /* NightSkyBackground.swift */; };
 		AAA00050 /* AnalogClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00050 /* AnalogClockView.swift */; };
@@ -25,28 +27,60 @@
 		AAA00070 /* AlarmEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00070 /* AlarmEditView.swift */; };
 		AAA00071 /* RepeatDaysPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00071 /* RepeatDaysPicker.swift */; };
 		AAA00072 /* SoundPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00072 /* SoundPickerView.swift */; };
-		AAA00080 /* AlarmActiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00080 /* AlarmActiveView.swift */; };
 		AAA00090 /* ZmanimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00090 /* ZmanimView.swift */; };
 		AAA00100 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00100 /* SettingsView.swift */; };
+		AAA00102 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00102 /* DebugView.swift */; };
+		AAA00103 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00103 /* OnboardingView.swift */; };
 		AAA00101 /* PremiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00101 /* PremiumView.swift */; };
 		AAA00200 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = BBB00200 /* Sounds */; };
+		DD112234 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112233 /* Localizable.xcstrings */; };
+		DD8859E3 /* LocationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBA /* LocationRow.swift */; };
+		DD8859E4 /* PermissionPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBB /* PermissionPromptView.swift */; };
+		DDAB2E76 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4824B /* CitySearchView.swift */; };
+		EDE72F3C2F8BFB3100E40DFF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDE72F3B2F8BFB3100E40DFF /* WidgetKit.framework */; };
+		EDE72F3E2F8BFB3100E40DFF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDE72F3D2F8BFB3100E40DFF /* SwiftUI.framework */; };
+		EDE72F4B2F8BFB3200E40DFF /* widgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EDF6A1E02F23A6860052797F /* KosherSwift in Frameworks */ = {isa = PBXBuildFile; productRef = EDF6A1DF2F23A6860052797F /* KosherSwift */; };
 		EDF6A1E52F23BA5C0052797F /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDF6A1E42F23BA5C0052797F /* Media.xcassets */; };
-		DD8859E3 /* LocationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBA /* LocationRow.swift */; };
-		DDAB2E76 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4824B /* CitySearchView.swift */; };
-		DD112234 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112233 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EDE72F492F8BFB3200E40DFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = JJJ00001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EDE72F382F8BFB3100E40DFF;
+			remoteInfo = widgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EDE72F502F8BFB3200E40DFF /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EDE72F4B2F8BFB3200E40DFF /* widgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		BBB00001 /* ShabbatClockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShabbatClockApp.swift; sourceTree = "<group>"; };
 		BBB00002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BBB00010 /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
 		BBB00011 /* AlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
-		BBB00020 /* BackgroundKeepAlive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundKeepAlive.swift; sourceTree = "<group>"; };
+		BBB00012 /* ShabbatAlarmMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShabbatAlarmMetadata.swift; sourceTree = "<group>"; };
 		BBB00021 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
-		BBB00022 /* AlarmScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmScheduler.swift; sourceTree = "<group>"; };
 		BBB00023 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		BBB00024 /* ZmanimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZmanimService.swift; sourceTree = "<group>"; };
+		BBB00025 /* AlarmKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmKitService.swift; sourceTree = "<group>"; };
+		BBB00026 /* StopAlarmIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopAlarmIntent.swift; sourceTree = "<group>"; };
+		BBB00027 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
+		BBB00028 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		BBB00030 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		BBB00040 /* NightSkyBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightSkyBackground.swift; sourceTree = "<group>"; };
 		BBB00050 /* AnalogClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalogClockView.swift; sourceTree = "<group>"; };
@@ -56,18 +90,37 @@
 		BBB00070 /* AlarmEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmEditView.swift; sourceTree = "<group>"; };
 		BBB00071 /* RepeatDaysPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatDaysPicker.swift; sourceTree = "<group>"; };
 		BBB00072 /* SoundPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPickerView.swift; sourceTree = "<group>"; };
-		BBB00080 /* AlarmActiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmActiveView.swift; sourceTree = "<group>"; };
 		BBB00090 /* ZmanimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZmanimView.swift; sourceTree = "<group>"; };
 		BBB00100 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BBB00102 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
+		BBB00103 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BBB00101 /* PremiumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumView.swift; sourceTree = "<group>"; };
 		BBB00200 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		BBB00201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		CCC00001 /* ShabbatClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShabbatClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EDF6A1E42F23BA5C0052797F /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = Resources/Media.xcassets; sourceTree = "<group>"; };
 		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
+		CC27FEBB /* PermissionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPromptView.swift; sourceTree = "<group>"; };
+		CCC00001 /* ShabbatClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShabbatClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCE4824B /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
 		DD112233 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = widgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EDE72F3B2F8BFB3100E40DFF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		EDE72F3D2F8BFB3100E40DFF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		EDF6A1E42F23BA5C0052797F /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = Resources/Media.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EDE72F4C2F8BFB3200E40DFF /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EDE72F382F8BFB3100E40DFF /* widgetsExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		EDE72F3F2F8BFB3100E40DFF /* widgets */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (EDE72F4C2F8BFB3200E40DFF /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = widgets; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		DDD00001 /* Frameworks */ = {
@@ -78,13 +131,33 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EDE72F362F8BFB3100E40DFF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EDE72F3E2F8BFB3100E40DFF /* SwiftUI.framework in Frameworks */,
+				EDE72F3C2F8BFB3100E40DFF /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		EDE72F3A2F8BFB3100E40DFF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EDE72F3B2F8BFB3100E40DFF /* WidgetKit.framework */,
+				EDE72F3D2F8BFB3100E40DFF /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		EEE00000 = {
 			isa = PBXGroup;
 			children = (
 				EEE00001 /* ShabbatClock */,
+				EDE72F3F2F8BFB3100E40DFF /* widgets */,
+				EDE72F3A2F8BFB3100E40DFF /* Frameworks */,
 				EEE00999 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -99,6 +172,7 @@
 				EEE00006 /* Views */,
 				EEE00007 /* Resources */,
 				BBB00201 /* Info.plist */,
+				BBB00028 /* Products.storekit */,
 				EDF6A1E42F23BA5C0052797F /* Media.xcassets */,
 			);
 			path = ShabbatClock;
@@ -118,6 +192,7 @@
 			children = (
 				BBB00010 /* Alarm.swift */,
 				BBB00011 /* AlarmSound.swift */,
+				BBB00012 /* ShabbatAlarmMetadata.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -125,9 +200,10 @@
 		EEE00004 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				BBB00020 /* BackgroundKeepAlive.swift */,
 				BBB00021 /* AudioManager.swift */,
-				BBB00022 /* AlarmScheduler.swift */,
+				BBB00025 /* AlarmKitService.swift */,
+				BBB00026 /* StopAlarmIntent.swift */,
+				BBB00027 /* StoreManager.swift */,
 				BBB00023 /* LocationManager.swift */,
 				BBB00024 /* ZmanimService.swift */,
 			);
@@ -152,6 +228,7 @@
 				EEE00014 /* AlarmFiring */,
 				EEE00015 /* Zmanim */,
 				EEE00016 /* Settings */,
+				EEE00017 /* Onboarding */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -171,6 +248,7 @@
 				BBB00040 /* NightSkyBackground.swift */,
 				CCE4824B /* CitySearchView.swift */,
 				CC27FEBA /* LocationRow.swift */,
+				CC27FEBB /* PermissionPromptView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -206,7 +284,6 @@
 		EEE00014 /* AlarmFiring */ = {
 			isa = PBXGroup;
 			children = (
-				BBB00080 /* AlarmActiveView.swift */,
 			);
 			path = AlarmFiring;
 			sourceTree = "<group>";
@@ -223,15 +300,25 @@
 			isa = PBXGroup;
 			children = (
 				BBB00100 /* SettingsView.swift */,
+				BBB00102 /* DebugView.swift */,
 				BBB00101 /* PremiumView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		EEE00017 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				BBB00103 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		EEE00999 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				CCC00001 /* ShabbatClock.app */,
+				EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -239,6 +326,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		EDE72F382F8BFB3100E40DFF /* widgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EDE72F4D2F8BFB3200E40DFF /* Build configuration list for PBXNativeTarget "widgetsExtension" */;
+			buildPhases = (
+				EDE72F352F8BFB3100E40DFF /* Sources */,
+				EDE72F362F8BFB3100E40DFF /* Frameworks */,
+				EDE72F372F8BFB3100E40DFF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EDE72F3F2F8BFB3100E40DFF /* widgets */,
+			);
+			name = widgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = widgetsExtension;
+			productReference = EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		FFF00001 /* ShabbatClock */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = GGG00001 /* Build configuration list for PBXNativeTarget "ShabbatClock" */;
@@ -246,10 +355,12 @@
 				HHH00001 /* Sources */,
 				DDD00001 /* Frameworks */,
 				III00001 /* Resources */,
+				EDE72F502F8BFB3200E40DFF /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EDE72F4A2F8BFB3200E40DFF /* PBXTargetDependency */,
 			);
 			name = ShabbatClock;
 			packageProductDependencies = (
@@ -266,9 +377,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
+				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
+					EDE72F382F8BFB3100E40DFF = {
+						CreatedOnToolsVersion = 26.3;
+					};
 					FFF00001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
@@ -292,11 +406,19 @@
 			projectRoot = "";
 			targets = (
 				FFF00001 /* ShabbatClock */,
+				EDE72F382F8BFB3100E40DFF /* widgetsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		EDE72F372F8BFB3100E40DFF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		III00001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -310,6 +432,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		EDE72F352F8BFB3100E40DFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		HHH00001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -318,15 +447,18 @@
 				AAA00002 /* ContentView.swift in Sources */,
 				AAA00010 /* Alarm.swift in Sources */,
 				AAA00011 /* AlarmSound.swift in Sources */,
-				AAA00020 /* BackgroundKeepAlive.swift in Sources */,
+				AAA00012 /* ShabbatAlarmMetadata.swift in Sources */,
 				AAA00021 /* AudioManager.swift in Sources */,
-				AAA00022 /* AlarmScheduler.swift in Sources */,
+				AAA00025 /* AlarmKitService.swift in Sources */,
+				AAA00026 /* StopAlarmIntent.swift in Sources */,
+				AAA00027 /* StoreManager.swift in Sources */,
 				AAA00023 /* LocationManager.swift in Sources */,
 				AAA00024 /* ZmanimService.swift in Sources */,
 				AAA00030 /* Theme.swift in Sources */,
 				AAA00040 /* NightSkyBackground.swift in Sources */,
 				DDAB2E76 /* CitySearchView.swift in Sources */,
 				DD8859E3 /* LocationRow.swift in Sources */,
+				DD8859E4 /* PermissionPromptView.swift in Sources */,
 				AAA00050 /* AnalogClockView.swift in Sources */,
 				AAA00051 /* MainClockView.swift in Sources */,
 				AAA00060 /* AlarmListView.swift in Sources */,
@@ -334,16 +466,87 @@
 				AAA00070 /* AlarmEditView.swift in Sources */,
 				AAA00071 /* RepeatDaysPicker.swift in Sources */,
 				AAA00072 /* SoundPickerView.swift in Sources */,
-				AAA00080 /* AlarmActiveView.swift in Sources */,
 				AAA00090 /* ZmanimView.swift in Sources */,
 				AAA00100 /* SettingsView.swift in Sources */,
+				AAA00102 /* DebugView.swift in Sources */,
+				AAA00103 /* OnboardingView.swift in Sources */,
 				AAA00101 /* PremiumView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		EDE72F4A2F8BFB3200E40DFF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EDE72F382F8BFB3100E40DFF /* widgetsExtension */;
+			targetProxy = EDE72F492F8BFB3200E40DFF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		EDE72F4E2F8BFB3200E40DFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = widgets/widgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = widgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = widgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shabbatclock.app.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EDE72F4F2F8BFB3200E40DFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = widgets/widgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = widgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = widgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shabbatclock.app.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		LLL00001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -473,6 +676,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = ShabbatClock/ShabbatClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -504,6 +708,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = ShabbatClock/ShabbatClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -532,6 +737,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		EDE72F4D2F8BFB3200E40DFF /* Build configuration list for PBXNativeTarget "widgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EDE72F4E2F8BFB3200E40DFF /* Debug */,
+				EDE72F4F2F8BFB3200E40DFF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		GGG00001 /* Build configuration list for PBXNativeTarget "ShabbatClock" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

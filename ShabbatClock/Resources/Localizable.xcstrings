@@ -1,1957 +1,2555 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "": {},
-    "%@, %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@, %2$@"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "/week" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/שבוע"
+          }
+        }
+      }
+    },
+    "/year" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "/שנה"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
+    "© %@ Shabbat Clock" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "© %@ שעון שבת"
+          }
+        }
+      }
+    },
+    "1.0.0" : {
+
+    },
+    "1.25 hours before sunset" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעה ורבע לפני השקיעה"
+          }
+        }
+      }
+    },
+    "5 min before" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 דק׳ לפני"
+          }
+        }
+      }
+    },
+    "10 min before" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 דק׳ לפני"
+          }
+        }
+      }
+    },
+    "15 min before" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 דק׳ לפני"
+          }
+        }
+      }
+    },
+    "30 min before" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 דק׳ לפני"
+          }
+        }
+      }
+    },
+    "30 sec" : {
+
+    },
+    "30s" : {
+
+    },
+    "42 beautiful sounds including Shabbat melodies" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "42 צלילים יפים כולל מנגינות שבת"
+          }
+        }
+      }
+    },
+    "72 minutes before sunrise" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "72 דקות לפני הנץ החמה"
+          }
+        }
+      }
+    },
+    "80's Alarm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעון מעורר משנות ה-80"
+          }
+        }
+      }
+    },
+    "About" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אודות"
+          }
+        }
+      }
+    },
+    "About Shabbat Clock" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אודות שעון שבת"
+          }
+        }
+      }
+    },
+    "Access every alarm sound including Shabbat melodies" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גישה לכל צלילי ההתראה כולל מנגינות שבת"
+          }
+        }
+      }
+    },
+    "Accurate Prayer Times" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמני תפילה מדויקים"
+          }
+        }
+      }
+    },
+    "Actions" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעולות"
+          }
+        }
+      }
+    },
+    "Airhorn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צופר אוויר"
+          }
+        }
+      }
+    },
+    "Alarm" : {
+      "comment" : "Default alarm label / placeholder",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה"
+          }
+        }
+      }
+    },
+    "Alarm ID" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מזהה התראה"
+          }
+        }
+      }
+    },
+    "Alarm Notifications" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות שעון מעורר"
+          }
+        }
+      }
+    },
+    "Alarm Saved in Basic Mode" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה נשמרה במצב בסיסי"
+          }
+        }
+      }
+    },
+    "Alarm Sound" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צליל התראה"
+          }
+        }
+      }
+    },
+    "Alarm stops automatically after this duration" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה נעצרת אוטומטית לאחר פרק זמן זה"
+          }
+        }
+      }
+    },
+    "Alarm will ring at" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה תצלצל ב"
+          }
+        }
+      }
+    },
+    "Alarm will stop automatically" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה תיפסק אוטומטית"
+          }
+        }
+      }
+    },
+    "AlarmKit" : {
+
+    },
+    "Alarms" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות"
+          }
+        }
+      }
+    },
+    "Alarms are limited to 30 seconds. Allow alarms in Settings for full features." : {
+
+    },
+    "All 47 Sounds" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל 47 הצלילים"
           }
         }
       }
     },
-    "%lld/%lld": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$lld/%2$lld"
+    "All Premium Sounds" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל הצלילים הפרימיום"
           }
         }
       }
     },
-    "© %@ Shabbat Clock": {},
-    "$4.99": {},
-    "1.0.0": {},
-    "1.25 hours before sunset": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שעה ורבע לפני השקיעה"
+    "Allow alarms in Settings for longer durations" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר התראות בהגדרות למשך זמן ארוך יותר"
           }
         }
       }
     },
-    "5 min before": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "5 דק׳ לפני"
+    "Ana Bekoach" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אנא בכוח"
           }
         }
       }
     },
-    "10 min before": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "10 דק׳ לפני"
+    "Appearance" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מראה"
           }
         }
       }
     },
-    "15 min before": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "15 דק׳ לפני"
+    "Are you sure you want to delete this alarm?" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "האם אתם בטוחים שברצונכם למחוק התראה זו?"
           }
         }
       }
     },
-    "30 min before": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "30 דק׳ לפני"
+    "At time" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בזמן"
           }
         }
       }
     },
-    "72 minutes before sunrise": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "72 דקות לפני הנץ החמה"
+    "Auto-Stop" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כיבוי אוטומטי"
           }
         }
       }
     },
-    "80's Alarm": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שעון מעורר משנות ה-80"
+    "Auto-stop up to 30 minutes" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עצירה אוטומטית עד 30 דקות"
           }
         }
       }
     },
-    "About": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אודות"
+    "Bicycle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אופניים"
           }
         }
       }
     },
-    "About Shabbat Clock": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אודות שעון שבת"
+    "Birds" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ציפורים"
           }
         }
       }
     },
-    "Access every alarm sound including Shabbat melodies": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גישה לכל צלילי ההתראה כולל מנגינות שבת"
+    "Boker Tov" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בוקר טוב"
           }
         }
       }
     },
-    "Airhorn": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צופר אוויר"
+    "Built with ❤️" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נבנה באהבה ❤️"
           }
         }
       }
     },
-    "Alarm": {
-      "comment": "Default alarm label / placeholder",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התראה"
+    "Calculating zmanim..." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחשב זמנים..."
           }
         }
       }
     },
-    "Alarm Sound": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צליל התראה"
+    "Cancel" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ביטול"
           }
         }
       }
     },
-    "Alarm will ring at": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ההתראה תצלצל ב"
+    "Candle Lighting" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הדלקת נרות"
           }
         }
       }
     },
-    "Alarm will stop automatically": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ההתראה תיפסק אוטומטית"
+    "Chimes & Bells" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צלצולים ופעמונים"
           }
         }
       }
     },
-    "Alarms": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התראות"
+    "Chinese Birthday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום הולדת סיני"
           }
         }
       }
     },
-    "All 47 Sounds": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "כל 47 הצלילים"
+    "Choose City Manually" : {
+
+    },
+    "Clear" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ניקוי"
+          }
+        }
+      }
+    },
+    "Clock" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעון"
+          }
+        }
+      }
+    },
+    "Contact Support" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יצירת קשר עם התמיכה"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשך"
+          }
+        }
+      }
+    },
+    "Cowbell" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעמון פרה"
+          }
+        }
+      }
+    },
+    "Create as many alarms as you need" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צרו כמה התראות שתרצו"
+          }
+        }
+      }
+    },
+    "Current City" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עיר נוכחית"
+          }
+        }
+      }
+    },
+    "Custom Durations" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משכי זמן מותאמים"
+          }
+        }
+      }
+    },
+    "Dark" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כהה"
+          }
+        }
+      }
+    },
+    "Dawn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שחר"
+          }
+        }
+      }
+    },
+    "Debug" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ניפוי שגיאות"
+          }
+        }
+      }
+    },
+    "Default Sound" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צליל ברירת מחדל"
+          }
+        }
+      }
+    },
+    "Defaults" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ברירות מחדל"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחיקה"
+          }
+        }
+      }
+    },
+    "Delete Alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחיקת התראה"
+          }
+        }
+      }
+    },
+    "Disabled" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כבוי"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיום"
+          }
+        }
+      }
+    },
+    "Earliest Mincha" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנחה גדולה"
+          }
+        }
+      }
+    },
+    "Earliest Tallit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טלית מוקדם"
+          }
+        }
+      }
+    },
+    "Earliest time for Mincha" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הזמן המוקדם ביותר לתפילת מנחה"
+          }
+        }
+      }
+    },
+    "Earliest time for tallit and tefillin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הזמן המוקדם ביותר לטלית ותפילין"
+          }
+        }
+      }
+    },
+    "Eastern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מזרחי"
+          }
+        }
+      }
+    },
+    "Edit Alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עריכת התראה"
+          }
+        }
+      }
+    },
+    "El Adon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אל אדון"
+          }
+        }
+      }
+    },
+    "El Adon (Regular)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אל אדון (רגיל)"
+          }
+        }
+      }
+    },
+    "Enable \"Alarms & Timers\" in Settings for longer durations" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעל \"שעונים מעוררים וטיימרים\" בהגדרות למשך זמן ארוך יותר"
+          }
+        }
+      }
+    },
+    "Enable Alarms" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעלת התראות"
+          }
+        }
+      }
+    },
+    "Enable Location" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשור מיקום"
+          }
+        }
+      }
+    },
+    "Enable location in Settings" : {
+
+    },
+    "Enable location in Settings for accurate prayer times, or choose your city manually." : {
+
+    },
+    "Enable location to see\ntoday's zmanim" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשרו מיקום כדי לראות\nאת זמני היום"
           }
         }
       }
     },
-    "Ana Bekoach": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אנא בכוח"
+    "Enable Notifications" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעלת התראות"
           }
         }
       }
     },
-    "Appearance": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מראה"
+    "Enabled" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מופעל"
           }
         }
       }
     },
-    "Are you sure you want to delete this alarm?": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "האם אתם בטוחים שברצונכם למחוק התראה זו?"
+    "English" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אנגלית"
           }
         }
       }
     },
-    "At time": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "בזמן"
+    "Error" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שגיאה"
           }
         }
       }
     },
-    "Bicycle": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אופניים"
+    "Every day" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל יום"
           }
         }
       }
     },
-    "Birds": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ציפורים"
+    "Extended Durations" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משכי זמן מורחבים"
           }
         }
       }
     },
-    "Boker Tov": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "בוקר טוב"
+    "Fire Alarm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אזעקת אש"
           }
         }
       }
     },
-    "Built with ❤️": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "נבנה באהבה ❤️"
+    "Fly" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טיסה"
           }
         }
       }
     },
-    "Calculating zmanim...": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מחשב זמנים..."
+    "Free users can create up to %lld alarms. Upgrade to Premium for unlimited alarms and more sounds!" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משתמשים חינמיים יכולים ליצור עד %lld התראות. שדרגו לפרימיום להתראות בלתי מוגבלות וצלילים נוספים!"
           }
         }
       }
     },
-    "Cancel": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ביטול"
+    "Friday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום שישי"
           }
         }
       }
     },
-    "Chimes & Bells": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צלצולים ופעמונים"
+    "Friday Evening" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ערב שבת"
           }
         }
       }
     },
-    "Chinese Birthday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יום הולדת סיני"
+    "Gan Eden" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גן עדן"
           }
         }
       }
     },
-    "Clear": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ניקוי"
+    "Get Busy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זוז!"
           }
         }
       }
     },
-    "Clock": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שעון"
+    "Go Premium" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שדרוג לפרימיום"
           }
         }
       }
     },
-    "Contact Support": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יצירת קשר עם התמיכה"
+    "Halachic midday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חצות היום ההלכתית"
           }
         }
       }
     },
-    "Cowbell": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פעמון פרה"
+    "Havdalah" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הבדלה"
           }
         }
       }
     },
-    "Create as many alarms as you need": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צרו כמה התראות שתרצו"
+    "HAVDALAH" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הבדלה"
           }
         }
       }
     },
-    "Current City": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "עיר נוכחית"
+    "Help us keep improving Shabbat Clock" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עזרו לנו להמשיך לשפר את שעון שבת"
           }
         }
       }
     },
-    "Custom Durations": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "משכי זמן מותאמים"
+    "Honk" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צפירה"
           }
         }
       }
     },
-    "Dark": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "כהה"
+    "I am Alive" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אני חי"
           }
         }
       }
     },
-    "Dawn": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שחר"
+    "In %d days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בעוד %d ימים"
           }
         }
       }
     },
-    "Default Sound": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צליל ברירת מחדל"
+    "Jazzy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ג'אזי"
           }
         }
       }
     },
-    "Defaults": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ברירות מחדל"
+    "Just %@/week" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רק %@/שבוע"
           }
         }
       }
     },
-    "Delete": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מחיקה"
+    "Just A Bit Annoying" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קצת מעצבן"
           }
         }
       }
     },
-    "Delete Alarm": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מחיקת התראה"
+    "Label" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תווית"
           }
         }
       }
     },
-    "Done": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סיום"
+    "Lake" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אגם"
           }
         }
       }
     },
-    "Earliest Mincha": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מנחה גדולה"
+    "Language" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שפה"
           }
         }
       }
     },
-    "Earliest Tallit": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "טלית מוקדם"
+    "Latest Shacharit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סוף זמן שחרית"
           }
         }
       }
     },
-    "Earliest time for Mincha": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הזמן המוקדם ביותר לתפילת מנחה"
+    "Latest Shema" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סוף זמן שמע"
           }
         }
       }
     },
-    "Earliest time for tallit and tefillin": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הזמן המוקדם ביותר לטלית ותפילין"
+    "Latest time for morning Shema (GRA)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סוף זמן קריאת שמע של שחרית (גר\"א)"
           }
         }
       }
     },
-    "Eastern": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מזרחי"
+    "Latest time for Shacharit Amidah" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סוף זמן תפילת עמידה של שחרית"
           }
         }
       }
     },
-    "Edit Alarm": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "עריכת התראה"
+    "Lecha Dodi" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לכה דודי"
           }
         }
       }
     },
-    "El Adon": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אל אדון"
+    "Lifetime access • No subscription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גישה לכל החיים • ללא מנוי"
           }
         }
       }
     },
-    "El Adon (Regular)": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אל אדון (רגיל)"
+    "Light" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בהיר"
           }
         }
       }
     },
-    "Enable Location": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אפשור מיקום"
+    "LIGHTING" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הדלקת נרות"
           }
         }
       }
     },
-    "Enable location to see\ntoday's zmanim": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אפשרו מיקום כדי לראות\nאת זמני היום"
+    "Limited Alarm Mode" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצב התראה מוגבל"
           }
         }
       }
     },
-    "English": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אנגלית"
+    "Location" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מיקום"
           }
         }
       }
+    },
+    "Location Access Disabled" : {
+
     },
-    "Error": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שגיאה"
+    "Location Required" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נדרש מיקום"
           }
         }
       }
     },
-    "Every day": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "כל יום"
+    "Lute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לוט"
           }
         }
       }
     },
-    "Fire Alarm": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אזעקת אש"
+    "Manage Subscription" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ניהול מנוי"
           }
         }
       }
     },
-    "Fly": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "טיסה"
+    "Maybe Later" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אולי אחר כך"
           }
         }
       }
     },
-    "Free users can create up to %lld alarms. Upgrade to Premium for unlimited alarms and more sounds!": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "משתמשים חינמיים יכולים ליצור עד %lld התראות. שדרגו לפרימיום להתראות בלתי מוגבלות וצלילים נוספים!"
+    "Meltdown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התמוטטות"
           }
         }
       }
     },
-    "Friday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יום שישי"
+    "Midday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חצות"
           }
         }
       }
     },
-    "Friday Evening": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ערב שבת"
+    "Mincha Ketana" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנחה קטנה"
           }
         }
       }
     },
-    "Gan Eden": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גן עדן"
+    "Minutes before" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דקות לפני"
           }
         }
       }
     },
-    "Get Busy": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "זוז!"
+    "Monday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום שני"
           }
         }
       }
     },
-    "Halachic midday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חצות היום ההלכתית"
+    "Nature" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טבע"
           }
         }
       }
     },
-    "HAVDALAH": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הבדלה"
+    "New Alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה חדשה"
           }
         }
       }
     },
-    "Help us keep improving Shabbat Clock": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "עזרו לנו להמשיך לשפר את שעון שבת"
+    "Next" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הבא"
           }
         }
       }
     },
-    "Honk": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צפירה"
+    "NEXT ALARM: " : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה הבאה: "
           }
         }
       }
     },
-    "I am Alive": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אני חי"
+    "NEXT ALARM: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה הבאה: %@"
           }
         }
       }
     },
-    "Jazzy": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ג'אזי"
+    "Next Friday Evening" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ערב שבת הבא"
           }
         }
       }
     },
-    "Just A Bit Annoying": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "קצת מעצבן"
+    "Next Saturday Night" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מוצאי שבת הבא"
           }
         }
       }
     },
-    "Label": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "תווית"
+    "Nightfall" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צאת הכוכבים"
           }
         }
       }
     },
-    "Lake": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אגם"
+    "Nightfall - 3 stars visible" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צאת הכוכבים - 3 כוכבים נראים"
           }
         }
       }
     },
-    "Language": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שפה"
+    "NO ALARMS SET" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין התראות"
           }
         }
       }
     },
-    "Latest Shacharit": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סוף זמן שחרית"
+    "No Alarms Yet" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין התראות עדיין"
           }
         }
       }
     },
-    "Latest Shema": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סוף זמן שמע"
+    "No limits on how many alarms you create" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ללא הגבלה על מספר ההתראות"
           }
         }
       }
     },
-    "Latest time for morning Shema (GRA)": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סוף זמן קריאת שמע של שחרית (גר\"א)"
+    "No previous purchases found" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נמצאו רכישות קודמות"
           }
         }
       }
     },
-    "Latest time for Shacharit Amidah": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סוף זמן תפילת עמידה של שחרית"
+    "Not Now" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא עכשיו"
           }
         }
       }
     },
-    "Lecha Dodi": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לכה דודי"
+    "Notifications allow Shabbat Clock to automatically stop your alarm after the duration you set — so you don't need to touch your phone on Shabbat." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות מאפשרות לשעון שבת לעצור אוטומטית את ההתראה לאחר הזמן שהגדרת — כך שלא תצטרך לגעת בטלפון בשבת."
           }
         }
       }
     },
-    "Lifetime access • No subscription": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גישה לכל החיים • ללא מנוי"
+    "O'clock" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעה עגולה"
           }
         }
       }
     },
-    "Light": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "בהיר"
+    "Ocean" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אוקיינוס"
           }
         }
       }
     },
-    "LIGHTING": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הדלקת נרות"
+    "Ohm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אום"
           }
         }
       }
     },
-    "Location": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מיקום"
+    "OK" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אישור"
           }
         }
       }
     },
-    "Location Required": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "נדרש מיקום"
+    "One time" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חד פעמי"
           }
         }
       }
     },
-    "Lute": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לוט"
+    "One-time purchase" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רכישה חד פעמית"
           }
         }
       }
     },
-    "Maybe Later": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אולי אחר כך"
+    "Open Settings" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פתח הגדרות"
           }
         }
       }
     },
-    "Meltdown": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התמוטטות"
+    "Parashat" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פרשת"
           }
         }
       }
     },
-    "Midday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חצות"
+    "Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless canceled at least 24 hours before the end of the current period. You can manage and cancel your subscriptions in your App Store account settings." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התשלום יחויב לחשבון Apple ID שלך באישור הרכישה. המנוי מתחדש אוטומטית אלא אם בוטל לפחות 24 שעות לפני תום התקופה הנוכחית. ניתן לנהל ולבטל מנויים בהגדרות חשבון App Store."
           }
         }
       }
     },
-    "Mincha Ketana": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מנחה קטנה"
+    "Permission Prompts" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בקשות הרשאה"
           }
         }
       }
     },
-    "Minutes before": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "דקות לפני"
+    "Permission States" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצבי הרשאה"
           }
         }
       }
     },
-    "Monday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יום שני"
+    "Phone Ring" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צלצול טלפון"
           }
         }
       }
     },
-    "Nature": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "טבע"
+    "Plag HaMincha" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פלג המנחה"
           }
         }
       }
     },
-    "New Alarm": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התראה חדשה"
+    "Pluck" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פריטה"
           }
         }
       }
     },
-    "NEXT ALARM: ": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התראה הבאה: "
+    "Police" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משטרה"
           }
         }
       }
     },
-    "NEXT ALARM: %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התראה הבאה: %@"
+    "Preferable time for Mincha" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמן מנחה קטנה"
           }
         }
       }
     },
-    "Next Friday Evening": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ערב שבת הבא"
+    "Premium" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פרימיום"
           }
         }
       }
     },
-    "Next Saturday Night": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מוצאי שבת הבא"
+    "Premium Active" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פרימיום פעיל"
           }
         }
       }
     },
-    "Nightfall": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צאת הכוכבים"
+    "Privacy Policy" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מדיניות פרטיות"
           }
         }
       }
     },
-    "Nightfall - 3 stars visible": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צאת הכוכבים - 3 כוכבים נראים"
+    "Progressive Alarm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה הדרגתית"
           }
         }
       }
     },
-    "NO ALARMS SET": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אין התראות"
+    "Pursuit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מרדף"
           }
         }
       }
     },
-    "No Alarms Yet": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אין התראות עדיין"
+    "Rain" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גשם"
           }
         }
       }
     },
-    "No previous purchases found": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לא נמצאו רכישות קודמות"
+    "Rate the App" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דרגו את האפליקציה"
           }
         }
       }
     },
-    "O'clock": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שעה עגולה"
+    "remaining" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נותרו"
           }
         }
       }
     },
-    "Ocean": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אוקיינוס"
+    "Repeat" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חזרה"
           }
         }
       }
     },
-    "Ohm": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אום"
+    "Repeats every day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חוזר כל יום"
           }
         }
       }
     },
-    "OK": {},
-    "One time": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חד פעמי"
+    "Repeats on selected days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חוזר בימים הנבחרים"
           }
         }
       }
     },
-    "One-time purchase": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "רכישה חד פעמית"
+    "Repeats on weekdays" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חוזר בימי חול"
           }
         }
       }
     },
-    "Phone Ring": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צלצול טלפון"
+    "Repeats on weekends" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חוזר בסופי שבוע"
           }
         }
       }
     },
-    "Plag HaMincha": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פלג המנחה"
+    "Restore Purchases" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שחזור רכישות"
           }
         }
       }
     },
-    "Pluck": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פריטה"
+    "Sage Tyrtle Bells" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעמוני מרווה"
           }
         }
       }
     },
-    "Police": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "משטרה"
+    "Saturday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבת"
           }
         }
       }
     },
-    "Preferable time for Mincha": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "זמן מנחה קטנה"
+    "Saturday (Shabbat)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבת"
           }
         }
       }
     },
-    "Premium": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פרימיום"
+    "Saturday Night" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מוצאי שבת"
           }
         }
       }
     },
-    "Premium Active": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פרימיום פעיל"
+    "Save" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שמירה"
           }
         }
       }
     },
-    "Progressive Alarm": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התראה הדרגתית"
+    "SAVE %lld%%" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חיסכון %lld%%"
           }
         }
       }
     },
-    "Pursuit": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מרדף"
+    "Search city..." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חיפוש עיר..."
           }
         }
       }
     },
-    "Rain": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גשם"
+    "Selected Location" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מיקום נבחר"
           }
         }
       }
     },
-    "Rate the App": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "דרגו את האפליקציה"
+    "Set Alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגדרת התראה"
           }
         }
       }
     },
-    "remaining": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "נותרו"
+    "Set any auto-shutoff duration up to 10 minutes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגדירו כל משך כיבוי אוטומטי עד 10 דקות"
           }
         }
       }
     },
-    "Repeat": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חזרה"
+    "Set location for accurate times" : {
+
+    },
+    "Settings" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגדרות"
           }
         }
       }
     },
-    "Repeats every day": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חוזר כל יום"
+    "Shabbat" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבת"
           }
         }
       }
     },
-    "Repeats on selected days": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חוזר בימים הנבחרים"
+    "Shabbat Alarms" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות שבת"
           }
         }
       }
     },
-    "Repeats on weekdays": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חוזר בימי חול"
+    "Shabbat Clock" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעון שבת"
           }
         }
       }
     },
-    "Repeats on weekends": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חוזר בסופי שבוע"
+    "SHABBAT CLOCK" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעון שבת"
           }
         }
       }
     },
-    "Restore Purchases": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שחזור רכישות"
+    "Shabbat Clock needs alarm access to wake you for tefilah. Alarms will sound even when your phone is on Do Not Disturb — so you can put your phone down for all of Shabbat." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעון שבת צריך גישה להתראות כדי להעיר אותך לתפילה. ההתראות יישמעו גם כשהטלפון במצב נא לא להפריע — כך שתוכל להניח את הטלפון לכל השבת."
           }
         }
       }
     },
-    "Sage Tyrtle Bells": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פעמוני מרווה"
+    "Shabbat Clock uses your location to calculate precise zmanim (halachic times) for your area — including candle lighting and havdalah times." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעון שבת משתמש במיקום שלך כדי לחשב זמנים הלכתיים מדויקים לאזורך — כולל זמני הדלקת נרות והבדלה."
           }
         }
       }
     },
-    "Saturday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שבת"
+    "Shabbat Melodies" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנגינות שבת"
           }
         }
       }
     },
-    "Saturday (Shabbat)": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שבת"
+    "Shabbat Shalom!" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבת שלום!"
           }
         }
       }
     },
-    "Saturday Night": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מוצאי שבת"
+    "Sitar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיטאר"
           }
         }
       }
     },
-    "Save": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שמירה"
+    "Snooze" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נודניק"
           }
         }
       }
     },
-    "Search city...": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חיפוש עיר..."
+    "Snooze Duration" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משך נודניק"
           }
         }
       }
     },
-    "Selected Location": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מיקום נבחר"
+    "Sound" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צליל"
           }
         }
       }
     },
-    "Set Alarm": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הגדרת התראה"
+    "Stop" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עצור"
           }
         }
       }
     },
-    "Set any auto-shutoff duration up to 10 minutes": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הגדירו כל משך כיבוי אוטומטי עד 10 דקות"
+    "Stop Alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עצירת התראה"
           }
         }
       }
     },
-    "Settings": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הגדרות"
+    "Stream" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נחל"
           }
         }
       }
     },
-    "Shabbat": {},
-    "Shabbat Clock": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שעון שבת"
+    "Subscribe Now" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הירשם עכשיו"
           }
         }
       }
     },
-    "SHABBAT CLOCK": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שעון שבת"
+    "Sun Shower" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מטר שמש"
           }
         }
       }
     },
-    "Shabbat Melodies": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מנגינות שבת"
+    "Sunday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום ראשון"
           }
         }
       }
     },
-    "Sitar": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סיטאר"
+    "Sunrise" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זריחה"
           }
         }
       }
     },
-    "Sound": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צליל"
+    "Sunrise - ideal start of Shacharit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הנץ החמה - זמן אידיאלי לתחילת שחרית"
           }
         }
       }
     },
-    "Stop Alarm": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "עצירת התראה"
+    "Sunset" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שקיעה"
           }
         }
       }
     },
-    "Stream": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "נחל"
+    "Sunset - start of evening" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שקיעת החמה - תחילת הערב"
           }
         }
       }
     },
-    "Sun Shower": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מטר שמש"
+    "Support Development" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תמיכה בפיתוח"
           }
         }
       }
     },
-    "Sunday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יום ראשון"
+    "Switch back to device location" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חזרה למיקום המכשיר"
           }
         }
       }
     },
-    "Sunrise": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "זריחה"
+    "Synthesized" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סינתיסייזר"
           }
         }
       }
     },
-    "Sunrise - ideal start of Shacharit": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הנץ החמה - זמן אידיאלי לתחילת שחרית"
+    "System" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מערכת"
           }
         }
       }
     },
-    "Sunset": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שקיעה"
+    "Tap + to create\nyour first Shabbat alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחצו + כדי ליצור\nאת ההתראה הראשונה שלכם"
           }
         }
       }
     },
-    "Sunset - start of evening": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שקיעת החמה - תחילת הערב"
+    "Terms of Use" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תנאי שימוש"
           }
         }
       }
     },
-    "Support Development": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "תמיכה בפיתוח"
+    "Thank you for your support!" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תודה על התמיכה!"
           }
         }
       }
     },
-    "Switch back to device location": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חזרה למיקום המכשיר"
+    "The alarm clock designed for\nShabbat observers" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעון המעורר שתוכנן\nעבור שומרי שבת"
           }
         }
       }
     },
-    "Synthesized": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סינתיסייזר"
+    "Theme" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ערכת נושא"
           }
         }
       }
     },
-    "System": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מערכת"
+    "This Friday Evening" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ערב שבת הקרוב"
           }
         }
       }
     },
-    "Tap + New Alarm to create\nyour first Shabbat alarm": {},
-    "Tap + to create\nyour first Shabbat alarm": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לחצו + כדי ליצור\nאת ההתראה הראשונה שלכם"
+    "This Saturday Night" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מוצאי שבת הקרוב"
           }
         }
       }
     },
-    "Thank you for your support!": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "תודה על התמיכה!"
+    "Thursday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום חמישי"
           }
         }
       }
     },
-    "The alarm clock designed for\nShabbat observers": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שעון המעורר שתוכנן\nעבור שומרי שבת"
+    "Tomorrow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחר"
           }
         }
       }
     },
-    "Theme": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ערכת נושא"
+    "Tomorrow Night" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחר בלילה"
           }
         }
       }
     },
-    "This Friday Evening": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ערב שבת הקרוב"
+    "Tonight" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הלילה"
           }
         }
       }
     },
-    "This Saturday Night": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מוצאי שבת הקרוב"
+    "Tuesday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום שלישי"
           }
         }
       }
     },
-    "Thursday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יום חמישי"
+    "Unknown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא ידוע"
           }
         }
       }
     },
-    "Tomorrow Night": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מחר בלילה"
+    "Unknown Location" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מיקום לא ידוע"
           }
         }
       }
     },
-    "Tonight": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הלילה"
+    "Unlimited Alarms" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות בלתי מוגבלות"
           }
         }
       }
     },
-    "Tuesday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יום שלישי"
+    "Unlimited alarms • All sounds" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות ללא הגבלה • כל הצלילים"
           }
         }
       }
     },
-    "Unknown": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לא ידוע"
+    "Unlimited alarms, all sounds" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות בלתי מוגבלות, כל הצלילים"
           }
         }
       }
     },
-    "Unknown Location": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מיקום לא ידוע"
+    "Unlock the full\nShabbat Clock experience" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פתחו את החוויה המלאה\nשל שעון שבת"
           }
         }
       }
     },
-    "Unlimited Alarms": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התראות בלתי מוגבלות"
+    "Unlock the full Shabbat Clock experience" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גלה את החוויה המלאה של שעון שבת"
           }
         }
       }
     },
-    "Unlimited alarms, all sounds": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התראות בלתי מוגבלות, כל הצלילים"
+    "Upgrade" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שדרוג"
           }
         }
       }
     },
-    "Unlock the full\nShabbat Clock experience": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פתחו את החוויה המלאה\nשל שעון שבת"
+    "Upgrade Now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שדרגו עכשיו"
           }
         }
       }
     },
-    "Upgrade": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שדרוג"
+    "Upgrade to Premium" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שדרגו לפרימיום"
           }
         }
       }
     },
-    "Upgrade Now": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שדרגו עכשיו"
+    "Use Current Location" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שימוש במיקום הנוכחי"
           }
         }
       }
     },
-    "Upgrade to Premium": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שדרגו לפרימיום"
+    "Version" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גרסה"
           }
         }
       }
     },
-    "Use Current Location": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שימוש במיקום הנוכחי"
+    "Wake up before" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השכמה לפני"
           }
         }
       }
     },
-    "Version": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גרסה"
+    "Wednesday" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום רביעי"
           }
         }
       }
     },
-    "Wake up before": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "השכמה לפני"
+    "Weekdays" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ימי חול"
           }
         }
       }
     },
-    "Wednesday": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יום רביעי"
+    "Weekends" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סופי שבוע"
           }
         }
       }
     },
-    "Weekdays": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ימי חול"
+    "Weekly" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבועי"
           }
         }
       }
     },
-    "Weekends": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סופי שבוע"
+    "Whale" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לוויתן"
           }
         }
       }
     },
-    "Whale": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לוויתן"
+    "Wind" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רוח"
           }
         }
       }
     },
-    "Wind": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "רוח"
+    "Wine Glasses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כוסות יין"
           }
         }
       }
     },
-    "Wine Glasses": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "כוסות יין"
+    "Xylophone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קסילופון"
           }
         }
       }
     },
-    "Xylophone": {
-      "extractionState": "stale",
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "קסילופון"
+    "Yearly" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שנתי"
           }
         }
       }
     },
-    "Zmanim": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "זמנים"
+    "Your alarm will use a 30-second notification sound. To enable full alarm features — longer durations, Do Not Disturb override, and Shabbat mode — allow alarms in Settings." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה תשתמש בצליל של 30 שניות. כדי לאפשר תכונות מלאות — משך ארוך יותר, עקיפת מצב לא להפריע ומצב שבת — אפשר התראות בהגדרות."
           }
         }
       }
     },
-    "עברית": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hebrew"
+    "Zmanim" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמנים"
           }
         }
       }
     },
-    "Next": {
-      "localizations": {
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הבא"
+    "עברית" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hebrew"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עברית"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

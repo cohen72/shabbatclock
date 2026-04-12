@@ -97,10 +97,7 @@ struct SoundCategorySection: View {
     }
 
     private func handlePreview(_ sound: AlarmSound) {
-        if sound.isPremium && !isPremium {
-            return
-        }
-
+        // Allow preview even for locked sounds — lets users hear what they're missing
         if previewingSound?.id == sound.id {
             // Stop preview
             AudioManager.shared.stopPreview()
@@ -125,47 +122,46 @@ struct SoundRow: View {
     let onPreview: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 12) {
-                // Sound name
+        HStack(spacing: 12) {
+            // Sound name — tappable to select (disabled when locked)
+            Button(action: onTap) {
                 Text(sound.displayName)
                     .font(AppFont.body())
                     .foregroundColor(isLocked ? .textSecondary.opacity(0.5) : .textPrimary)
-
-                Spacer()
-
-                // Lock icon for premium
-                if isLocked {
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(.goldAccent.opacity(0.7))
-                }
-
-                // Preview button
-                Button(action: onPreview) {
-                    Image(systemName: isPreviewing ? "stop.fill" : "play.fill")
-                        .font(.system(size: 12))
-                        .foregroundStyle(isLocked ? .textSecondary.opacity(0.3) : .accentPurple)
-                        .frame(width: 32, height: 32)
-                        .background(
-                            Circle()
-                                .fill(Color.surfaceSubtle)
-                        )
-                }
-                .disabled(isLocked)
-
-                // Checkmark for selected
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(.accentPurple)
-                        .fontWeight(.semibold)
-                }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(isSelected ? Color.surfaceSelected : Color.surfaceSubtle)
+            .disabled(isLocked)
+
+            Spacer()
+
+            // Lock icon for premium
+            if isLocked {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(.goldAccent.opacity(0.7))
+            }
+
+            // Preview button — always enabled so users can hear premium sounds
+            Button(action: onPreview) {
+                Image(systemName: isPreviewing ? "stop.fill" : "play.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.accentPurple)
+                    .frame(width: 32, height: 32)
+                    .background(
+                        Circle()
+                            .fill(Color.surfaceSubtle)
+                    )
+            }
+
+            // Checkmark for selected
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .foregroundStyle(.accentPurple)
+                    .fontWeight(.semibold)
+            }
         }
-        .disabled(isLocked)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(isSelected ? Color.surfaceSelected : Color.surfaceSubtle)
     }
 }
 

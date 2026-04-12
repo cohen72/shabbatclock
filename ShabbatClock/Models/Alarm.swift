@@ -12,6 +12,28 @@ final class Alarm {
     var repeatDays: [Int]  // 0=Sunday, 1=Monday, ..., 6=Saturday
     var createdAt: Date
     var lastFiredAt: Date?
+    var alarmKitID: UUID?
+    var snoozeDurationSecondsValue: Int?
+    var snoozeEnabledValue: Bool?
+    var alarmDurationSecondsValue: Int?
+
+    /// Snooze duration in seconds (defaults to 300 / 5 min for migrated alarms).
+    var snoozeDurationSeconds: Int {
+        get { snoozeDurationSecondsValue ?? 300 }
+        set { snoozeDurationSecondsValue = newValue }
+    }
+
+    /// Whether snooze is enabled (defaults to true for migrated alarms).
+    var snoozeEnabled: Bool {
+        get { snoozeEnabledValue ?? true }
+        set { snoozeEnabledValue = newValue }
+    }
+
+    /// How long the alarm should ring before auto-stopping (defaults to 30s for migrated alarms).
+    var alarmDurationSeconds: Int {
+        get { alarmDurationSecondsValue ?? 30 }
+        set { alarmDurationSecondsValue = newValue }
+    }
 
     init(
         id: UUID = UUID(),
@@ -22,7 +44,11 @@ final class Alarm {
         soundName: String = "Lecha Dodi",
         repeatDays: [Int] = [],
         createdAt: Date = Date(),
-        lastFiredAt: Date? = nil
+        lastFiredAt: Date? = nil,
+        alarmKitID: UUID? = nil,
+        snoozeDurationSeconds: Int = 5 * 60,
+        snoozeEnabled: Bool = true,
+        alarmDurationSeconds: Int = 30
     ) {
         self.id = id
         self.hour = hour
@@ -33,6 +59,10 @@ final class Alarm {
         self.repeatDays = repeatDays
         self.createdAt = createdAt
         self.lastFiredAt = lastFiredAt
+        self.alarmKitID = alarmKitID
+        self.snoozeDurationSecondsValue = snoozeDurationSeconds
+        self.snoozeEnabledValue = snoozeEnabled
+        self.alarmDurationSecondsValue = alarmDurationSeconds
     }
 
     // MARK: - Computed Properties

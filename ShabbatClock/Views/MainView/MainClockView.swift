@@ -5,11 +5,13 @@ import SwiftData
 struct MainClockView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(filter: #Predicate<Alarm> { $0.isEnabled }, sort: \Alarm.hour) private var enabledAlarms: [Alarm]
-    @EnvironmentObject private var alarmScheduler: AlarmScheduler
+    @Environment(AlarmKitService.self) private var alarmService
     @StateObject private var zmanimService = ZmanimService.shared
     @StateObject private var locationManager = LocationManager.shared
 
     @State private var currentTime = Date()
+    @State private var showingLocationPrompt = false
+    @State private var showingCitySearch = false
 
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -48,25 +50,40 @@ struct MainClockView: View {
 
                     Spacer()
 
-                    // Shabbat info cards
-                    shabbatCardsView
-
-                    // Location
-                    LocationRow(locationManager: locationManager)
-                        .padding(.top, 24)
-                        .padding(.bottom, 24)
+                    // Shabbat dashboard
+                    shabbatDashboard
+                        .padding(.bottom, 16)
                 }
                 .padding(.horizontal, 20)
             }
         }
         .onAppear {
             zmanimService.calculateTodayZmanim()
-            if !locationManager.isUsingManualLocation {
+            // Only request location if already authorized — don't prompt on launch
+            if locationManager.isAuthorized && !locationManager.isUsingManualLocation {
                 locationManager.requestLocation()
             }
         }
+        .onChange(of: locationManager.locationName) {
+            zmanimService.calculateTodayZmanim()
+        }
         .onReceive(timer) { _ in
             currentTime = Date()
+        }
+        .fullScreenCover(isPresented: $showingLocationPrompt) {
+            PermissionPromptView.location(
+                onContinue: {
+                    showingLocationPrompt = false
+                    locationManager.requestPermission()
+                },
+                onSkip: {
+                    showingLocationPrompt = false
+                }
+            )
+        }
+        .sheet(isPresented: $showingCitySearch) {
+            CitySearchView()
+                .applyLanguageOverride(AppLanguage.current)
         }
     }
 
@@ -74,7 +91,7 @@ struct MainClockView: View {
 
     private var nextAlarmLabel: some View {
         Group {
-            if let nextAlarm = alarmScheduler.nextAlarmDate {
+            if let nextAlarm = alarmService.nextAlarmDate {
                 HStack(spacing: 0) {
                     Text("NEXT ALARM: ")
                         .foregroundStyle(.textSecondary)
@@ -92,25 +109,137 @@ struct MainClockView: View {
         }
     }
 
-    // MARK: - Shabbat Cards
+    // MARK: - Shabbat Dashboard
 
-    private var shabbatCardsView: some View {
-        HStack(spacing: 12) {
-            ShabbatInfoCard(
-                icon: "flame.fill",
-                iconColor: .goldAccent,
-                title: "LIGHTING",
-                time: zmanimService.shortTimeString(from: zmanimService.candleLightingTime),
-                subtitle: zmanimService.candleLightingDateLabel
-            )
+    /// Whether we have a real location (not the fallback default).
+    private var hasValidLocation: Bool {
+        locationManager.location != nil
+    }
 
-            ShabbatInfoCard(
-                icon: "moon.stars.fill",
-                iconColor: Color(hex: "8B9DC3"),
-                title: "HAVDALAH",
-                time: zmanimService.shortTimeString(from: zmanimService.havdalahTime),
-                subtitle: zmanimService.havdalahDateLabel
-            )
+    private var shabbatDashboard: some View {
+        VStack(spacing: 12) {
+            // Hebrew date + Location row
+            HStack {
+                Text(zmanimService.hebrewDateString)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.goldAccent)
+
+                Spacer()
+
+                LocationRow(locationManager: locationManager)
+            }
+
+            // Parasha + Shabbat times grouped card
+            VStack(spacing: 0) {
+                // Parasha banner with subtle gold tinted background
+                if !zmanimService.parashaHebrew.isEmpty {
+                    HStack(spacing: 8) {
+                        Image(systemName: "book.fill")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.goldAccent)
+
+                        Text(parashaDisplayText)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(.textPrimary)
+
+                        Spacer()
+
+                        if zmanimService.daysUntilShabbat > 0 {
+                            Text(countdownText)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.textSecondary)
+                        } else {
+                            Text("Shabbat Shalom!")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(.goldAccent)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                    .background(Color.goldAccent.opacity(0.06))
+
+                    Divider()
+                        .overlay(Color.surfaceBorder)
+                }
+
+                // Candle lighting + Havdalah times
+                VStack(spacing: 0) {
+                    HStack(spacing: 0) {
+                        ShabbatTimeCard(
+                            icon: "flame.fill",
+                            iconColor: .goldAccent,
+                            title: "Candle Lighting",
+                            time: hasValidLocation ? zmanimService.shortTimeString(from: zmanimService.candleLightingTime) : "--:--",
+                            subtitle: zmanimService.candleLightingDateLabel
+                        )
+
+                        Divider()
+                            .overlay(Color.surfaceBorder)
+
+                        ShabbatTimeCard(
+                            icon: "moon.stars.fill",
+                            iconColor: Color(hex: "8B9DC3"),
+                            title: "Havdalah",
+                            time: hasValidLocation ? zmanimService.shortTimeString(from: zmanimService.havdalahTime) : "--:--",
+                            subtitle: zmanimService.havdalahDateLabel
+                        )
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+
+                    // Subtle location nudge when no location set
+                    if !hasValidLocation {
+                        Divider()
+                            .overlay(Color.surfaceBorder)
+
+                        Button {
+                            if locationManager.authorizationStatus == .denied {
+                                // Location was denied — take user to iOS Settings
+                                if let url = URL(string: UIApplication.openSettingsURLString) {
+                                    UIApplication.shared.open(url)
+                                }
+                            } else if locationManager.authorizationStatus == .notDetermined {
+                                showingLocationPrompt = true
+                            } else {
+                                showingCitySearch = true
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: locationManager.authorizationStatus == .denied
+                                      ? "gear" : "location.circle")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.goldAccent)
+
+                                Text(locationManager.authorizationStatus == .denied
+                                     ? "Enable location in Settings"
+                                     : "Set location for accurate times")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundStyle(.textSecondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                        }
+                    }
+                }
+            }
+            .themeCard(cornerRadius: 14)
+        }
+    }
+
+    private var parashaDisplayText: String {
+        let isHebrew = AppLanguage.current == .hebrew
+        if isHebrew {
+            return "פרשת \(zmanimService.parashaHebrew)"
+        } else {
+            return "Parashat \(zmanimService.parashaEnglish)"
+        }
+    }
+
+    private var countdownText: String {
+        let days = zmanimService.daysUntilShabbat
+        if days == 1 {
+            return AppLanguage.localized("Tomorrow")
+        } else {
+            return String(format: AppLanguage.localized("In %d days"), days)
         }
     }
 
@@ -129,38 +258,34 @@ struct MainClockView: View {
     }
 }
 
-// MARK: - Shabbat Info Card
+// MARK: - Shabbat Time Card
 
-struct ShabbatInfoCard: View {
+struct ShabbatTimeCard: View {
     let icon: String
     let iconColor: Color
-    let title: String
+    let title: LocalizedStringKey
     let time: String
     let subtitle: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Icon + title row — top aligned
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
+            // Icon + title
+            HStack(spacing: 5) {
                 Image(systemName: icon)
-                    .font(.system(size: 14))
+                    .font(.system(size: 12))
                     .foregroundStyle(iconColor)
 
                 Text(title)
-                    .font(.system(size: 10, weight: .semibold, design: .default))
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.textSecondary)
-                    .tracking(1)
             }
 
-            // Time — right under the title
+            // Time
             Text(time)
-                .font(.system(size: 28, weight: .bold, design: .default))
-                .foregroundStyle(.textPrimary)
-                .padding(.top, 6)
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(time == "--:--" ? .textSecondary.opacity(0.4) : .textPrimary)
 
-            Spacer(minLength: 8)
-
-            // Subtitle — bottom aligned
+            // Subtitle (date label)
             Group {
                 switch subtitle {
                 case "__friday_evening__": Text("Friday Evening")
@@ -168,14 +293,12 @@ struct ShabbatInfoCard: View {
                 default: Text(subtitle)
                 }
             }
-            .font(.system(size: 11, weight: .medium, design: .default))
+            .font(.system(size: 11, weight: .medium))
             .foregroundStyle(.textSecondary.opacity(0.7))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 100)
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .themeCard(cornerRadius: 16)
     }
 }
 
@@ -184,5 +307,5 @@ struct ShabbatInfoCard: View {
 #Preview {
     MainClockView()
         .modelContainer(for: Alarm.self, inMemory: true)
-        .environmentObject(AlarmScheduler.shared)
+        .environment(AlarmKitService.shared)
 }

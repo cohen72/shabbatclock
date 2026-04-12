@@ -4,13 +4,14 @@ An iOS application for setting alarms based on Jewish prayer times (Zmanim) with
 
 ## Project Overview
 
-ShabbatClock is a Swift/SwiftUI iOS app that combines alarm functionality with Jewish prayer time calculations. It features a night sky background, analog clock display, and custom alarm sounds tailored for Shabbat and weekday use.
+ShabbatClock is a Swift/SwiftUI iOS app that combines alarm functionality with Jewish prayer time calculations. It features an adaptive light/dark theme, analog clock display, Shabbat dashboard with parasha and countdown, and custom alarm sounds tailored for Shabbat and weekday use. The app is fully localized in English and Hebrew with full RTL support.
 
-**Platform**: iOS 17+
+**Platform**: iOS 26+
 **Language**: Swift
 **UI Framework**: SwiftUI
 **Data Persistence**: SwiftData
 **Package Manager**: Swift Package Manager
+**Localization**: English, Hebrew (RTL)
 
 ## Architecture
 
@@ -19,28 +20,33 @@ ShabbatClock is a Swift/SwiftUI iOS app that combines alarm functionality with J
 ```
 ShabbatClock/
 ├── App/
-│   ├── ShabbatClockApp.swift     # App entry point with SwiftData container
-│   └── ContentView.swift          # Root view container
+│   ├── ShabbatClockApp.swift     # App entry point with SwiftData container + language override
+│   └── ContentView.swift          # Root view container with theme/language/tab management
 ├── Models/
 │   ├── Alarm.swift                # SwiftData model for alarms
-│   └── AlarmSound.swift           # Alarm sound configurations
+│   ├── AlarmSound.swift           # Alarm sound configurations with localized display names
+│   └── ShabbatAlarmMetadata.swift # Metadata for AlarmKit integration
 ├── Views/
-│   ├── MainView/                  # Main clock display
-│   ├── AlarmList/                 # Alarm list interface
-│   ├── AlarmEdit/                 # Alarm creation/editing
-│   ├── AlarmFiring/               # Active alarm view
-│   ├── Zmanim/                    # Prayer times display
-│   ├── Settings/                  # App settings
-│   └── Components/                # Reusable UI components
+│   ├── MainView/                  # Main clock display (MainClockView, AnalogClockView)
+│   ├── AlarmList/                 # Alarm list (AlarmListView, AlarmRowView)
+│   ├── AlarmEdit/                 # Alarm creation/editing (AlarmEditView, RepeatDaysPicker, SoundPickerView)
+│   ├── Zmanim/                    # Prayer times display with pull-to-refresh
+│   ├── Settings/                  # App settings (SettingsView, PremiumView, DebugView)
+│   └── Components/                # Reusable UI (NightSkyBackground, LocationRow, CitySearchView, PermissionPromptView)
 ├── Services/
-│   ├── ZmanimService.swift        # Jewish prayer time calculations
-│   ├── LocationManager.swift     # Location services
-│   ├── AlarmScheduler.swift      # Alarm scheduling logic
+│   ├── AlarmKitService.swift     # AlarmKit integration (iOS 26+) — main alarm scheduling
+│   ├── StopAlarmIntent.swift     # App Intent for stopping alarms
+│   ├── ZmanimService.swift        # Jewish prayer time + Shabbat dashboard calculations
+│   ├── LocationManager.swift     # Location services with CLGeocoder locale support
 │   ├── AudioManager.swift        # Audio playback
-│   └── BackgroundKeepAlive.swift # Background processing
+│   └── StoreManager.swift        # StoreKit 2 subscription manager (singleton)
+├── Products.storekit              # StoreKit testing configuration (weekly + yearly plans)
 ├── Utilities/
-│   └── Theme.swift                # App theme/colors
-└── Resources/                     # Assets and resources
+│   └── Theme.swift                # Adaptive theme + AppearanceMode + AppLanguage + Bundle override
+└── Resources/
+    ├── Localizable.xcstrings      # String Catalog with English + Hebrew translations
+    ├── Sounds/                    # Alarm sound files organized by category
+    └── Media.xcassets/            # App icon, accent color, launch screen background
 ```
 
 ## Key Features
@@ -49,13 +55,15 @@ ShabbatClock/
 - **Model**: `Alarm.swift` - SwiftData model with properties:
   - Time (hour/minute)
   - Enable/disable state
-  - Custom label
+  - Custom label (defaults to localized "Alarm" / "התראה")
   - Sound selection
-  - Auto-shutoff duration
+  - Snooze support (enable/disable, configurable duration)
   - Repeat days (weekdays/weekends/specific days)
   - Shabbat detection
-- **Scheduler**: `AlarmScheduler.swift` - Manages alarm firing and background checks
-- **Audio**: `AudioManager.swift` - Plays custom alarm sounds
+  - `alarmKitID` - links to AlarmKit system alarm
+- **Service**: `AlarmKitService.swift` - AlarmKit integration (iOS 26+) for system-level alarm scheduling
+- **Intent**: `StopAlarmIntent.swift` - App Intent for dismissing alarms via Live Activity / Dynamic Island
+- **Audio**: `AudioManager.shared` - Plays custom alarm sounds with preview support
 
 ### 2. Zmanim (Prayer Times)
 - **Service**: `ZmanimService.swift`
@@ -63,28 +71,71 @@ ShabbatClock/
   - Supports 11 different zmanim types (Dawn, Sunrise, Latest Shema, etc.)
   - Uses precise astronomical calculations via ComplexZmanimCalendar
   - Implements GRA (Vilna Gaon) opinions for halachic times
+  - Zmanim row shows Hebrew name, English name, time, and alarm button
+  - "Next" badge highlights the upcoming zman
+  - Pull-to-refresh support
 
-### 3. Location Services
-- **Manager**: `LocationManager.swift`
-- Tracks user location for accurate zmanim calculations
-- Falls back to default location if unavailable
+### 3. Shabbat Dashboard (Main Clock Screen)
+- **Hebrew date**: Today's date in the Hebrew calendar (e.g., "י״ד ניסן תשפ״ו")
+- **Parashat Hashavua**: Weekly Torah portion — Hebrew or English based on app language
+  - Uses KosherSwift's `JewishCalendar.getParshah()` + `HebrewDateFormatter.formatParsha()`
+- **Shabbat countdown**: "In X days" / "Tomorrow" / "Shabbat Shalom!" based on day of week
+- **Candle Lighting**: Time for the upcoming Friday candle lighting
+- **Havdalah**: Time for Saturday night havdalah
+- **Location**: Tappable row showing current city, opens CitySearchView
 
-### 4. Background Processing
-- **KeepAlive**: `BackgroundKeepAlive.swift`
-- Plays quiet (not silent) audio to keep app alive in background
-- Uses `quiet_tone.m4a` - a very low volume 50Hz tone at -50dB
-- Integrates with Background App Refresh for additional resilience
-- Health monitoring: checks every 30 seconds that playback is active
-- Auto-recovery: restarts playback if failures detected
-- Audio session refresh: refreshes every 5 minutes to maintain background state
+### 4. Location Services
+- **Manager**: `LocationManager.shared`
+- Device GPS location with reverse geocoding (locale-aware via `CLGeocoder`)
+- Manual city selection via `CitySearchView` (MapKit search)
+- Location name stored as `"__unknown__"` sentinel, resolved to localized "Unknown Location" at display time
+- Timezone resolution for manual locations
+
+### 5. Localization (English + Hebrew)
+- **String Catalog**: `Resources/Localizable.xcstrings` — 100+ strings with Hebrew translations
+- **In-app language switching**: System / English / עברית picker in Settings
+- **Bundle override**: `OverriddenBundle` swizzles `Bundle.main` for immediate language switching
+  - `AppLanguage.applyBundleOverride()` called on app init and language change
+  - `.id("lang-\(appLanguage)")` on root TabView forces full view rebuild
+- **RTL support**: `.environment(\.layoutDirection, .rightToLeft)` applied at root + all sheets
+- **Non-SwiftUI contexts**: `AppLanguage.localized("key")` resolves from correct `.lproj` bundle
+- **DateFormatters**: Use `AppLanguage.current.effectiveLocale` for locale-aware formatting
+- **Reverse geocoding**: Uses `CLGeocoder(preferredLocale:)` for localized place names
+- **Directional icons**: All chevrons use `chevron.forward` (auto-flips for RTL)
+- **Sheets**: Each `.sheet()` must include `.applyLanguageOverride(AppLanguage.current)` since sheets create a new presentation context
+- **Sound names**: `AlarmSound.displayName` and `Category.displayName` use `AppLanguage.localized()` for Hebrew translations
+- **Sentinel pattern**: Services store sentinel strings (e.g., `"__unknown__"`, `"__friday_evening__"`) and views resolve them to `Text("localized key")` which auto-resolves via the environment
+
+### 6. Theme System (Light/Dark Mode)
+- **Adaptive colors**: `Color(light:dark:)` pattern using `UIColor` dynamic provider
+- **Semantic colors**: `backgroundPrimary`, `backgroundSecondary`, `surfaceCard`, `surfaceBorder`, `surfaceSubtle`, `textPrimary`, `textSecondary`, `clockFaceFill`, `clockHand`, etc.
+- **Light mode**: Warm cream (#F5F2EC) backgrounds, dark navy text, gold accents
+- **Dark mode**: Deep navy (#141833) backgrounds, white text, gold/amber accents
+- **Gold accent** (`#F4A261`) consistent in both modes for interactive elements
+- **Launch screen**: `LaunchScreenBackground` color in asset catalog — adapts to light/dark
+- **Night sky**: Stars/moon/clouds only shown in dark mode; light mode is clean gradient
+- **Appearance setting**: `AppearanceMode` enum (system/light/dark) in `@AppStorage("appearanceMode")`
+- **Tab bar**: Uses system material (floating tab bar in iOS 18+), `.preferredColorScheme()` ensures dark materials
+
+### 7. Premium / Subscription System
+- **StoreManager**: `StoreManager.shared` - Centralized StoreKit 2 subscription manager
+- **Plans**: Weekly ($0.99/week) and Yearly ($14.99/year, ~71% savings)
+- **Product IDs**: `com.shabbatclock.app.premium.weekly`, `com.shabbatclock.app.premium.yearly`
+- **Free tier**: Limited to 3 alarms; can preview but not select premium sounds
+- **Premium state**: `StoreManager.shared.isPremium` is source of truth
+- **UI**: Toolbar capsule badge "1/3" with lock icon; + button shows lock when limit reached
 
 ## Dependencies
 
 ### KosherSwift
 - **Repository**: https://github.com/Elyahu41/KosherSwift.git
-- **Version**: 1.0.0+
-- **Purpose**: Advanced Jewish calendar and zmanim calculations
-- Provides precise astronomical calculations for prayer times
+- **Version**: 2.0.0+
+- **Purpose**: Jewish calendar, zmanim calculations, parasha lookup
+- **Key classes used**:
+  - `ComplexZmanimCalendar` — prayer time calculations
+  - `JewishCalendar` — parasha, Hebrew date, holidays
+  - `HebrewDateFormatter` — Hebrew date formatting, parsha names
+  - `GeoLocation` — location wrapper for calculations
 
 ## Data Models
 
@@ -98,16 +149,19 @@ final class Alarm {
     var isEnabled: Bool
     var label: String
     var soundName: String
-    var autoShutoffSeconds: Int
     var repeatDays: [Int]  // 0=Sunday, 1=Monday, ..., 6=Saturday
     var createdAt: Date
     var lastFiredAt: Date?
+    var alarmKitID: UUID?
+    var snoozeDurationSecondsValue: Int?
+    var snoozeEnabledValue: Bool?
 }
 ```
 
 **Key Methods**:
 - `nextFireDate()` - Calculates when alarm will fire next
 - `shouldFire(at:)` - Checks if alarm should trigger at given time
+- `repeatDaysString` - Locale-aware repeat days display using `AppLanguage.current.effectiveLocale`
 - Computed properties for formatted display strings
 
 ### Zman Types
@@ -127,27 +181,47 @@ Supported zmanim (prayer times):
 ## UI Components
 
 ### Main Views
-- **MainClockView** - Analog clock display with Zmanim
-- **AlarmListView** - List of all alarms
-- **AlarmEditView** - Create/edit alarm interface
-- **AlarmActiveView** - Full-screen alarm firing view
-- **ZmanimView** - Prayer times display
-- **SettingsView** - App configuration
+- **MainClockView** - Analog clock + Shabbat dashboard (parasha, countdown, candle lighting, havdalah)
+- **AlarmListView** - List of all alarms with premium tier badge
+- **AlarmEditView** - Create/edit alarm with NavigationStack (sound picker, repeat picker via NavigationLink)
+- **ZmanimView** - Prayer times display with pull-to-refresh and location toolbar button
+- **SettingsView** - App configuration (location, appearance, language, premium, defaults, about)
+- **PremiumView** - Premium subscription upsell screen
 
 ### Reusable Components
-- **NightSkyBackground** - Animated starry background
-- **AnalogClockView** - Custom analog clock rendering
+- **NightSkyBackground** - Animated starry background (dark mode only)
+- **AnalogClockView** - Custom Canvas-based analog clock
 - **AlarmRowView** - Individual alarm list item
-- **RepeatDaysPicker** - Day selection for recurring alarms
-- **SoundPickerView** - Alarm sound selection
+- **RepeatDaysPicker** - Day selection with locale-aware day names
+- **SoundPickerView** - Categorized alarm sound selection with preview
+- **LocationRow** - Tappable location display (resolves `"__unknown__"` sentinel to localized text)
+- **CitySearchView** - MapKit-powered city search
+- **PermissionPromptView** - Permission request UI
+- **SectionHeader** - Settings section header (uses `LocalizedStringKey`)
+- **ShabbatTimeCard** - Compact candle lighting / havdalah time display
 
 ## Development Guidelines
 
+### Localization (MANDATORY)
+**All user-facing strings MUST use localization.** This is non-negotiable for every change:
+- SwiftUI `Text("literal")` auto-localizes via `LocalizedStringKey` + bundle swizzle
+- Use `String(localized:)` for computed strings in SwiftUI contexts
+- Use `AppLanguage.localized("key")` for non-SwiftUI code (services, models) — resolves from correct `.lproj`
+- **Never** use `Locale.current` for formatting — use `AppLanguage.current.effectiveLocale`
+- Add new strings to `Resources/Localizable.xcstrings` for both `en` and `he`
+- Test both LTR (English) and RTL (Hebrew) layouts for any UI changes
+- Use `chevron.forward` (not `chevron.right`) for directional icons — auto-flips for RTL
+- Apply `.applyLanguageOverride(AppLanguage.current)` to every `.sheet()` content
+- For services storing display strings: use sentinel values (e.g., `"__unknown__"`) and resolve in views
+- **Picker labels**: Use `Text("literal")` directly (not `Text(variable)`) for proper LocalizedStringKey resolution
+- Language picker shows: "מערכת" / "English" / "עברית" — English stays in English since users selecting it can read it
+
 ### Working with Alarms
 1. Alarms use SwiftData for persistence
-2. Access via `@Query` in views or `AlarmScheduler.shared`
-3. Always call `alarmScheduler.scheduleNextCheck()` after modifying alarms
+2. Access via `@Query` in views or `AlarmKitService.shared`
+3. Alarm scheduling is handled by AlarmKit (iOS 26+) — never use UNUserNotificationCenter for alarm delivery
 4. Repeat days use 0-based week indexing (0=Sunday, 6=Saturday)
+5. Default alarm label uses `String(localized: "Alarm")` for locale-aware defaults
 
 ### Zmanim Calculations
 1. `ZmanimService.shared` is the main interface
@@ -155,32 +229,33 @@ Supported zmanim (prayer times):
 3. Uses KosherSwift's `ComplexZmanimCalendar` for precise calculations
 4. Times automatically adjust for user location and timezone
 5. All calculations follow GRA (Vilna Gaon) opinions
-6. Available KosherSwift methods:
-   - `getAlos72()` - Dawn (72 minutes)
-   - `getMisheyakir10Point2Degrees()` - Earliest tallit
-   - `getSunrise()` / `getSunset()` - Sun events
-   - `getSofZmanShmaGRA()` / `getSofZmanTfilaGRA()` - Latest times
-   - `getChatzos()` - Midday
-   - `getMinchaGedola()` / `getMinchaKetana()` - Mincha times
-   - `getPlagHamincha()` - Plag time
-   - `getTzais()` - Nightfall
+6. Shabbat info (parasha, countdown, candle lighting, havdalah) calculated via `calculateShabbatTimes()`
+7. Hebrew date formatted via KosherSwift's `HebrewDateFormatter`
+8. Zman descriptions are localized via `AppLanguage.localized()`
 
 ### Theme and Styling
-- Colors defined in `Theme.swift`
-- App uses dark mode with celestial blue/purple theme
-- Night sky background throughout
+- Colors defined in `Theme.swift` with adaptive light/dark mode support via `Color(light:dark:)`
+- Light mode: warm cream/white backgrounds, dark text, gold accents
+- Dark mode: deep navy backgrounds, white text, gold/amber accents
+- Gold accent (`#F4A261`) used for interactive elements, badges, and premium indicators
+- Appearance mode (system/light/dark) configurable via `AppearanceMode` in Settings
+- Use `.themeCard()` modifier for standard card backgrounds
+- Use `.settingsCard()` for settings-style card backgrounds
 
 ### Audio Management
-- Custom alarm sounds stored in Resources
+- Custom alarm sounds stored in Resources/Sounds/ organized by category
+- 47 sounds across 7 categories (Shabbat Melodies, Nature, Chimes & Bells, Jazzy, Eastern, Synthesized, Just A Bit Annoying)
 - Default sound: "Lecha Dodi" (traditional Shabbat song)
+- `AlarmSound.displayName` returns localized name; `Category.displayName` returns localized category
+- Sound names are proper nouns — Hebrew translations use Hebrew spellings (e.g., "לכה דודי")
 - Audio playback managed by `AudioManager.shared`
 
 ## Building and Running
 
 ### Requirements
-- Xcode 15.0+
-- iOS 17.0+ target device/simulator
-- Swift 5.9+
+- Xcode 26+
+- iOS 26.0+ target device/simulator (AlarmKit dependency)
+- Swift 6+
 
 ### Setup
 ```bash
@@ -196,8 +271,13 @@ swift build
 
 ### Running
 1. Open project in Xcode
-2. Select target device/simulator (iOS 17+)
+2. Select target device/simulator (iOS 26+)
 3. Build and run (⌘R)
+
+### Build command (CLI)
+```bash
+xcodebuild -project ShabbatClock.xcodeproj -scheme ShabbatClock -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+```
 
 ## Key Technical Notes
 
@@ -206,15 +286,24 @@ swift build
 - Alarm model uses `@Model` macro
 - Views use `@Query` for reactive data fetching
 
-### Background Processing
-- App uses background refresh for alarm checking
-- `BackgroundKeepAlive` manages task scheduling
-- Limited by iOS background execution limits
+### AlarmKit Integration
+- Alarms are scheduled via AlarmKit (iOS 26+), which provides system-level alarm behavior
+- AlarmKit alarms override Do Not Disturb and work without the app running
+- `AlarmKitService.shared` is the main interface for scheduling/canceling alarms
+- Live Activity / Dynamic Island support via widget extension
+
+### In-App Language Switching
+- `OverriddenBundle` class swizzles `Bundle.main` to intercept `localizedString(forKey:value:table:)`
+- Routes string lookups to the correct `.lproj` bundle based on `AppLanguage.current`
+- `AppLanguage.applyBundleOverride()` activates the swizzle on app launch
+- `.id("lang-\(appLanguage)")` on root TabView forces complete view hierarchy rebuild on language change
+- `AppleLanguages` UserDefaults key also set for next cold launch consistency
 
 ### Location Privacy
 - Requires location permissions for accurate zmanim
-- Falls back to default location if denied
-- Location used only for solar calculations
+- Falls back to manual city selection or default location if denied
+- Uses `CLGeocoder` with `preferredLocale` for localized place names
+- Location used only for solar calculations and timezone resolution
 
 ### Shabbat Mode
 - Alarms detect if they're set for Saturday (Shabbat)
@@ -224,39 +313,40 @@ swift build
 ## Future Enhancements
 
 ### Planned Features
-- [x] Full KosherSwift integration for precise zmanim ✅
-- [ ] Hebrew calendar display
-- [ ] Custom location selection
-- [ ] More alarm sounds
+- [x] Full KosherSwift integration for precise zmanim
+- [x] AlarmKit migration (iOS 26+)
+- [x] Light/dark mode support with user override
+- [x] Custom location selection (CitySearchView)
+- [x] Premium/subscription tier system
+- [x] Hebrew localization with in-app language switching
+- [x] RTL layout support
+- [x] Hebrew calendar display on main dashboard
+- [x] Parashat Hashavua on main dashboard
+- [x] Shabbat countdown
 - [ ] Zmanim-based alarms (e.g., "30 min before sunset")
 - [ ] Widget support for quick zmanim view
 - [ ] Shabbat mode enhancements
 - [ ] Multiple opinion support (Magen Avraham vs. GRA)
+- [ ] Additional language support
 
 ### Code Improvements
 - Add unit tests for alarm scheduling logic
 - Implement proper error handling for location failures
 - Add accessibility labels for VoiceOver support
-- Add Hebrew calendar integration using JewishCalendar from KosherSwift
 
 ## References
 
 ### Related Files
-- Main app: `ShabbatClock/App/ShabbatClockApp.swift:5`
-- Alarm model: `ShabbatClock/Models/Alarm.swift:4`
-- Zmanim service: `ShabbatClock/Services/ZmanimService.swift:7`
+- Main app: `ShabbatClock/App/ShabbatClockApp.swift`
+- Alarm model: `ShabbatClock/Models/Alarm.swift`
+- AlarmKit service: `ShabbatClock/Services/AlarmKitService.swift`
+- Zmanim service: `ShabbatClock/Services/ZmanimService.swift`
 - Location manager: `ShabbatClock/Services/LocationManager.swift`
-- Alarm scheduler: `ShabbatClock/Services/AlarmScheduler.swift`
+- Store manager: `ShabbatClock/Services/StoreManager.swift`
+- Theme + language: `ShabbatClock/Utilities/Theme.swift`
+- String catalog: `ShabbatClock/Resources/Localizable.xcstrings`
 
 ### External Resources
 - KosherSwift Documentation: https://github.com/Elyahu41/KosherSwift
 - SwiftData: https://developer.apple.com/documentation/swiftdata
 - SwiftUI: https://developer.apple.com/documentation/swiftui
-
-## License
-
-[License information to be added]
-
-## Contributors
-
-[Contributor information to be added]

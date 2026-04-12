@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import Combine
 import KosherSwift
 
 /// Service for calculating Jewish Zmanim (halachic times) using KosherSwift.
@@ -17,9 +18,25 @@ final class ZmanimService: ObservableObject {
   @Published var sunriseTime: Date?
   @Published var sunsetTime: Date?
 
+  // Shabbat dashboard info
+  @Published var parashaHebrew: String = ""
+  @Published var parashaEnglish: String = ""
+  @Published var hebrewDateString: String = ""
+  @Published var daysUntilShabbat: Int = 0
+  @Published var nextShabbatDate: Date?
+
   private let locationManager = LocationManager.shared
-  
-  private init() {}
+  private var locationObservation: Any?
+
+  private init() {
+    // Recalculate zmanim whenever location changes
+    locationObservation = locationManager.$location
+      .compactMap { $0 }
+      .receive(on: RunLoop.main)
+      .sink { [weak self] _ in
+        self?.calculateTodayZmanim()
+      }
+  }
   
   // MARK: - Zman Model
   
@@ -114,7 +131,7 @@ final class ZmanimService: ObservableObject {
       locationName: locationManager.locationName,
       latitude: location.coordinate.latitude,
       longitude: location.coordinate.longitude,
-      timeZone: TimeZone.current
+      timeZone: locationManager.locationTimeZone
     )
     
     // Create ComplexZmanimCalendar
@@ -266,7 +283,7 @@ final class ZmanimService: ObservableObject {
       locationName: locationManager.locationName,
       latitude: location.coordinate.latitude,
       longitude: location.coordinate.longitude,
-      timeZone: TimeZone.current
+      timeZone: locationManager.locationTimeZone
     )
 
     let calendar = Calendar.current
@@ -302,6 +319,37 @@ final class ZmanimService: ObservableObject {
     // Date labels
     candleLightingDateLabel = "__friday_evening__"
     havdalahDateLabel = "__saturday_night__"
+
+    // Store the next Shabbat date
+    nextShabbatDate = nextSaturday
+
+    // Days until Shabbat (until Friday evening)
+    if weekday == 7 {
+      daysUntilShabbat = 0 // It's Shabbat!
+    } else if weekday == 6 {
+      daysUntilShabbat = 0 // It's Friday (Erev Shabbat)
+    } else {
+      daysUntilShabbat = daysUntilFriday
+    }
+
+    // Parasha for the upcoming Shabbat
+    let jewishCal = JewishCalendar()
+    jewishCal.workingDate = nextSaturday
+    let parsha = jewishCal.getParshah()
+
+    let hebrewFormatter = HebrewDateFormatter()
+    hebrewFormatter.hebrewFormat = true
+    parashaHebrew = hebrewFormatter.formatParsha(parsha: parsha)
+
+    hebrewFormatter.hebrewFormat = false
+    parashaEnglish = hebrewFormatter.formatParsha(parsha: parsha)
+
+    // Hebrew date for today
+    let todayJewish = JewishCalendar()
+    todayJewish.workingDate = today
+    let hdf = HebrewDateFormatter()
+    hdf.hebrewFormat = true
+    hebrewDateString = hdf.format(jewishCalendar: todayJewish)
   }
 
   // MARK: - Helper Methods

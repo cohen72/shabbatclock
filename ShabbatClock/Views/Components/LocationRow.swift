@@ -4,19 +4,25 @@ import SwiftUI
 struct LocationRow: View {
     @ObservedObject var locationManager: LocationManager
     @State private var showingCitySearch = false
+    @State private var showingLocationPrompt = false
+    @State private var showingDeniedAlert = false
 
     var body: some View {
         Button {
             if locationManager.isAuthorized || locationManager.isUsingManualLocation {
                 showingCitySearch = true
+            } else if locationManager.authorizationStatus == .denied {
+                showingDeniedAlert = true
             } else {
-                locationManager.requestPermission()
+                showingLocationPrompt = true
             }
         } label: {
             HStack(spacing: 8) {
-                Image(systemName: "location.fill")
+                Image(systemName: locationManager.authorizationStatus == .denied
+                      ? "location.slash.fill" : "location.fill")
                     .font(.system(size: 12))
-                    .foregroundStyle(.accentPurple)
+                    .foregroundStyle(locationManager.authorizationStatus == .denied
+                                    ? .textSecondary : .accentPurple)
 
                 if locationManager.locationName == "__unknown__" {
                     Text("Unknown Location")
@@ -46,6 +52,30 @@ struct LocationRow: View {
         .sheet(isPresented: $showingCitySearch) {
             CitySearchView()
                 .applyLanguageOverride(AppLanguage.current)
+        }
+        .fullScreenCover(isPresented: $showingLocationPrompt) {
+            PermissionPromptView.location(
+                onContinue: {
+                    showingLocationPrompt = false
+                    locationManager.requestPermission()
+                },
+                onSkip: {
+                    showingLocationPrompt = false
+                }
+            )
+        }
+        .alert("Location Access Disabled", isPresented: $showingDeniedAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("Choose City Manually") {
+                showingCitySearch = true
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enable location in Settings for accurate prayer times, or choose your city manually.")
         }
     }
 }

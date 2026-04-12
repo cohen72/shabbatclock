@@ -5,14 +5,14 @@ import SwiftData
 struct AlarmListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Alarm.hour) private var alarms: [Alarm]
-    @EnvironmentObject private var alarmScheduler: AlarmScheduler
+    @Environment(AlarmKitService.self) private var alarmService
 
     @State private var selectedAlarm: Alarm?
     @State private var newAlarm: Alarm?
     @State private var showingPremiumAlert = false
 
     // Free tier limit
-    private let freeAlarmLimit = 2
+    private let freeAlarmLimit = 3
     @AppStorage("isPremium") private var isPremium = false
 
     var body: some View {
@@ -46,8 +46,9 @@ struct AlarmListView: View {
                                 }
                             }
                             .padding(.horizontal, 20)
-                            .padding(.bottom, 120)
+
                         }
+                        .padding(.bottom, 120)
                     }
                 }
             }
@@ -55,13 +56,29 @@ struct AlarmListView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 12) {
+                        // Alarm count badge (free tier only)
                         if !isPremium {
-                            Text("\(alarms.count)/\(freeAlarmLimit)")
-                                .font(.system(size: 11, weight: .semibold))
+                            Button {
+                                showingPremiumAlert = true
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 11, weight: .semibold))
+                                    Text("\(alarms.count)/\(freeAlarmLimit)")
+                                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                                }
                                 .foregroundStyle(.goldAccent)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(
+                                    Capsule()
+                                        .fill(Color.goldAccent.opacity(0.15))
+                                )
+                            }
                         }
 
+                        // Add alarm button
                         Button {
                             if canAddAlarm {
                                 newAlarm = Alarm()
@@ -69,7 +86,7 @@ struct AlarmListView: View {
                                 showingPremiumAlert = true
                             }
                         } label: {
-                            Image(systemName: "plus")
+                            Image(systemName: canAddAlarm ? "plus" : "lock.fill")
                                 .font(.system(size: 20, weight: .semibold))
                                 .foregroundStyle(.goldAccent)
                         }
@@ -109,7 +126,7 @@ struct AlarmListView: View {
                         .font(AppFont.header(20))
                         .foregroundStyle(.textPrimary)
 
-                    Text("Tap + New Alarm to create\nyour first Shabbat alarm")
+                    Text("Tap + to create\nyour first Shabbat alarm")
                         .font(AppFont.body(14))
                         .foregroundStyle(.textSecondary)
                         .multilineTextAlignment(.center)
@@ -128,18 +145,33 @@ struct AlarmListView: View {
     }
 
     private func deleteAlarm(_ alarm: Alarm) {
-        alarmScheduler.removeNotification(for: alarm)
+        Task {
+            alarmService.cancelAlarm(for: alarm)
+        }
         modelContext.delete(alarm)
-        alarmScheduler.updateNextAlarmDate()
+        alarmService.updateNextAlarmDate()
     }
 
     private func handleToggle(alarm: Alarm, isEnabled: Bool) {
-        if isEnabled {
-            alarmScheduler.scheduleNotification(for: alarm)
-        } else {
-            alarmScheduler.removeNotification(for: alarm)
+        Task {
+            if isEnabled {
+                if alarmService.isAuthorized {
+                    if let newID = await alarmService.scheduleAlarm(for: alarm) {
+                        alarm.alarmKitID = newID
+                    }
+                } else {
+                    alarmService.scheduleFallbackAlarm(for: alarm)
+                }
+            } else {
+                if alarmService.isAuthorized {
+                    alarmService.cancelAlarm(for: alarm)
+                    alarm.alarmKitID = nil
+                } else {
+                    alarmService.cancelFallbackAlarm(for: alarm)
+                }
+            }
+            alarmService.updateNextAlarmDate()
         }
-        alarmScheduler.updateNextAlarmDate()
     }
 }
 
@@ -148,5 +180,5 @@ struct AlarmListView: View {
 #Preview {
     AlarmListView()
         .modelContainer(for: Alarm.self, inMemory: true)
-        .environmentObject(AlarmScheduler.shared)
+        .environment(AlarmKitService.shared)
 }

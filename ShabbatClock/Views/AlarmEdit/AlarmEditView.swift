@@ -5,7 +5,7 @@ import SwiftData
 struct AlarmEditView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var alarmScheduler: AlarmScheduler
+    @Environment(AlarmKitService.self) private var alarmService
 
     let alarm: Alarm
     let isNew: Bool
@@ -16,8 +16,42 @@ struct AlarmEditView: View {
     @State private var draftLabel: String = ""
     @State private var draftSoundName: String = ""
     @State private var draftRepeatDays: [Int] = []
+    @State private var draftSnoozeEnabled: Bool = true
+    @State private var draftSnoozeDuration: Int = 5 * 60
+    @State private var draftAlarmDuration: Int = 30
 
     @State private var showingDeleteConfirmation = false
+    @State private var showingAlarmPermission = false
+    @State private var showingNotificationPermission = false
+    @State private var showingFallbackAlert = false
+
+    @AppStorage("isPremium") private var isPremium = false
+
+    private var alarmDurationOptions: [(String, Int)] {
+        var options: [(String, Int)] = [
+            ("15 sec", 15),
+            ("30 sec", 30),
+            ("1 min", 60),
+            ("2 min", 120),
+            ("5 min", 300),
+            ("10 min", 600),
+        ]
+        if isPremium {
+            options.append(contentsOf: [
+                ("15 min", 900),
+                ("30 min", 1800),
+            ])
+        }
+        return options
+    }
+
+    private let snoozeDurationOptions: [(String, Int)] = [
+        ("1 min", 60),
+        ("3 min", 180),
+        ("5 min", 300),
+        ("9 min", 540),
+        ("10 min", 600),
+    ]
 
     var body: some View {
         NavigationStack {
@@ -39,6 +73,12 @@ struct AlarmEditView: View {
 
                         // Repeat days
                         repeatSection
+
+                        // Alarm duration (auto-stop)
+                        alarmDurationSection
+
+                        // Snooze
+                        snoozeSection
 
                         // Delete button (for existing alarms)
                         if !isNew {
@@ -78,6 +118,9 @@ struct AlarmEditView: View {
             draftLabel = alarm.label
             draftSoundName = alarm.soundName
             draftRepeatDays = alarm.repeatDays
+            draftSnoozeEnabled = alarm.snoozeEnabled
+            draftSnoozeDuration = alarm.snoozeDurationSeconds
+            draftAlarmDuration = alarm.alarmDurationSeconds
         }
         .scrollDismissesKeyboard(.interactively)
         .onTapGesture {
@@ -90,6 +133,57 @@ struct AlarmEditView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Are you sure you want to delete this alarm?")
+        }
+        .fullScreenCover(isPresented: $showingAlarmPermission) {
+            PermissionPromptView.alarms(
+                onContinue: {
+                    showingAlarmPermission = false
+                    Task {
+                        await alarmService.requestAuthorization()
+                        if alarmService.isAuthorized {
+                            // Full AlarmKit mode — check notification permission next
+                            if !alarmService.isNotificationAuthorized {
+                                showingNotificationPermission = true
+                            } else {
+                                commitSave()
+                            }
+                        } else {
+                            // User denied — save with fallback and show info alert
+                            commitSave()
+                            showingFallbackAlert = true
+                        }
+                    }
+                },
+                onSkip: {
+                    showingAlarmPermission = false
+                    // Save with fallback and show info alert
+                    commitSave()
+                    showingFallbackAlert = true
+                }
+            )
+        }
+        .fullScreenCover(isPresented: $showingNotificationPermission) {
+            PermissionPromptView.notifications(
+                onContinue: {
+                    showingNotificationPermission = false
+                    Task {
+                        await alarmService.requestNotificationAuthorization()
+                        commitSave()
+                    }
+                },
+                onSkip: {
+                    showingNotificationPermission = false
+                    commitSave()
+                }
+            )
+        }
+        .alert("Alarm Saved in Basic Mode", isPresented: $showingFallbackAlert) {
+            Button("Open Settings") {
+                openAppSettings()
+            }
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Your alarm will use a 30-second notification sound. To enable full alarm features — longer durations, Do Not Disturb override, and Shabbat mode — allow alarms in Settings.")
         }
     }
 
@@ -217,6 +311,110 @@ struct AlarmEditView: View {
         return draftRepeatDays.sorted().map { symbols[$0] }.joined(separator: ", ")
     }
 
+    // MARK: - Alarm Duration Section
+
+    private var alarmDurationSection: some View {
+        VStack(spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Auto-Stop")
+                        .font(AppFont.caption(12))
+                        .foregroundStyle(.textSecondary)
+
+                    Text("Alarm stops automatically after this duration")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.textSecondary.opacity(0.6))
+                }
+
+                Spacer()
+
+                if alarmService.isFallbackMode {
+                    Text("30 sec")
+                        .font(AppFont.body())
+                        .foregroundStyle(.textSecondary)
+                } else {
+                    Picker("", selection: $draftAlarmDuration) {
+                        ForEach(alarmDurationOptions, id: \.1) { option in
+                            Text(option.0).tag(option.1)
+                        }
+                    }
+                    .tint(.accentPurple)
+                }
+            }
+            .padding(16)
+            .themeCard(cornerRadius: 14)
+
+            // Fallback mode hint
+            if alarmService.isFallbackMode {
+                Button {
+                    openAppSettings()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 11))
+                        Text("Allow alarms in Settings for longer durations")
+                            .font(.system(size: 11))
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
+                        Image(systemName: "arrow.up.forward")
+                            .font(.system(size: 9))
+                    }
+                    .foregroundStyle(.goldAccent)
+                    .padding(.horizontal, 16)
+                }
+            }
+        }
+    }
+
+    // MARK: - Snooze Section
+
+    private var snoozeSection: some View {
+        VStack(spacing: 12) {
+            // Snooze toggle
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Snooze")
+                        .font(AppFont.caption(12))
+                        .foregroundStyle(.textSecondary)
+
+                    Text(draftSnoozeEnabled ? "Enabled" : "Disabled")
+                        .font(AppFont.body())
+                        .foregroundStyle(.textPrimary)
+                }
+
+                Spacer()
+
+                Toggle("", isOn: $draftSnoozeEnabled)
+                    .labelsHidden()
+                    .tint(.accentPurple)
+            }
+            .padding(16)
+            .themeCard(cornerRadius: 14)
+
+            // Snooze duration picker (shown when snooze enabled)
+            if draftSnoozeEnabled {
+                HStack {
+                    Text("Snooze Duration")
+                        .font(AppFont.body())
+                        .foregroundStyle(.textPrimary)
+
+                    Spacer()
+
+                    Picker("", selection: $draftSnoozeDuration) {
+                        ForEach(snoozeDurationOptions, id: \.1) { option in
+                            Text(option.0).tag(option.1)
+                        }
+                    }
+                    .tint(.accentPurple)
+                }
+                .padding(16)
+                .themeCard(cornerRadius: 14)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: draftSnoozeEnabled)
+    }
+
     // MARK: - Delete Button
 
     private var deleteButton: some View {
@@ -245,25 +443,67 @@ struct AlarmEditView: View {
     // MARK: - Actions
 
     private func saveAlarm() {
+        // First save: prompt for AlarmKit permission if never asked
+        if !alarmService.isAuthorized && !alarmService.hasBeenAskedForAuthorization {
+            showingAlarmPermission = true
+            return
+        }
+
+        // If authorized, check notification permission (for auto-stop)
+        if alarmService.isAuthorized && !alarmService.isNotificationAuthorized {
+            showingNotificationPermission = true
+            return
+        }
+
+        commitSave()
+    }
+
+    /// Actually save the alarm — uses AlarmKit if authorized, fallback notifications otherwise.
+    private func commitSave() {
         alarm.hour = draftHour
         alarm.minute = draftMinute
         alarm.label = draftLabel
         alarm.soundName = draftSoundName
         alarm.repeatDays = draftRepeatDays
+        alarm.snoozeEnabled = draftSnoozeEnabled
+        alarm.snoozeDurationSeconds = draftSnoozeEnabled ? draftSnoozeDuration : 0
         alarm.isEnabled = true
+
+        if alarmService.isFallbackMode {
+            // Fallback: force 30s duration and schedule via notifications
+            alarm.alarmDurationSeconds = AlarmKitService.fallbackMaxDuration
+        } else {
+            alarm.alarmDurationSeconds = draftAlarmDuration
+        }
+
         if isNew {
             modelContext.insert(alarm)
         }
-        alarmScheduler.scheduleNotification(for: alarm)
-        alarmScheduler.updateNextAlarmDate()
+
+        Task {
+            if alarmService.isAuthorized {
+                if let newID = await alarmService.scheduleAlarm(for: alarm) {
+                    alarm.alarmKitID = newID
+                }
+            } else {
+                alarmService.scheduleFallbackAlarm(for: alarm)
+            }
+            alarmService.updateNextAlarmDate()
+        }
+
         dismiss()
     }
 
     private func deleteAlarm() {
-        alarmScheduler.removeNotification(for: alarm)
+        alarmService.cancelAlarm(for: alarm)
         modelContext.delete(alarm)
-        alarmScheduler.updateNextAlarmDate()
+        alarmService.updateNextAlarmDate()
         dismiss()
+    }
+
+    private func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 }
 
@@ -275,5 +515,5 @@ struct AlarmEditView: View {
         isNew: true
     )
     .modelContainer(for: Alarm.self, inMemory: true)
-    .environmentObject(AlarmScheduler.shared)
+    .environment(AlarmKitService.shared)
 }

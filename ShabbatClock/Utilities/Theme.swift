@@ -89,6 +89,49 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
         return String(localized: String.LocalizationValue(key))
     }
+
+    /// Apply the language override to Bundle.main so that SwiftUI LocalizedStringKey
+    /// and all bundle-based lookups use the correct language immediately.
+    /// Call this when the language setting changes and on app launch.
+    static func applyBundleOverride() {
+        let language = current
+        if let locale = language.locale {
+            let langCode = locale.language.languageCode?.identifier ?? "en"
+            OverriddenBundle.overriddenLanguage = langCode
+            // Also set AppleLanguages for next launch
+            UserDefaults.standard.set([langCode], forKey: "AppleLanguages")
+        } else {
+            OverriddenBundle.overriddenLanguage = nil
+            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+        }
+        // Swizzle Bundle.main if not already done
+        OverriddenBundle.activate()
+    }
+}
+
+// MARK: - Bundle Override for In-App Language Switching
+
+/// Swizzles Bundle.main's localizedString(forKey:value:table:) to use the overridden language bundle.
+/// This makes SwiftUI's LocalizedStringKey resolution respect the in-app language setting.
+private class OverriddenBundle: Bundle, @unchecked Sendable {
+    static var overriddenLanguage: String?
+    private static var hasActivated = false
+
+    static func activate() {
+        guard !hasActivated else { return }
+        hasActivated = true
+        // Swizzle Bundle.main's class
+        object_setClass(Bundle.main, OverriddenBundle.self)
+    }
+
+    override func localizedString(forKey key: String, value: String?, table tableName: String?) -> String {
+        if let lang = OverriddenBundle.overriddenLanguage,
+           let path = Bundle.main.path(forResource: lang, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return bundle.localizedString(forKey: key, value: value, table: tableName)
+        }
+        return super.localizedString(forKey: key, value: value, table: tableName)
+    }
 }
 
 // MARK: - Adaptive Color Definitions

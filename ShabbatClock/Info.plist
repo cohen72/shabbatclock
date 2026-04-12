@@ -51,5 +51,7 @@
 	<string>Shabbat Clock needs your location to calculate accurate Zmanim (halachic times) for your area.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>Shabbat Clock uses alarms to wake you for Shabbat prayers and zmanim. Alarms will sound even when Do Not Disturb is enabled.</string>
 </dict>
 </plist>

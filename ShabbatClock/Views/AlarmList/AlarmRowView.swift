@@ -3,6 +3,7 @@ import SwiftUI
 /// A row displaying a single alarm in the list.
 struct AlarmRowView: View {
     @Bindable var alarm: Alarm
+    @Environment(AlarmKitService.self) private var alarmService
     var onToggle: ((Bool) -> Void)?
 
     var body: some View {
@@ -20,10 +21,22 @@ struct AlarmRowView: View {
                         .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.7 : 0.4))
                 }
 
-                // Label
-                Text(alarm.label)
-                    .font(.system(size: 14, weight: .regular, design: .default))
-                    .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.85 : 0.4))
+                // Label + fallback indicator
+                HStack(spacing: 6) {
+                    Text(alarm.label)
+                        .font(.system(size: 14, weight: .regular, design: .default))
+                        .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.85 : 0.4))
+
+                    if alarmService.isFallbackMode && alarm.isEnabled {
+                        HStack(spacing: 3) {
+                            Image(systemName: "bell.badge")
+                                .font(.system(size: 10))
+                            Text("30s")
+                                .font(.system(size: 10, weight: .medium))
+                        }
+                        .foregroundStyle(.goldAccent.opacity(0.7))
+                    }
+                }
 
                 // Repeat days
                 if !alarm.repeatDays.isEmpty {
@@ -125,4 +138,5 @@ struct AlarmRowCompact: View {
         }
         .padding()
     }
+    .environment(AlarmKitService.shared)
 }
