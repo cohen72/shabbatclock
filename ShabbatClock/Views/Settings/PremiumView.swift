@@ -170,24 +170,19 @@ struct PremiumView: View {
 
     private var planSelectionSection: some View {
         VStack(spacing: 8) {
-            // Yearly plan (recommended)
             planCard(
                 title: String(localized: "Yearly"),
                 pricePerPeriod: store.yearlyProduct.map { $0.displayPrice + String(localized: "/year") }
                     ?? String(localized: "$14.99/year"),
-                subtitle: store.yearlyProduct.flatMap { weeklyEquivalentLabel(for: $0) }
-                    ?? String(localized: "Just $0.29/week"),
                 badge: savingsBadge ?? String(localized: "SAVE 71%"),
                 isSelected: selectedPlan == StoreManager.yearlyID
             )
             .onTapGesture { selectedPlan = StoreManager.yearlyID }
 
-            // Weekly plan
             planCard(
                 title: String(localized: "Weekly"),
                 pricePerPeriod: store.weeklyProduct.map { $0.displayPrice + String(localized: "/week") }
                     ?? String(localized: "$0.99/week"),
-                subtitle: nil,
                 badge: nil,
                 isSelected: selectedPlan == StoreManager.weeklyID
             )
@@ -198,12 +193,10 @@ struct PremiumView: View {
     private func planCard(
         title: String,
         pricePerPeriod: String,
-        subtitle: String?,
         badge: String?,
         isSelected: Bool
     ) -> some View {
-        HStack(spacing: 14) {
-            // Radio circle
+        HStack(spacing: 12) {
             ZStack {
                 Circle()
                     .stroke(isSelected ? Color.goldAccent : Color.surfaceBorder, lineWidth: 2)
@@ -216,37 +209,29 @@ struct PremiumView: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 8) {
-                    Text(title)
-                        .font(AppFont.body(16))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.textPrimary)
+            HStack(spacing: 8) {
+                Text(title)
+                    .font(AppFont.body(15))
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.textPrimary)
 
-                    if let badge {
-                        Text(badge)
-                            .font(AppFont.caption(10))
-                            .fontWeight(.bold)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [Color.goldAccent, Color.accentPurple],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
+                if let badge {
+                    Text(badge)
+                        .font(AppFont.caption(9))
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.goldAccent, Color.accentPurple],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
                                     )
-                            )
-                    }
-                }
-
-                if let subtitle {
-                    Text(subtitle)
-                        .font(AppFont.caption(12))
-                        .foregroundStyle(.textSecondary)
+                                )
+                        )
                 }
             }
 
@@ -258,7 +243,7 @@ struct PremiumView: View {
                 .foregroundStyle(isSelected ? .goldAccent : .textSecondary)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.vertical, 14)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color.surfaceCard)
@@ -337,10 +322,10 @@ struct PremiumView: View {
                 .multilineTextAlignment(.center)
 
             HStack(spacing: 16) {
-                Link("Terms of Use", destination: URL(string: "https://shabbatclock.app/terms")!)
+                Link("Terms of Use", destination: AppURLs.termsOfUse)
                     .font(.system(size: 11))
                     .foregroundStyle(.textSecondary)
-                Link("Privacy Policy", destination: URL(string: "https://shabbatclock.app/privacy")!)
+                Link("Privacy Policy", destination: AppURLs.privacyPolicy)
                     .font(.system(size: 11))
                     .foregroundStyle(.textSecondary)
             }
@@ -376,11 +361,6 @@ struct PremiumView: View {
         return String(localized: "SAVE \(percent)%")
     }
 
-    private func weeklyEquivalentLabel(for yearly: Product) -> String? {
-        let weeklyPrice = yearly.price / 52
-        let formatted = weeklyPrice.formatted(.currency(code: yearly.priceFormatStyle.currencyCode))
-        return String(localized: "Just \(formatted)/week")
-    }
 }
 
 // MARK: - Preview

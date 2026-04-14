@@ -105,41 +105,13 @@ struct OnboardingView: View {
                 .padding(.bottom, 20)
 
             // Details
-            Text("Your alarm stops automatically after the time you choose. This requires Critical Alert permission.")
+            Text("Your alarm stops automatically after the time you choose. This requires notification permission.")
                 .font(AppFont.body(15))
                 .foregroundStyle(.textSecondary.opacity(0.8))
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
                 .padding(.horizontal, 40)
                 .padding(.bottom, 20)
-
-            // System dialog hint card
-            HStack(spacing: 12) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 24))
-                    .foregroundStyle(.red)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Tap \"Allow\" on the next prompt")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.textPrimary)
-
-                    Text("This lets your alarm sound through silent mode.")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.textSecondary)
-                }
-            }
-            .padding(14)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color.red.opacity(0.08))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(Color.red.opacity(0.2), lineWidth: 0.5)
-                    )
-            )
-            .padding(.horizontal, 32)
 
             Spacer()
 
@@ -160,7 +132,7 @@ struct OnboardingView: View {
                             .font(.system(size: 18))
                     }
                     Text(alarmService.isNotificationAuthorized
-                         ? "Alerts Enabled" : "Allow Critical Alerts")
+                         ? "Alerts Enabled" : "Allow Notifications")
                         .font(.system(size: 18, weight: .bold))
                 }
                 .foregroundStyle(.white)

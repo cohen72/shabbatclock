@@ -29,6 +29,14 @@ struct ContentView: View {
         UINavigationBar.appearance().standardAppearance = navAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
         UINavigationBar.appearance().compactAppearance = navAppearance
+
+        let segmentFont = UIFont.systemFont(ofSize: 13, weight: .medium)
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.font: segmentFont], for: .normal
+        )
+        UISegmentedControl.appearance().setTitleTextAttributes(
+            [.font: segmentFont], for: .selected
+        )
     }
 
     var body: some View {
@@ -56,7 +64,11 @@ struct ContentView: View {
         .onAppear {
             alarmService.configure(with: modelContext)
             if !hasCompletedOnboarding {
-                showingOnboarding = true
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    showingOnboarding = true
+                }
             }
         }
         .fullScreenCover(isPresented: $showingOnboarding) {

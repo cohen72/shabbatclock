@@ -34,6 +34,17 @@
         }
       }
     },
+    "%d min before" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d דק׳ לפני"
+          }
+        }
+      }
+    },
     "%lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -74,7 +85,18 @@
         }
       }
     },
+    "5 min" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "5 דק׳"
+          }
+        }
+      }
+    },
     "5 min before" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -84,7 +106,18 @@
         }
       }
     },
+    "10 min" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 דק׳"
+          }
+        }
+      }
+    },
     "10 min before" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -94,7 +127,18 @@
         }
       }
     },
+    "15 min" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 דק׳"
+          }
+        }
+      }
+    },
     "15 min before" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -104,7 +148,18 @@
         }
       }
     },
+    "30 min" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 דק׳"
+          }
+        }
+      }
+    },
     "30 min before" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -213,6 +268,16 @@
         }
       }
     },
+    "Afternoon" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אחר הצהריים"
+          }
+        }
+      }
+    },
     "Airhorn" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -231,6 +296,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "התראה"
+          }
+        }
+      }
+    },
+    "Alarm Enabled" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה מופעלת"
           }
         }
       }
@@ -370,18 +445,18 @@
         }
       }
     },
-    "Allow Critical Alerts" : {
+    "Allow in Settings for full alarm features" : {
+
+    },
+    "Allow Notifications" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "אישור התראות קריטיות"
+            "value" : "אישור התראות"
           }
         }
       }
-    },
-    "Allow in Settings for full alarm features" : {
-
     },
     "Ana Bekoach" : {
       "extractionState" : "manual",
@@ -415,6 +490,17 @@
       }
     },
     "At time" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בזמן"
+          }
+        }
+      }
+    },
+    "At zman time" : {
+      "extractionState" : "manual",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -903,6 +989,16 @@
         }
       }
     },
+    "Evening" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ערב"
+          }
+        }
+      }
+    },
     "Every day" : {
       "localizations" : {
         "he" : {
@@ -1060,6 +1156,9 @@
         }
       }
     },
+    "Help & FAQ" : {
+
+    },
     "Help us keep improving Shabbat Clock" : {
       "localizations" : {
         "he" : {
@@ -1103,6 +1202,39 @@
         }
       }
     },
+    "in %d min" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בעוד %d דק׳"
+          }
+        }
+      }
+    },
+    "in %dh" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בעוד %dש׳"
+          }
+        }
+      }
+    },
+    "in %dh %dm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בעוד %dש׳ %dד׳"
+          }
+        }
+      }
+    },
     "Jazzy" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1115,6 +1247,7 @@
       }
     },
     "Just %@/week" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1123,9 +1256,6 @@
           }
         }
       }
-    },
-    "Just $0.29/week" : {
-
     },
     "Just A Bit Annoying" : {
       "extractionState" : "manual",
@@ -1380,6 +1510,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "יום שני"
+          }
+        }
+      }
+    },
+    "Morning" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בוקר"
           }
         }
       }
@@ -1967,6 +2107,16 @@
     "SAVE 71%" : {
 
     },
+    "Save Alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שמור התראה"
+          }
+        }
+      }
+    },
     "Search city..." : {
       "localizations" : {
         "he" : {
@@ -2383,12 +2533,12 @@
         }
       }
     },
-    "This lets your alarm sound through silent mode." : {
+    "This lets your alarm ring at the scheduled time." : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "זה מאפשר להתראה לצלצל גם במצב שקט."
+            "value" : "זה מאפשר להתראה לצלצל בזמן שנקבע."
           }
         }
       }
@@ -2709,12 +2859,12 @@
         }
       }
     },
-    "Your alarm stops automatically after the time you choose. This requires Critical Alert permission." : {
+    "Your alarm stops automatically after the time you choose. This requires notification permission." : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ההתראה נכבית אוטומטית אחרי הזמן שבחרת. נדרשת הרשאת התראה קריטית."
+            "value" : "ההתראה נכבית אוטומטית אחרי הזמן שבחרת. נדרשת הרשאת התראות."
           }
         }
       }

@@ -9,8 +9,8 @@ final class StoreManager: ObservableObject {
 
     // MARK: - Product IDs
 
-    static let weeklyID = "com.shabbatclock.app.premium.weekly"
-    static let yearlyID = "com.shabbatclock.app.premium.yearly"
+    static let weeklyID = "works.delicious.shabbatclock.premium.weekly"
+    static let yearlyID = "works.delicious.shabbatclock.premium.yearly"
     static let subscriptionGroupID = "premium_group"
 
     private let productIDs: Set<String> = [weeklyID, yearlyID]

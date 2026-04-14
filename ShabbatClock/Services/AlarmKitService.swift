@@ -14,7 +14,7 @@ import UserNotifications
 final class AlarmKitService: NSObject {
     static let shared = AlarmKitService()
 
-    static let appGroupID = "group.com.shabbatclock.app"
+    static let appGroupID = "group.works.delicious.shabbatclock"
     static let autoStopNotificationPrefix = "autostop-"
     static let autoStopCategoryID = "AUTO_STOP_CATEGORY"
     static let fallbackNotificationPrefix = "fallback-"
@@ -111,7 +111,7 @@ final class AlarmKitService: NSObject {
     func requestNotificationAuthorization() async {
         let center = UNUserNotificationCenter.current()
         do {
-            let granted = try await center.requestAuthorization(options: [.alert, .sound, .criticalAlert])
+            let granted = try await center.requestAuthorization(options: [.alert, .sound, .timeSensitive])
             isNotificationAuthorized = granted
         } catch {
             print("[AlarmKitService] Notification authorization error: \(error)")
@@ -439,17 +439,16 @@ final class AlarmKitService: NSObject {
         content.title = alarm.label
         content.body = String(localized: "Alarm")
 
-        // Use critical alert to bypass DND/silent mode
+        // Time-sensitive fallback (AlarmKit is the primary path)
         let sound = AlarmSound.sound(named: alarm.soundName)
         if let sound {
-            content.sound = .criticalSoundNamed(
-                UNNotificationSoundName("\(sound.fileName).\(sound.fileExtension)"),
-                withAudioVolume: 1.0
+            content.sound = UNNotificationSound(
+                named: UNNotificationSoundName("\(sound.fileName).\(sound.fileExtension)")
             )
         } else {
-            content.sound = .defaultCritical
+            content.sound = .default
         }
-        content.interruptionLevel = .critical
+        content.interruptionLevel = .timeSensitive
 
         let triggerComponents = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],

@@ -19,6 +19,7 @@
 		AAA00026 /* StopAlarmIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00026 /* StopAlarmIntent.swift */; };
 		AAA00027 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00027 /* StoreManager.swift */; };
 		AAA00030 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00030 /* Theme.swift */; };
+		AAA00031 /* AppURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00031 /* AppURLs.swift */; };
 		AAA00040 /* NightSkyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00040 /* NightSkyBackground.swift */; };
 		AAA00050 /* AnalogClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00050 /* AnalogClockView.swift */; };
 		AAA00051 /* MainClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00051 /* MainClockView.swift */; };
@@ -29,9 +30,9 @@
 		AAA00072 /* SoundPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00072 /* SoundPickerView.swift */; };
 		AAA00090 /* ZmanimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00090 /* ZmanimView.swift */; };
 		AAA00100 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00100 /* SettingsView.swift */; };
+		AAA00101 /* PremiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00101 /* PremiumView.swift */; };
 		AAA00102 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00102 /* DebugView.swift */; };
 		AAA00103 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00103 /* OnboardingView.swift */; };
-		AAA00101 /* PremiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00101 /* PremiumView.swift */; };
 		AAA00200 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = BBB00200 /* Sounds */; };
 		DD112234 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112233 /* Localizable.xcstrings */; };
 		DD112236 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112235 /* InfoPlist.xcstrings */; };
@@ -83,6 +84,7 @@
 		BBB00027 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		BBB00028 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		BBB00030 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		BBB00031 /* AppURLs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppURLs.swift; sourceTree = "<group>"; };
 		BBB00040 /* NightSkyBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightSkyBackground.swift; sourceTree = "<group>"; };
 		BBB00050 /* AnalogClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalogClockView.swift; sourceTree = "<group>"; };
 		BBB00051 /* MainClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainClockView.swift; sourceTree = "<group>"; };
@@ -93,9 +95,9 @@
 		BBB00072 /* SoundPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPickerView.swift; sourceTree = "<group>"; };
 		BBB00090 /* ZmanimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZmanimView.swift; sourceTree = "<group>"; };
 		BBB00100 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		BBB00101 /* PremiumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumView.swift; sourceTree = "<group>"; };
 		BBB00102 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		BBB00103 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		BBB00101 /* PremiumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumView.swift; sourceTree = "<group>"; };
 		BBB00200 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		BBB00201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 			isa = PBXGroup;
 			children = (
 				BBB00030 /* Theme.swift */,
+				BBB00031 /* AppURLs.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -459,6 +462,7 @@
 				AAA00023 /* LocationManager.swift in Sources */,
 				AAA00024 /* ZmanimService.swift in Sources */,
 				AAA00030 /* Theme.swift in Sources */,
+				AAA00031 /* AppURLs.swift in Sources */,
 				AAA00040 /* NightSkyBackground.swift in Sources */,
 				DDAB2E76 /* CitySearchView.swift in Sources */,
 				DD8859E3 /* LocationRow.swift in Sources */,
@@ -508,7 +512,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shabbatclock.app.widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -539,7 +543,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shabbatclock.app.widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -687,6 +691,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShabbatClock/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Shabbat Clock";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -698,7 +703,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shabbatclock.app;
+				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -719,6 +724,7 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShabbatClock/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Shabbat Clock";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -730,7 +736,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shabbatclock.app;
+				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

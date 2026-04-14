@@ -31,7 +31,7 @@ ShabbatClock/
 │   ├── MainView/                  # Main clock display (MainClockView, AnalogClockView)
 │   ├── AlarmList/                 # Alarm list (AlarmListView, AlarmRowView)
 │   ├── AlarmEdit/                 # Alarm creation/editing (AlarmEditView, RepeatDaysPicker, SoundPickerView)
-│   ├── Zmanim/                    # Prayer times display with pull-to-refresh
+│   ├── Zmanim/                    # Prayer times with alarm management (ZmanimView, ZmanAlarmSheet)
 │   ├── Settings/                  # App settings (SettingsView, PremiumView, DebugView)
 │   └── Components/                # Reusable UI (NightSkyBackground, LocationRow, CitySearchView, PermissionPromptView)
 ├── Services/
@@ -69,6 +69,7 @@ ShabbatClock/
   - Repeat days (weekdays/weekends/specific days)
   - Shabbat detection
   - `alarmKitID` - links to AlarmKit system alarm
+  - `zmanTypeRawValue` / `zmanMinutesBefore` - links to zman source (optional, nil for manual alarms)
 - **Service**: `AlarmKitService.swift` - AlarmKit integration (iOS 26+) for system-level alarm scheduling
   - Layered auto-stop: local notification (primary, works when app killed) + in-process Task.sleep (backup)
   - Fallback mode: if AlarmKit denied, uses critical alert notifications (30s max)
@@ -77,15 +78,25 @@ ShabbatClock/
 - **Intent**: `StopAlarmIntent.swift` - LiveActivityIntent for stopping alarms
 - **Audio**: `AudioManager.shared` - Sound preview only (AlarmKit handles alarm audio)
 
-### 2. Zmanim (Prayer Times)
+### 2. Zmanim (Prayer Times + Alarm Management)
+- **Screen purpose**: Personal daily halachic schedule with one-tap alarm management
 - **Service**: `ZmanimService.swift`
   - Calculates Jewish prayer times based on location using **KosherSwift**
   - Supports 11 different zmanim types (Dawn, Sunrise, Latest Shema, etc.)
   - Uses precise astronomical calculations via ComplexZmanimCalendar
   - Implements GRA (Vilna Gaon) opinions for halachic times
-  - Zmanim row shows Hebrew name, English name, time, and alarm button
-  - "Next" badge highlights the upcoming zman
-  - Pull-to-refresh support
+- **Zman-Alarm linkage**: Alarms created from zmanim store `zmanTypeRawValue` and `zmanMinutesBefore`
+  - `alarmsByZmanType` dictionary in ZmanimView maps zmanType → linked Alarm
+  - Bell icon states: hollow (no alarm), filled (alarm enabled), slash (alarm disabled)
+  - Alarm subtitle shows offset (e.g., "10 min before") below English name
+  - Duplicate prevention: if alarm exists for zmanType, opens management sheet instead of creation
+- **Sections**: Morning (Shacharit), Afternoon (Mincha), Evening (Arvit) with thin headers
+- **"Next" zman**: Gold accent bar, countdown text ("in 47 min"), highlighted row border
+- **Past-zman dimming**: Rows where time passed get `.opacity(0.45)`
+- **ZmanAlarmSheet**: Manage existing zman alarm (toggle, change offset, delete)
+- **CreateAlarmFromZmanSheet**: Create alarm with offset picker (0/5/10/15/30 min before)
+- **Premium**: Zman alarms count toward 3-alarm free limit; premium upsell when exceeded
+- Pull-to-refresh support
 
 ### 3. Shabbat Dashboard (Main Clock Screen)
 - **Hebrew date**: Today's date in the Hebrew calendar (e.g., "י״ד ניסן תשפ״ו")
@@ -151,7 +162,7 @@ ShabbatClock/
 ### 9. Premium / Subscription System
 - **StoreManager**: `StoreManager.shared` - Centralized StoreKit 2 subscription manager
 - **Plans**: Weekly ($0.99/week) and Yearly ($14.99/year, ~71% savings)
-- **Product IDs**: `com.shabbatclock.app.premium.weekly`, `com.shabbatclock.app.premium.yearly`
+- **Product IDs**: `works.delicious.shabbatclock.premium.weekly`, `works.delicious.shabbatclock.premium.yearly`
 - **Free tier**: Limited to 3 alarms; can preview but not select premium sounds
 - **Premium state**: `StoreManager.shared.isPremium` is source of truth
 - **UI**: Toolbar capsule badge "1/3" with lock icon; + button shows lock when limit reached
@@ -218,7 +229,7 @@ Supported zmanim (prayer times):
 - **MainClockView** - Analog clock + Shabbat dashboard (parasha, countdown, candle lighting, havdalah)
 - **AlarmListView** - List of all alarms with premium tier badge
 - **AlarmEditView** - Create/edit alarm with NavigationStack (sound picker, repeat picker via NavigationLink)
-- **ZmanimView** - Prayer times display with pull-to-refresh and location toolbar button
+- **ZmanimView** - Prayer times with inline alarm management, section grouping, and "next" zman prominence
 - **SettingsView** - App configuration (location, appearance, language, premium, defaults, about)
 - **PremiumView** - Premium subscription upsell screen
 
@@ -333,7 +344,7 @@ xcodebuild -project ShabbatClock.xcodeproj -scheme ShabbatClock -destination 'pl
 - Auto-stop: layered approach — UNNotification at `fireTime + duration` (works when app killed) + in-process Task.sleep
 - Fallback mode: if user denies AlarmKit, uses critical alert notifications (limited to 30s sound)
 - Custom sounds: `AlertConfiguration.AlertSound.named("FileName.m4a")`
-- Widget extension requires App Groups (`group.com.shabbatclock.app`) for shared data
+- Widget extension requires App Groups (`group.works.delicious.shabbatclock`) for shared data
 - `ShabbatAlarmMetadata` must be kept in sync between `ShabbatClock/Models/` and `widgets/`
 
 ### Permissions (Just-in-Time)

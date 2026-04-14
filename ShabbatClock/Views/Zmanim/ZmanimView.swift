@@ -207,31 +207,23 @@ struct ZmanimView: View {
     private func deleteAlarm(for zman: ZmanimService.Zman) {
         guard let alarm = alarmsByZmanType[zman.type.rawValue] else { return }
         let context = alarm.modelContext
-        Task { @MainActor in
-            if let akID = alarm.alarmKitID {
-                await AlarmKitService.shared.cancelAlarm(id: akID)
-            }
-            context?.delete(alarm)
-            try? context?.save()
-            AlarmKitService.shared.updateNextAlarmDate()
-        }
+        AlarmKitService.shared.cancelAlarm(for: alarm)
+        context?.delete(alarm)
+        try? context?.save()
+        AlarmKitService.shared.updateNextAlarmDate()
     }
 
     // MARK: - Subviews
 
     private func sectionHeader(_ title: LocalizedStringKey) -> some View {
-        HStack(spacing: 8) {
-            Text(title)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.textSecondary.opacity(0.5))
-                .textCase(.uppercase)
-            Rectangle()
-                .fill(Color.surfaceBorder)
-                .frame(height: 0.5)
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 4)
+        Text(title)
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(.textSecondary.opacity(0.6))
+            .textCase(.uppercase)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            .padding(.bottom, 12)
     }
 
     private var locationInfoView: some View {
@@ -368,6 +360,8 @@ struct ZmanRowView: View {
                         .font(.system(size: 13))
                         .foregroundStyle(.textSecondary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .fixedSize(horizontal: false, vertical: true)
 
                     if isNext {
                         Text("Next")
@@ -407,27 +401,35 @@ struct ZmanRowView: View {
             // Bell button
             Button(action: onBellTap) {
                 Image(systemName: bellIconName)
-                    .font(.system(size: 12))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(bellColor)
-                    .frame(width: 28, height: 28)
+                    .frame(width: 36, height: 36)
                     .background(
                         Circle()
                             .fill(bellBackground)
+                            .overlay(
+                                Circle()
+                                    .stroke(linkedAlarm?.isEnabled == true
+                                            ? Color.accentPurple.opacity(0.4)
+                                            : Color.surfaceBorder,
+                                            lineWidth: 1)
+                            )
                     )
             }
+            .buttonStyle(.plain)
+            .contentShape(Circle())
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isNext ? Color.surfaceCard.opacity(1) : Color.surfaceCard)
+                .fill(Color.surfaceCard)
                 .overlay(
                     isNext ?
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .stroke(Color.goldAccent.opacity(0.2), lineWidth: 1) : nil
                 )
         )
-        .opacity(isPast && linkedAlarm == nil ? 0.45 : 1.0)
         .onTapGesture {
             showingInfo = true
         }
@@ -541,10 +543,8 @@ struct ZmanAlarmSheet: View {
                                         alarm.alarmKitID = newID
                                     }
                                 } else {
-                                    if let akID = alarm.alarmKitID {
-                                        await alarmService.cancelAlarm(id: akID)
-                                        alarm.alarmKitID = nil
-                                    }
+                                    alarmService.cancelAlarm(for: alarm)
+                                    alarm.alarmKitID = nil
                                 }
                                 alarmService.updateNextAlarmDate()
                             }
@@ -625,9 +625,7 @@ struct ZmanAlarmSheet: View {
         alarm.zmanMinutesBefore = newMinutes
 
         Task {
-            if let akID = alarm.alarmKitID {
-                await alarmService.cancelAlarm(id: akID)
-            }
+            alarmService.cancelAlarm(for: alarm)
             if alarm.isEnabled {
                 if let newID = await alarmService.scheduleAlarm(for: alarm) {
                     alarm.alarmKitID = newID

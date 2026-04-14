@@ -183,6 +183,7 @@ struct SettingsView: View {
                     Text("Theme")
                         .font(AppFont.body())
                         .foregroundStyle(.textPrimary)
+                        .lineLimit(1)
 
                     Spacer()
 
@@ -211,6 +212,7 @@ struct SettingsView: View {
                     Text("Language")
                         .font(AppFont.body())
                         .foregroundStyle(.textPrimary)
+                        .lineLimit(1)
 
                     Spacer()
 
@@ -387,11 +389,47 @@ struct SettingsView: View {
                 }
 
                 settingsRow {
-                    Link(destination: URL(string: "mailto:support@shabbatclock.app")!) {
+                    Link(destination: AppURLs.supportMailto) {
                         HStack {
                             Text("Contact Support")
                             Spacer()
                             Image(systemName: "envelope")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.textSecondary)
+                        }
+                    }
+                }
+
+                settingsRow {
+                    Link(destination: AppURLs.support) {
+                        HStack {
+                            Text("Help & FAQ")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.textSecondary)
+                        }
+                    }
+                }
+
+                settingsRow {
+                    Link(destination: AppURLs.privacyPolicy) {
+                        HStack {
+                            Text("Privacy Policy")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.textSecondary)
+                        }
+                    }
+                }
+
+                settingsRow {
+                    Link(destination: AppURLs.termsOfUse) {
+                        HStack {
+                            Text("Terms of Use")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
                                 .font(.system(size: 14))
                                 .foregroundStyle(.textSecondary)
                         }
