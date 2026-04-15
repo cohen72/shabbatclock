@@ -199,10 +199,13 @@ final class AlarmKitService: NSObject {
             soundCategory: sound?.category.rawValue ?? "Shabbat Melodies"
         )
 
-        // Build duration (snooze post-alert)
-        let duration: AlarmKit.Alarm.CountdownDuration? = alarm.snoozeEnabled
-            ? AlarmKit.Alarm.CountdownDuration(preAlert: nil, postAlert: TimeInterval(alarm.snoozeDurationSeconds))
-            : nil
+        // Build duration — preAlert auto-stops at system level (works when app killed)
+        // postAlert is for snooze countdown
+        let alarmDuration = TimeInterval(alarm.alarmDurationSeconds)
+        let duration = AlarmKit.Alarm.CountdownDuration(
+            preAlert: alarmDuration,  // System-level auto-stop after this duration
+            postAlert: alarm.snoozeEnabled ? TimeInterval(alarm.snoozeDurationSeconds) : nil
+        )
 
         // Build sound — use the custom alarm sound file from the bundle
         let alertSound: ActivityKit.AlertConfiguration.AlertSound
@@ -265,6 +268,11 @@ final class AlarmKitService: NSObject {
             let alarms = try modelContext.fetch(descriptor)
             Task {
                 for alarm in alarms {
+                    // Skip if already scheduled in AlarmKit (has a valid alarmKitID that's active)
+                    if let existingID = alarm.alarmKitID,
+                       activeAlarms.contains(where: { $0.id == existingID }) {
+                        continue // Already scheduled, don't double-schedule
+                    }
                     if let newID = await scheduleAlarm(for: alarm) {
                         alarm.alarmKitID = newID
                     }
