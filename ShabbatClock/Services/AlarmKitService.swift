@@ -163,7 +163,7 @@ final class AlarmKitService: NSObject {
         // Cancel existing AlarmKit alarm if re-scheduling
         if let existingID = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: existingID)
-            removeAutoStopNotification(for: existingID)
+            removeAutoStopNotifications(for: existingID, repeatDays: alarm.repeatDays)
         }
 
         let alarmKitID = UUID()
@@ -248,7 +248,7 @@ final class AlarmKitService: NSObject {
         guard let alarmKitID = alarm.alarmKitID else { return }
         do {
             try AlarmManager.shared.cancel(id: alarmKitID)
-            removeAutoStopNotification(for: alarmKitID)
+            removeAutoStopNotifications(for: alarmKitID, repeatDays: alarm.repeatDays)
             print("[AlarmKitService] Cancelled alarm: \(alarm.label)")
         } catch {
             print("[AlarmKitService] Failed to cancel alarm: \(error)")
@@ -326,43 +326,64 @@ final class AlarmKitService: NSObject {
 
     /// Layer 1: Schedule a local notification that fires at alarm time + auto-stop duration.
     /// When delivered, the delegate calls AlarmManager.stop().
+    /// For repeating alarms, schedules one recurring notification per repeat day.
+    /// For one-time alarms, schedules a single non-repeating notification.
     private func scheduleAutoStopNotification(alarmKitID: UUID, alarm: Alarm) {
-        guard let fireDate = alarm.nextFireDate() else { return }
+        // First remove any existing auto-stop notifications for this alarm
+        removeAutoStopNotifications(for: alarmKitID, repeatDays: alarm.repeatDays)
 
-        let stopDate = fireDate.addingTimeInterval(TimeInterval(alarm.alarmDurationSeconds))
-        let notificationID = Self.autoStopNotificationPrefix + alarmKitID.uuidString
+        let center = UNUserNotificationCenter.current()
+        let durationSeconds = alarm.alarmDurationSeconds
 
-        let content = UNMutableNotificationContent()
-        content.categoryIdentifier = Self.autoStopCategoryID
-        content.userInfo = [
-            "alarmKitID": alarmKitID.uuidString,
-            "action": "autoStop"
-        ]
-        // Time-sensitive notification — wakes app even when killed, Low Power Mode, or Focus.
-        // This is critical for Shabbat use: alarm MUST stop automatically without user interaction.
-        // Shows a brief banner "Alarm stopped automatically" — intentionally visible for reliability.
-        content.title = alarm.label
-        content.body = String(localized: "Alarm stopped automatically")
-        content.sound = nil  // No sound — just a banner to wake the app
-        content.interruptionLevel = .timeSensitive
+        // Build shared notification content
+        func makeContent() -> UNMutableNotificationContent {
+            let content = UNMutableNotificationContent()
+            content.categoryIdentifier = Self.autoStopCategoryID
+            content.userInfo = ["alarmKitID": alarmKitID.uuidString, "action": "autoStop"]
+            content.title = alarm.label
+            content.body = String(localized: "Alarm stopped automatically")
+            content.sound = nil
+            content.interruptionLevel = .timeSensitive
+            return content
+        }
 
-        let triggerDate = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second],
-            from: stopDate
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
+        if alarm.repeatDays.isEmpty {
+            // One-time alarm: schedule a single non-repeating notification at nextFireDate + duration
+            guard let fireDate = alarm.nextFireDate() else { return }
+            let stopDate = fireDate.addingTimeInterval(TimeInterval(durationSeconds))
+            let triggerComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: stopDate)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
+            let id = "\(Self.autoStopNotificationPrefix)\(alarmKitID.uuidString)-once"
+            let request = UNNotificationRequest(identifier: id, content: makeContent(), trigger: trigger)
+            center.add(request) { error in
+                if let error { print("[AlarmKitService] Auto-stop (one-time) error: \(error)") }
+            }
+        } else {
+            // Repeating alarm: schedule one recurring notification per repeat day
+            // Each fires weekly on that weekday at alarmTime + durationSeconds
+            for weekdayIndex in alarm.repeatDays {
+                // weekdayIndex: 0=Sunday, 1=Monday, ..., 6=Saturday
+                // UNCalendarNotificationTrigger weekday: 1=Sunday, 7=Saturday
+                let unWeekday = weekdayIndex + 1
 
-        let request = UNNotificationRequest(
-            identifier: notificationID,
-            content: content,
-            trigger: trigger
-        )
+                // Calculate stop time: alarm hour:minute + duration seconds
+                let totalSeconds = alarm.hour * 3600 + alarm.minute * 60 + durationSeconds
+                let stopHour = (totalSeconds / 3600) % 24
+                let stopMinute = (totalSeconds % 3600) / 60
+                let stopSecond = totalSeconds % 60
 
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                print("[AlarmKitService] Failed to schedule auto-stop notification: \(error)")
-            } else {
-                print("[AlarmKitService] Auto-stop notification scheduled for \(stopDate)")
+                var triggerComponents = DateComponents()
+                triggerComponents.weekday = unWeekday
+                triggerComponents.hour = stopHour
+                triggerComponents.minute = stopMinute
+                triggerComponents.second = stopSecond
+
+                let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: true)
+                let id = "\(Self.autoStopNotificationPrefix)\(alarmKitID.uuidString)-\(weekdayIndex)"
+                let request = UNNotificationRequest(identifier: id, content: makeContent(), trigger: trigger)
+                center.add(request) { error in
+                    if let error { print("[AlarmKitService] Auto-stop (day \(weekdayIndex)) error: \(error)") }
+                }
             }
         }
     }
@@ -383,12 +404,20 @@ final class AlarmKitService: NSObject {
         }
     }
 
-    /// Remove a pending auto-stop notification.
-    private func removeAutoStopNotification(for alarmKitID: UUID) {
-        let notificationID = Self.autoStopNotificationPrefix + alarmKitID.uuidString
-        UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: [notificationID]
-        )
+    /// Remove all pending auto-stop notifications for an alarm (per-day + old-style migration).
+    private func removeAutoStopNotifications(for alarmKitID: UUID, repeatDays: [Int]) {
+        var ids: [String] = []
+        if repeatDays.isEmpty {
+            ids.append("\(Self.autoStopNotificationPrefix)\(alarmKitID.uuidString)-once")
+        } else {
+            for day in repeatDays {
+                ids.append("\(Self.autoStopNotificationPrefix)\(alarmKitID.uuidString)-\(day)")
+            }
+        }
+        // Also remove the old-style ID (migration safety for existing installs)
+        ids.append(Self.autoStopNotificationPrefix + alarmKitID.uuidString)
+
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
     }
 
     /// Layer 2: In-process auto-stop for when the app is alive.
@@ -427,8 +456,20 @@ final class AlarmKitService: NSObject {
             try AlarmManager.shared.stop(id: uuid)
             print("[AlarmKitService] Notification-triggered auto-stop for alarm \(uuid)")
         } catch {
-            // Alarm may already be stopped — that's fine
-            print("[AlarmKitService] Auto-stop notification: alarm \(uuid) already stopped or not found")
+            print("[AlarmKitService] Auto-stop: alarm \(uuid) already stopped or not found")
+        }
+
+        // Disable one-time alarms after firing (like iOS built-in clock)
+        guard let modelContext else { return }
+        let descriptor = FetchDescriptor<Alarm>()
+        guard let alarms = try? modelContext.fetch(descriptor),
+              let alarm = alarms.first(where: { $0.alarmKitID == uuid }) else { return }
+
+        if alarm.repeatDays.isEmpty {
+            alarm.isEnabled = false
+            alarm.alarmKitID = nil  // Clear so syncAllAlarms won't try to re-schedule it
+            try? modelContext.save()
+            print("[AlarmKitService] One-time alarm '\(alarm.label)' disabled after firing")
         }
     }
 
