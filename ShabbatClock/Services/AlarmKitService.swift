@@ -199,13 +199,12 @@ final class AlarmKitService: NSObject {
             soundCategory: sound?.category.rawValue ?? "Shabbat Melodies"
         )
 
-        // Build duration — preAlert auto-stops at system level (works when app killed)
-        // postAlert is for snooze countdown
-        let alarmDuration = TimeInterval(alarm.alarmDurationSeconds)
-        let duration = AlarmKit.Alarm.CountdownDuration(
-            preAlert: alarmDuration,  // System-level auto-stop after this duration
-            postAlert: alarm.snoozeEnabled ? TimeInterval(alarm.snoozeDurationSeconds) : nil
-        )
+        // Build duration — postAlert handles snooze countdown only.
+        // Auto-stop is handled by Layer 1 (local notification) + Layer 2 (in-process Task.sleep).
+        // preAlert is NOT used for auto-stop — it's a pre-alarm countdown timer, not a ring duration limiter.
+        let duration: AlarmKit.Alarm.CountdownDuration? = alarm.snoozeEnabled
+            ? AlarmKit.Alarm.CountdownDuration(preAlert: nil, postAlert: TimeInterval(alarm.snoozeDurationSeconds))
+            : nil
 
         // Build sound — use the custom alarm sound file from the bundle
         let alertSound: ActivityKit.AlertConfiguration.AlertSound
