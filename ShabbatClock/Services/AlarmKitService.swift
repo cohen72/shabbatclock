@@ -338,9 +338,13 @@ final class AlarmKitService: NSObject {
             "alarmKitID": alarmKitID.uuidString,
             "action": "autoStop"
         ]
-        // Silent notification — no sound, no banner (the alarm itself is the alert)
-        content.sound = nil
-        content.interruptionLevel = .passive
+        // Time-sensitive notification — wakes app even when killed, Low Power Mode, or Focus.
+        // This is critical for Shabbat use: alarm MUST stop automatically without user interaction.
+        // Shows a brief banner "Alarm stopped automatically" — intentionally visible for reliability.
+        content.title = alarm.label
+        content.body = String(localized: "Alarm stopped automatically")
+        content.sound = nil  // No sound — just a banner to wake the app
+        content.interruptionLevel = .timeSensitive
 
         let triggerDate = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute, .second],
@@ -565,7 +569,7 @@ extension AlarmKitService: UNUserNotificationCenterDelegate {
             Task { @MainActor in
                 AlarmKitService.shared.handleAutoStopNotification(alarmKitIDString: alarmKitIDString)
             }
-            completionHandler([]) // Don't show anything — silent stop
+            completionHandler([.banner]) // Show banner even in foreground so user sees alarm stopped
         } else {
             completionHandler([.banner, .sound])
         }

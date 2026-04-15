@@ -300,6 +300,17 @@
         }
       }
     },
+    "Alarm stopped automatically" : {
+      "comment" : "Auto-stop notification body — shown when alarm ends after set duration",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה הופסקה אוטומטית"
+          }
+        }
+      }
+    },
     "Alarm Enabled" : {
       "localizations" : {
         "he" : {
