@@ -97,12 +97,8 @@ struct AlarmEditView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button {
+                    Button(role: .close) {
                         dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.textSecondary)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -329,9 +325,10 @@ struct AlarmEditView: View {
                         .font(AppFont.caption(12))
                         .foregroundStyle(.textSecondary)
 
-                    Text("Alarm stops automatically after this duration")
+                    Text("Stops alarm automatically")
                         .font(.system(size: 11))
                         .foregroundStyle(.textSecondary.opacity(0.6))
+                        .lineLimit(1)
                 }
 
                 Spacer()
@@ -381,10 +378,11 @@ struct AlarmEditView: View {
             Image(systemName: "iphone.radiowaves.left.and.right")
                 .font(.system(size: 14))
                 .foregroundStyle(.textSecondary)
-            Text("Vibration is controlled by iOS. Adjust in Settings › Sounds & Haptics.")
+            Text("Vibration is controlled in iOS Settings")
                 .font(.system(size: 12))
                 .foregroundStyle(.textSecondary)
-                .multilineTextAlignment(.leading)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 14)
@@ -513,8 +511,11 @@ struct AlarmEditView: View {
     }
 
     private func deleteAlarm() {
-        alarmService.delete(alarm)
+        let alarmToDelete = alarm
         dismiss()
+        DispatchQueue.main.async {
+            alarmService.delete(alarmToDelete)
+        }
     }
 
     private func openAppSettings() {

@@ -66,6 +66,7 @@ final class AlarmKitService: NSObject {
 
         // Sync alarms using the appropriate mechanism
         if isAuthorized {
+            reconcileOrphanedAlarms()
             syncAllAlarms()
             scheduleAutoStopNotifications()
         } else {
@@ -204,8 +205,26 @@ final class AlarmKitService: NSObject {
 
     /// Fully remove the alarm from the store and cancel all related notifications.
     func delete(_ alarm: Alarm) {
+        // Snapshot everything we need BEFORE deletion — once the model is removed
+        // from the context, property access (e.g. repeatDays) crashes with a
+        // "detached backing data" fault.
         let context = alarm.modelContext
-        disable(alarm)
+        let alarmKitID = alarm.alarmKitID
+        let repeatDays = alarm.repeatDays
+        let alarmID = alarm.id
+
+        // Cancel AlarmKit alarm
+        if let id = alarmKitID {
+            try? AlarmManager.shared.cancel(id: id)
+            removeAutoStopNotifications(for: id, repeatDays: repeatDays)
+        }
+
+        // Cancel fallback notification (inline — avoid touching the model)
+        let fallbackID = Self.fallbackNotificationPrefix + alarmID.uuidString
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [fallbackID]
+        )
+
         context?.delete(alarm)
         try? context?.save()
         updateNextAlarmDate()
@@ -316,6 +335,54 @@ final class AlarmKitService: NSObject {
         } catch {
             print("[AlarmKitService] Failed to cancel alarm: \(error)")
         }
+    }
+
+    /// Cancel system-scheduled AlarmKit alarms and auto-stop notifications that no longer
+    /// correspond to a SwiftData alarm. Guards against a crash/interruption between
+    /// `AlarmManager.cancel` and `context.save()` in `delete()` leaving orphaned alarms
+    /// that keep firing on their weekly recurrence forever.
+    private func reconcileOrphanedAlarms() {
+        guard let modelContext else { return }
+
+        let systemAlarms: [AlarmKit.Alarm]
+        do {
+            systemAlarms = try AlarmManager.shared.alarms
+        } catch {
+            print("[AlarmKitService] Reconcile: failed to fetch system alarms: \(error)")
+            return
+        }
+
+        let storedIDs: Set<UUID>
+        do {
+            let alarms = try modelContext.fetch(FetchDescriptor<Alarm>())
+            storedIDs = Set(alarms.compactMap { $0.alarmKitID })
+        } catch {
+            print("[AlarmKitService] Reconcile: failed to fetch stored alarms: \(error)")
+            return
+        }
+
+        let orphaned = systemAlarms.filter { !storedIDs.contains($0.id) }
+        guard !orphaned.isEmpty else { return }
+
+        for alarm in orphaned {
+            try? AlarmManager.shared.cancel(id: alarm.id)
+        }
+
+        // Clear any lingering auto-stop notifications for the orphaned IDs.
+        // We don't know each alarm's original repeatDays, so remove every possible key:
+        // the one-time variant, all seven weekday variants, and the legacy bare-UUID form.
+        let orphanIDStrings = orphaned.map { $0.id.uuidString }
+        var notificationIDs: [String] = []
+        for idString in orphanIDStrings {
+            notificationIDs.append("\(Self.autoStopNotificationPrefix)\(idString)-once")
+            for day in 0...6 {
+                notificationIDs.append("\(Self.autoStopNotificationPrefix)\(idString)-\(day)")
+            }
+            notificationIDs.append(Self.autoStopNotificationPrefix + idString)
+        }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: notificationIDs)
+
+        print("[AlarmKitService] Reconcile: cancelled \(orphaned.count) orphaned alarm(s)")
     }
 
     /// Sync all enabled SwiftData alarms to AlarmKit.

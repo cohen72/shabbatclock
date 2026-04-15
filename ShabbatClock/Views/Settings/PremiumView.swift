@@ -20,45 +20,39 @@ struct PremiumView: View {
     ]
 
     var body: some View {
-        ZStack {
-            // Background
-            LinearGradient.nightSky
-                .ignoresSafeArea()
+        NavigationStack {
+            ZStack {
+                // Background
+                LinearGradient.nightSky
+                    .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // Close button
-                HStack {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.textSecondary)
-                            .frame(width: 32, height: 32)
-                            .background(Circle().fill(Color.surfaceSubtle))
+                VStack(spacing: 0) {
+                    // Top content
+                    VStack(spacing: 14) {
+                        heroSection
+                        featuresSection
                     }
-                    Spacer()
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 12)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 12)
 
-                // Top content
-                VStack(spacing: 14) {
-                    heroSection
-                    featuresSection
-                }
-                .padding(.horizontal, 24)
+                    Spacer(minLength: 12)
 
-                Spacer(minLength: 12)
-
-                // Bottom-aligned: plans + subscribe + restore + fine print
-                VStack(spacing: 10) {
-                    planSelectionSection
-                    subscribeButton
-                    finePrintSection
+                    // Bottom-aligned: plans + subscribe + restore + fine print
+                    VStack(spacing: 10) {
+                        planSelectionSection
+                        subscribeButton
+                        finePrintSection
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 12)
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .close) {
+                        dismiss()
+                    }
+                }
             }
         }
         .alert("Error", isPresented: $showingError) {

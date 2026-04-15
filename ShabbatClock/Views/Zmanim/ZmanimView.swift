@@ -336,7 +336,7 @@ struct ZmanRowView: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 12) {
             // Gold accent bar for "next" zman
             if isNext {
                 RoundedRectangle(cornerRadius: 1.5)
@@ -345,19 +345,12 @@ struct ZmanRowView: View {
             }
 
             // Left: Names + alarm subtitle
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
                     Text(zman.hebrewName)
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.goldAccent)
                         .lineLimit(1)
-
-                    Text(zman.englishName)
-                        .font(.system(size: 13))
-                        .foregroundStyle(.textSecondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .fixedSize(horizontal: false, vertical: true)
 
                     if isNext {
                         Text("Next")
@@ -371,6 +364,12 @@ struct ZmanRowView: View {
                             )
                     }
                 }
+
+                Text(zman.englishName)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
                 if let subtitle = alarmSubtitle {
                     Text(subtitle)

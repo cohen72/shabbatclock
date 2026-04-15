@@ -7,43 +7,49 @@ struct AlarmRowView: View {
     var onToggle: ((Bool) -> Void)?
 
     var body: some View {
+        if alarm.isDeleted {
+            EmptyView()
+        } else {
+            rowContent
+        }
+    }
+
+    private var rowContent: some View {
         HStack(spacing: 16) {
             // Time and label
             VStack(alignment: .leading, spacing: 6) {
                 // Time
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(alarm.timeString)
-                        .font(.system(size: 38, weight: .bold, design: .default))
+                        .font(.system(size: 56, weight: .thin, design: .default))
+                        .monospacedDigit()
                         .foregroundStyle(alarm.isEnabled ? .textPrimary : .textSecondary.opacity(0.6))
 
                     Text(alarm.periodString)
-                        .font(.system(size: 16, weight: .medium, design: .default))
-                        .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.7 : 0.4))
+                        .font(.system(size: 22, weight: .thin, design: .default))
+                        .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.8 : 0.4))
                 }
 
-                // Label + fallback indicator
+                // Label + duration
                 HStack(spacing: 6) {
                     Text(alarm.label)
                         .font(.system(size: 14, weight: .regular, design: .default))
                         .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.85 : 0.4))
 
-                    if alarmService.isFallbackMode && alarm.isEnabled {
-                        HStack(spacing: 3) {
-                            Image(systemName: "bell.badge")
-                                .font(.system(size: 10))
-                            Text("30s")
-                                .font(.system(size: 10, weight: .medium))
-                        }
-                        .foregroundStyle(.goldAccent.opacity(0.7))
+                    HStack(spacing: 3) {
+                        Image(systemName: "bell.fill")
+                            .font(.system(size: 9))
+                        Text(durationLabel)
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .monospacedDigit()
                     }
+                    .foregroundStyle(.goldAccent.opacity(alarm.isEnabled ? 0.75 : 0.35))
                 }
 
-                // Repeat days
-                if !alarm.repeatDays.isEmpty {
-                    Text(alarm.repeatDaysString)
-                        .font(.system(size: 12, weight: .medium, design: .default))
-                        .foregroundStyle(.goldAccent.opacity(alarm.isEnabled ? 0.8 : 0.4))
-                }
+                // Schedule: repeat days OR next fire date
+                Text(scheduleLabel)
+                    .font(.system(size: 12, weight: .medium, design: .default))
+                    .foregroundStyle(.goldAccent.opacity(alarm.isEnabled ? 0.8 : 0.4))
             }
 
             Spacer(minLength: 12)
@@ -70,6 +76,60 @@ struct AlarmRowView: View {
                 )
         )
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: alarm.isEnabled)
+    }
+
+    private var durationLabel: String {
+        let seconds = alarm.alarmDurationSeconds
+        if seconds < 60 { return "\(seconds)s" }
+        let minutes = seconds / 60
+        return "\(minutes)m"
+    }
+
+    private var scheduleLabel: String {
+        // Repeat days take precedence (e.g., "Tue, Thu, Sat")
+        if !alarm.repeatDays.isEmpty {
+            return alarm.repeatDaysString
+        }
+        // One-time alarm — show relative date
+        let locale = AppLanguage.current.effectiveLocale
+        let calendar = Calendar.current
+        let now = Date()
+        guard let fireDate = alarm.nextFireDate(from: now) else {
+            // Disabled alarm — still show a schedule hint
+            return oneTimeFallbackLabel(locale: locale, calendar: calendar, now: now)
+        }
+        return relativeDateLabel(for: fireDate, now: now, calendar: calendar, locale: locale)
+    }
+
+    private func oneTimeFallbackLabel(locale: Locale, calendar: Calendar, now: Date) -> String {
+        // Alarm is disabled — compute what "would" be the next fire based on time only.
+        var components = calendar.dateComponents([.year, .month, .day], from: now)
+        components.hour = alarm.hour
+        components.minute = alarm.minute
+        guard let candidate = calendar.date(from: components) else {
+            return String(localized: "Once")
+        }
+        let target = candidate <= now ? calendar.date(byAdding: .day, value: 1, to: candidate) ?? candidate : candidate
+        return relativeDateLabel(for: target, now: now, calendar: calendar, locale: locale)
+    }
+
+    private func relativeDateLabel(for date: Date, now: Date, calendar: Calendar, locale: Locale) -> String {
+        if calendar.isDateInToday(date) {
+            return String(localized: "Today")
+        }
+        if calendar.isDateInTomorrow(date) {
+            return String(localized: "Tomorrow")
+        }
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        // Within the next 6 days → weekday name (e.g. "Thursday")
+        if let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: now), to: calendar.startOfDay(for: date)).day, days < 7 {
+            formatter.setLocalizedDateFormatFromTemplate("EEEE")
+        } else {
+            // Further out → short date (e.g. "Thu, Apr 16")
+            formatter.setLocalizedDateFormatFromTemplate("EEE, MMM d")
+        }
+        return formatter.string(from: date)
     }
 }
 

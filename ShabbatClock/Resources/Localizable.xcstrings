@@ -172,9 +172,6 @@
     "30 sec" : {
 
     },
-    "30s" : {
-
-    },
     "42 beautiful sounds including Shabbat melodies" : {
       "localizations" : {
         "he" : {
@@ -300,17 +297,6 @@
         }
       }
     },
-    "Alarm stopped automatically" : {
-      "comment" : "Auto-stop notification body — shown when alarm ends after set duration",
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ההתראה הופסקה אוטומטית"
-          }
-        }
-      }
-    },
     "Alarm Enabled" : {
       "localizations" : {
         "he" : {
@@ -361,12 +347,33 @@
         }
       }
     },
-    "Alarm stops automatically after this duration" : {
+    "Alarm stopped automatically" : {
+      "comment" : "Auto-stop notification body — shown when alarm ends after set duration",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ההתראה נעצרת אוטומטית לאחר פרק זמן זה"
+            "value" : "ההתראה הופסקה אוטומטית"
+          }
+        }
+      }
+    },
+    "Stops alarm automatically" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עוצר את ההתראה אוטומטית"
+          }
+        }
+      }
+    },
+    "Alarm Vibration" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רטט ההתראה"
           }
         }
       }
@@ -686,6 +693,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "המשך"
+          }
+        }
+      }
+    },
+    "Controlled by iOS · Settings › Sounds & Haptics" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נשלט על ידי iOS · הגדרות › צלילים ומגע"
           }
         }
       }
@@ -2578,6 +2595,28 @@
         }
       }
     },
+    "Today" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היום"
+          }
+        }
+      }
+    },
+    "Once" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעם אחת"
+          }
+        }
+      }
+    },
     "Tomorrow" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2756,32 +2795,12 @@
         }
       }
     },
-    "Alarm Vibration" : {
+    "Vibration is controlled in iOS Settings" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "רטט ההתראה"
-          }
-        }
-      }
-    },
-    "Controlled by iOS · Settings › Sounds & Haptics" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נשלט על ידי iOS · הגדרות › צלילים ומגע"
-          }
-        }
-      }
-    },
-    "Vibration is controlled by iOS. Adjust in Settings › Sounds & Haptics." : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הרטט נשלט על ידי iOS. להתאמה: הגדרות › צלילים ומגע."
+            "value" : "הרטט נשלט דרך הגדרות iOS"
           }
         }
       }

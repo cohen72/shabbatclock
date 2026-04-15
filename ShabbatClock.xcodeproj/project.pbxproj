@@ -38,6 +38,7 @@
 		DD112236 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112235 /* InfoPlist.xcstrings */; };
 		DD8859E3 /* LocationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBA /* LocationRow.swift */; };
 		DD8859E4 /* PermissionPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBB /* PermissionPromptView.swift */; };
+		DD8859E5 /* SwipeToDelete.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBC /* SwipeToDelete.swift */; };
 		DDAB2E76 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4824B /* CitySearchView.swift */; };
 		EDE72F3C2F8BFB3100E40DFF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDE72F3B2F8BFB3100E40DFF /* WidgetKit.framework */; };
 		EDE72F3E2F8BFB3100E40DFF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDE72F3D2F8BFB3100E40DFF /* SwiftUI.framework */; };
@@ -102,6 +103,7 @@
 		BBB00201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
 		CC27FEBB /* PermissionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPromptView.swift; sourceTree = "<group>"; };
+		CC27FEBC /* SwipeToDelete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeToDelete.swift; sourceTree = "<group>"; };
 		CCC00001 /* ShabbatClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShabbatClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCE4824B /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
 		DD112233 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -230,7 +232,6 @@
 				EEE00011 /* MainView */,
 				EEE00012 /* AlarmList */,
 				EEE00013 /* AlarmEdit */,
-				EEE00014 /* AlarmFiring */,
 				EEE00015 /* Zmanim */,
 				EEE00016 /* Settings */,
 				EEE00017 /* Onboarding */,
@@ -255,6 +256,7 @@
 				CCE4824B /* CitySearchView.swift */,
 				CC27FEBA /* LocationRow.swift */,
 				CC27FEBB /* PermissionPromptView.swift */,
+				CC27FEBC /* SwipeToDelete.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -285,13 +287,6 @@
 				BBB00072 /* SoundPickerView.swift */,
 			);
 			path = AlarmEdit;
-			sourceTree = "<group>";
-		};
-		EEE00014 /* AlarmFiring */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = AlarmFiring;
 			sourceTree = "<group>";
 		};
 		EEE00015 /* Zmanim */ = {
@@ -467,6 +462,7 @@
 				DDAB2E76 /* CitySearchView.swift in Sources */,
 				DD8859E3 /* LocationRow.swift in Sources */,
 				DD8859E4 /* PermissionPromptView.swift in Sources */,
+				DD8859E5 /* SwipeToDelete.swift in Sources */,
 				AAA00050 /* AnalogClockView.swift in Sources */,
 				AAA00051 /* MainClockView.swift in Sources */,
 				AAA00060 /* AlarmListView.swift in Sources */,
