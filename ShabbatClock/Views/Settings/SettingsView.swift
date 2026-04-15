@@ -33,6 +33,9 @@ struct SettingsView: View {
                             alarmPermissionSection
                         }
 
+                        // Vibration hint (alarm vibration is iOS-controlled)
+                        vibrationSection
+
                         // Location section
                         locationSection
 
@@ -126,6 +129,36 @@ struct SettingsView: View {
                 .padding(16)
                 .settingsCard()
             }
+        }
+    }
+
+    // MARK: - Vibration Section
+
+    private var vibrationSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Vibration", icon: "iphone.radiowaves.left.and.right")
+
+            HStack(spacing: 12) {
+                Image(systemName: "waveform")
+                    .font(.system(size: 20))
+                    .foregroundStyle(.accentPurple)
+                    .frame(width: 32)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Alarm Vibration")
+                        .font(AppFont.body())
+                        .foregroundStyle(.textPrimary)
+
+                    Text("Controlled by iOS · Settings › Sounds & Haptics")
+                        .font(AppFont.caption(12))
+                        .foregroundStyle(.textSecondary)
+                        .lineLimit(2)
+                }
+
+                Spacer()
+            }
+            .padding(16)
+            .settingsCard()
         }
     }
 

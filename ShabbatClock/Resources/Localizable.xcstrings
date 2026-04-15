@@ -2464,6 +2464,7 @@
       }
     },
     "Tap \"Allow\" on the next prompt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2545,6 +2546,7 @@
       }
     },
     "This lets your alarm ring at the scheduled time." : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2740,6 +2742,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "גרסה"
+          }
+        }
+      }
+    },
+    "Vibration" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רטט"
+          }
+        }
+      }
+    },
+    "Alarm Vibration" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רטט ההתראה"
+          }
+        }
+      }
+    },
+    "Controlled by iOS · Settings › Sounds & Haptics" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נשלט על ידי iOS · הגדרות › צלילים ומגע"
+          }
+        }
+      }
+    },
+    "Vibration is controlled by iOS. Adjust in Settings › Sounds & Haptics." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרטט נשלט על ידי iOS. להתאמה: הגדרות › צלילים ומגע."
           }
         }
       }

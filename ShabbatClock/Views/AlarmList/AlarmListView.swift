@@ -145,32 +145,16 @@ struct AlarmListView: View {
     }
 
     private func deleteAlarm(_ alarm: Alarm) {
-        Task {
-            alarmService.cancelAlarm(for: alarm)
-        }
-        modelContext.delete(alarm)
-        alarmService.updateNextAlarmDate()
+        alarmService.delete(alarm)
     }
 
     private func handleToggle(alarm: Alarm, isEnabled: Bool) {
         Task {
             if isEnabled {
-                if alarmService.isAuthorized {
-                    if let newID = await alarmService.scheduleAlarm(for: alarm) {
-                        alarm.alarmKitID = newID
-                    }
-                } else {
-                    alarmService.scheduleFallbackAlarm(for: alarm)
-                }
+                await alarmService.enable(alarm)
             } else {
-                if alarmService.isAuthorized {
-                    alarmService.cancelAlarm(for: alarm)
-                    alarm.alarmKitID = nil
-                } else {
-                    alarmService.cancelFallbackAlarm(for: alarm)
-                }
+                alarmService.disable(alarm)
             }
-            alarmService.updateNextAlarmDate()
         }
     }
 }

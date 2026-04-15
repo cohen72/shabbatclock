@@ -41,7 +41,7 @@ struct AlarmSound: Identifiable, Hashable {
     }
 
     var url: URL? {
-        Bundle.main.url(forResource: fileName, withExtension: fileExtension, subdirectory: "Sounds/\(category.rawValue)")
+        Bundle.main.url(forResource: fileName, withExtension: fileExtension, subdirectory: "Sounds")
     }
 }
 
