@@ -168,7 +168,7 @@ final class AlarmKitService: NSObject {
         // Clear any prior state — prior AlarmKit alarm, prior auto-stop, prior fallback.
         if let priorID = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: priorID)
-            removeAutoStopNotification(for: priorID)
+            removeAutoStopNotifications(for: priorID, repeatDays: alarm.repeatDays)
         }
         cancelFallbackAlarm(for: alarm)
 
@@ -192,7 +192,7 @@ final class AlarmKitService: NSObject {
     func disable(_ alarm: Alarm) {
         if let id = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: id)
-            removeAutoStopNotification(for: id)
+            removeAutoStopNotifications(for: id, repeatDays: alarm.repeatDays)
             alarm.alarmKitID = nil
         }
         cancelFallbackAlarm(for: alarm)
@@ -488,6 +488,10 @@ final class AlarmKitService: NSObject {
     ///   - a fresh UNNotification at now+duration (primary; survives suspension if the system
     ///     is willing to deliver it while our process is briefly alive during the fire)
     ///   - an in-process Task.sleep (backup; only works while app is alive)
+        /// Layer 2 only: in-process Task.sleep backup when app is alive.
+    /// Layer 1 (pre-scheduled timeSensitive notifications) handles the killed-app case.
+    /// Note: Any alarm property change goes through enable(_:) which fully tears down
+    /// and rebuilds all notifications — so pre-scheduled notifications are always in sync.
     private func armAutoStopOnFire(for alarmKitID: UUID) {
         guard let modelContext else {
             performDelayedStop(id: alarmKitID, after: 30)
@@ -501,34 +505,9 @@ final class AlarmKitService: NSObject {
             return
         }
 
-        let duration = alarm.alarmDurationSeconds
-
-        // Layer 1 (fresh): schedule a one-shot UN notif relative to now. This supersedes
-        // any pre-scheduled auto-stop notif (same identifier) and covers repeating alarms
-        // whose original notif fired last week.
-        let notificationID = Self.autoStopNotificationPrefix + alarmKitID.uuidString
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [notificationID])
-
-        let content = UNMutableNotificationContent()
-        content.categoryIdentifier = Self.autoStopCategoryID
-        content.userInfo = [
-            "alarmKitID": alarmKitID.uuidString,
-            "action": "autoStop"
-        ]
-        content.sound = nil
-        content.interruptionLevel = .passive
-
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(duration), repeats: false)
-        let request = UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                print("[AlarmKitService] Failed to arm on-fire auto-stop notif: \(error)")
-            }
-        }
-
-        // Layer 2: in-process backup
-        performDelayedStop(id: alarmKitID, after: duration)
-        print("[AlarmKitService] Auto-stop armed for \(alarm.label) in \(duration)s")
+        // Layer 2: in-process Task.sleep backup (pre-scheduled timeSensitive notifications are Layer 1)
+        performDelayedStop(id: alarmKitID, after: alarm.alarmDurationSeconds)
+        print("[AlarmKitService] Layer 2 auto-stop armed for \(alarm.label) in \(alarm.alarmDurationSeconds)s")
     }
 
     /// Called when an alarm transitions from `.alerting` back to idle (user tapped Stop,
@@ -541,8 +520,8 @@ final class AlarmKitService: NSObject {
         guard let alarms = try? modelContext.fetch(descriptor),
               let alarm = alarms.first(where: { $0.alarmKitID == alarmKitID }) else { return }
 
-        // Clear the "immediate" auto-stop notif if still pending (alarm already ended).
-        removeAutoStopNotification(for: alarmKitID)
+        // Clear any pending auto-stop notifications (all day variants).
+        removeAutoStopNotifications(for: alarmKitID, repeatDays: alarm.repeatDays)
 
         if alarm.repeatDays.isEmpty {
             // One-time alarm: AlarmKit itself removes the schedule. Mirror in our model.
