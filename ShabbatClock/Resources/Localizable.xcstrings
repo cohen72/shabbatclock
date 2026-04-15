@@ -55,6 +55,9 @@
         }
       }
     },
+    "•" : {
+
+    },
     "© %@ Shabbat Clock" : {
       "localizations" : {
         "he" : {
@@ -354,16 +357,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ההתראה הופסקה אוטומטית"
-          }
-        }
-      }
-    },
-    "Stops alarm automatically" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "עוצר את ההתראה אוטומטית"
           }
         }
       }
@@ -1091,6 +1084,7 @@
       }
     },
     "Friday Evening" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1382,6 +1376,17 @@
         }
       }
     },
+    "LEFT" : {
+      "comment" : "Countdown ring label — time remaining until event",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נותרו"
+          }
+        }
+      }
+    },
     "Lifetime access • No subscription" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1604,6 +1609,17 @@
         }
       }
     },
+    "NEXT EVENT" : {
+      "comment" : "Label for the featured next Shabbat event card on the main screen",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "האירוע הבא"
+          }
+        }
+      }
+    },
     "Next Friday Evening" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1763,6 +1779,17 @@
     },
     "Onboarding" : {
 
+    },
+    "Once" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעם אחת"
+          }
+        }
+      }
     },
     "One quick permission and your Shabbat alarm works like the built-in Clock app — loud, on time, every time." : {
       "localizations" : {
@@ -2103,6 +2130,7 @@
       }
     },
     "Saturday Night" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2272,6 +2300,7 @@
       }
     },
     "Shabbat Shalom!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2348,6 +2377,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "עצירת התראה"
+          }
+        }
+      }
+    },
+    "Stops alarm automatically" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עוצר את ההתראה אוטומטית"
           }
         }
       }
@@ -2602,17 +2641,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "היום"
-          }
-        }
-      }
-    },
-    "Once" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "פעם אחת"
           }
         }
       }

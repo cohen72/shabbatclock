@@ -7,12 +7,11 @@ struct ZmanimView: View {
     @StateObject private var locationManager = LocationManager.shared
     @Query(sort: \Alarm.hour) private var allAlarms: [Alarm]
 
-    @State private var showingCreateSheet = false
-    @State private var showingManageSheet = false
     @State private var showingCitySearch = false
     @State private var showingLocationPrompt = false
     @State private var showingPremiumAlert = false
-    @State private var selectedZman: ZmanimService.Zman?
+    @State private var createSheetZman: ZmanimService.Zman?
+    @State private var manageSheetZman: ZmanimService.Zman?
 
     // Premium
     private let freeAlarmLimit = 3
@@ -156,14 +155,12 @@ struct ZmanimView: View {
         .onChange(of: locationManager.location) { _, _ in
             zmanimService.calculateTodayZmanim()
         }
-        .sheet(isPresented: $showingCreateSheet) {
-            if let zman = selectedZman {
-                CreateAlarmFromZmanSheet(zman: zman)
-                    .applyLanguageOverride(AppLanguage.current)
-            }
+        .sheet(item: $createSheetZman) { zman in
+            CreateAlarmFromZmanSheet(zman: zman)
+                .applyLanguageOverride(AppLanguage.current)
         }
-        .sheet(isPresented: $showingManageSheet) {
-            if let zman = selectedZman, let alarm = alarmsByZmanType[zman.type.rawValue] {
+        .sheet(item: $manageSheetZman) { zman in
+            if let alarm = alarmsByZmanType[zman.type.rawValue] {
                 ZmanAlarmSheet(zman: zman, alarm: alarm, onDelete: {
                     deleteAlarm(for: zman)
                 })
@@ -192,15 +189,12 @@ struct ZmanimView: View {
     // MARK: - Bell Tap Handler
 
     private func handleBellTap(for zman: ZmanimService.Zman, existingAlarm: Alarm?) {
-        selectedZman = zman
         if existingAlarm != nil {
-            showingManageSheet = true
+            manageSheetZman = zman
+        } else if canAddAlarm {
+            createSheetZman = zman
         } else {
-            if canAddAlarm {
-                showingCreateSheet = true
-            } else {
-                showingPremiumAlert = true
-            }
+            showingPremiumAlert = true
         }
     }
 
@@ -371,11 +365,10 @@ struct ZmanRowView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
-                if let subtitle = alarmSubtitle {
-                    Text(subtitle)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.textSecondary.opacity(0.7))
-                }
+                Text(alarmSubtitle ?? " ")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.textSecondary.opacity(0.7))
+                    .opacity(alarmSubtitle == nil ? 0 : 1)
             }
 
             Spacer()
