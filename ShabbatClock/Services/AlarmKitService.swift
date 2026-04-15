@@ -138,21 +138,84 @@ final class AlarmKitService: NSObject {
         Task {
             for await alarms in AlarmManager.shared.alarmUpdates {
                 let previouslyAlerting = Set(activeAlarms.filter { $0.state == .alerting }.map(\.id))
+                let currentlyAlerting = Set(alarms.filter { $0.state == .alerting }.map(\.id))
                 activeAlarms = alarms
                 updateNextAlarmDate()
 
-                // Foreground auto-stop: if app is alive when alarm fires, stop it after duration
-                for alarm in alarms where alarm.state == .alerting && !previouslyAlerting.contains(alarm.id) {
-                    scheduleInProcessAutoStop(for: alarm.id)
+                // Newly firing: arm auto-stop (both immediate UN + Task.sleep backup)
+                for id in currentlyAlerting.subtracting(previouslyAlerting) {
+                    armAutoStopOnFire(for: id)
+                }
+
+                // Finished alerting (user tapped Stop, or we stopped it): handle post-fire lifecycle
+                for id in previouslyAlerting.subtracting(currentlyAlerting) {
+                    handleAlarmFinishedAlerting(alarmKitID: id)
                 }
             }
         }
     }
 
-    // MARK: - Schedule / Cancel
+    // MARK: - Centralized Lifecycle
+    //
+    // All alarm mutations from views flow through enable/disable/delete.
+    // Each method is idempotent and cleans up every side-effect tied to the alarm:
+    // AlarmKit scheduling, auto-stop notifications, and fallback notifications.
+
+    /// Turn an alarm on (or re-arm an already-on alarm after edits).
+    /// Idempotent: cancels any prior AlarmKit alarm + notifications before scheduling fresh.
+    /// Assigns the new AlarmKit ID to the model and saves.
+    func enable(_ alarm: Alarm) async {
+        // Clear any prior state — prior AlarmKit alarm, prior auto-stop, prior fallback.
+        if let priorID = alarm.alarmKitID {
+            try? AlarmManager.shared.cancel(id: priorID)
+            removeAutoStopNotification(for: priorID)
+        }
+        cancelFallbackAlarm(for: alarm)
+
+        alarm.isEnabled = true
+
+        if isAuthorized {
+            if let newID = await scheduleAlarm(for: alarm) {
+                alarm.alarmKitID = newID
+            }
+        } else {
+            alarm.alarmKitID = nil
+            scheduleFallbackAlarm(for: alarm)
+        }
+
+        try? alarm.modelContext?.save()
+        updateNextAlarmDate()
+    }
+
+    /// Turn an alarm off without deleting the model.
+    /// Idempotent: safe to call even if already disabled.
+    func disable(_ alarm: Alarm) {
+        if let id = alarm.alarmKitID {
+            try? AlarmManager.shared.cancel(id: id)
+            removeAutoStopNotification(for: id)
+            alarm.alarmKitID = nil
+        }
+        cancelFallbackAlarm(for: alarm)
+
+        alarm.isEnabled = false
+        try? alarm.modelContext?.save()
+        updateNextAlarmDate()
+    }
+
+    /// Fully remove the alarm from the store and cancel all related notifications.
+    func delete(_ alarm: Alarm) {
+        let context = alarm.modelContext
+        disable(alarm)
+        context?.delete(alarm)
+        try? context?.save()
+        updateNextAlarmDate()
+    }
+
+    // MARK: - Schedule / Cancel (low-level)
 
     /// Schedule an AlarmKit alarm for the given SwiftData Alarm model.
     /// Returns the AlarmKit alarm ID so it can be stored on the model.
+    /// Prefer `enable(_:)` from views — this is the low-level primitive.
     @discardableResult
     func scheduleAlarm(for alarm: Alarm) async -> UUID? {
         guard isAuthorized else {
@@ -207,7 +270,7 @@ final class AlarmKitService: NSObject {
         // Build sound — use the custom alarm sound file from the bundle
         let alertSound: ActivityKit.AlertConfiguration.AlertSound
         if let sound {
-            alertSound = .named("\(sound.fileName).\(sound.fileExtension)")
+            alertSound = .named("Sounds/\(sound.fileName).\(sound.fileExtension)")
         } else {
             alertSound = .default
         }
@@ -380,21 +443,77 @@ final class AlarmKitService: NSObject {
         )
     }
 
-    /// Layer 2: In-process auto-stop for when the app is alive.
-    private func scheduleInProcessAutoStop(for alarmKitID: UUID) {
-        guard let modelContext else { return }
+    /// Called when an alarm enters the `.alerting` state.
+    /// Arms both:
+    ///   - a fresh UNNotification at now+duration (primary; survives suspension if the system
+    ///     is willing to deliver it while our process is briefly alive during the fire)
+    ///   - an in-process Task.sleep (backup; only works while app is alive)
+    private func armAutoStopOnFire(for alarmKitID: UUID) {
+        guard let modelContext else {
+            performDelayedStop(id: alarmKitID, after: 30)
+            return
+        }
 
         let descriptor = FetchDescriptor<Alarm>()
         guard let alarms = try? modelContext.fetch(descriptor),
               let alarm = alarms.first(where: { $0.alarmKitID == alarmKitID }) else {
-            // Fallback: 30 seconds
             performDelayedStop(id: alarmKitID, after: 30)
             return
         }
 
         let duration = alarm.alarmDurationSeconds
+
+        // Layer 1 (fresh): schedule a one-shot UN notif relative to now. This supersedes
+        // any pre-scheduled auto-stop notif (same identifier) and covers repeating alarms
+        // whose original notif fired last week.
+        let notificationID = Self.autoStopNotificationPrefix + alarmKitID.uuidString
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [notificationID])
+
+        let content = UNMutableNotificationContent()
+        content.categoryIdentifier = Self.autoStopCategoryID
+        content.userInfo = [
+            "alarmKitID": alarmKitID.uuidString,
+            "action": "autoStop"
+        ]
+        content.sound = nil
+        content.interruptionLevel = .passive
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(duration), repeats: false)
+        let request = UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                print("[AlarmKitService] Failed to arm on-fire auto-stop notif: \(error)")
+            }
+        }
+
+        // Layer 2: in-process backup
         performDelayedStop(id: alarmKitID, after: duration)
-        print("[AlarmKitService] In-process auto-stop scheduled for \(alarm.label) in \(duration)s")
+        print("[AlarmKitService] Auto-stop armed for \(alarm.label) in \(duration)s")
+    }
+
+    /// Called when an alarm transitions from `.alerting` back to idle (user tapped Stop,
+    /// we auto-stopped it, or snooze countdown started). Handles:
+    ///   - one-time alarms: flip isEnabled = false (mirrors stock Clock behavior)
+    ///   - repeating alarms: re-arm the pre-scheduled auto-stop for the next occurrence
+    private func handleAlarmFinishedAlerting(alarmKitID: UUID) {
+        guard let modelContext else { return }
+        let descriptor = FetchDescriptor<Alarm>()
+        guard let alarms = try? modelContext.fetch(descriptor),
+              let alarm = alarms.first(where: { $0.alarmKitID == alarmKitID }) else { return }
+
+        // Clear the "immediate" auto-stop notif if still pending (alarm already ended).
+        removeAutoStopNotification(for: alarmKitID)
+
+        if alarm.repeatDays.isEmpty {
+            // One-time alarm: AlarmKit itself removes the schedule. Mirror in our model.
+            alarm.isEnabled = false
+            alarm.alarmKitID = nil
+            try? modelContext.save()
+            updateNextAlarmDate()
+        } else {
+            // Repeating: re-arm pre-scheduled auto-stop for the next fire date.
+            scheduleAutoStopNotification(alarmKitID: alarmKitID, alarm: alarm)
+        }
     }
 
     private func performDelayedStop(id: UUID, after seconds: Int) {
@@ -443,7 +562,7 @@ final class AlarmKitService: NSObject {
         let sound = AlarmSound.sound(named: alarm.soundName)
         if let sound {
             content.sound = UNNotificationSound(
-                named: UNNotificationSoundName("\(sound.fileName).\(sound.fileExtension)")
+                named: UNNotificationSoundName("Sounds/\(sound.fileName).\(sound.fileExtension)")
             )
         } else {
             content.sound = .default

@@ -16,7 +16,7 @@ struct AlarmEditView: View {
     @State private var draftLabel: String = ""
     @State private var draftSoundName: String = ""
     @State private var draftRepeatDays: [Int] = []
-    @State private var draftSnoozeEnabled: Bool = true
+    @State private var draftSnoozeEnabled: Bool = false
     @State private var draftSnoozeDuration: Int = 5 * 60
     @State private var draftAlarmDuration: Int = 30
 
@@ -77,8 +77,10 @@ struct AlarmEditView: View {
                         // Alarm duration (auto-stop)
                         alarmDurationSection
 
-                        // Snooze
-                        snoozeSection
+                        // Vibration hint — system-controlled, not per-alarm
+                        vibrationHintRow
+
+                        // Snooze intentionally hidden — Shabbat clock has no snooze
 
                         // Delete button (for existing alarms)
                         if !isNew {
@@ -113,8 +115,14 @@ struct AlarmEditView: View {
             }
         }
         .onAppear {
-            draftHour = alarm.hour
-            draftMinute = alarm.minute
+            if isNew {
+                let next = Date().addingTimeInterval(60 * 60)
+                draftHour = Calendar.current.component(.hour, from: next)
+                draftMinute = 0
+            } else {
+                draftHour = alarm.hour
+                draftMinute = alarm.minute
+            }
             draftLabel = alarm.label
             draftSoundName = alarm.soundName
             draftRepeatDays = alarm.repeatDays
@@ -366,6 +374,23 @@ struct AlarmEditView: View {
         }
     }
 
+    // MARK: - Vibration Hint
+
+    private var vibrationHintRow: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "iphone.radiowaves.left.and.right")
+                .font(.system(size: 14))
+                .foregroundStyle(.textSecondary)
+            Text("Vibration is controlled by iOS. Adjust in Settings › Sounds & Haptics.")
+                .font(.system(size: 12))
+                .foregroundStyle(.textSecondary)
+                .multilineTextAlignment(.leading)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+    }
+
     // MARK: - Snooze Section
 
     private var snoozeSection: some View {
@@ -481,23 +506,14 @@ struct AlarmEditView: View {
         }
 
         Task {
-            if alarmService.isAuthorized {
-                if let newID = await alarmService.scheduleAlarm(for: alarm) {
-                    alarm.alarmKitID = newID
-                }
-            } else {
-                alarmService.scheduleFallbackAlarm(for: alarm)
-            }
-            alarmService.updateNextAlarmDate()
+            await alarmService.enable(alarm)
         }
 
         dismiss()
     }
 
     private func deleteAlarm() {
-        alarmService.cancelAlarm(for: alarm)
-        modelContext.delete(alarm)
-        alarmService.updateNextAlarmDate()
+        alarmService.delete(alarm)
         dismiss()
     }
 

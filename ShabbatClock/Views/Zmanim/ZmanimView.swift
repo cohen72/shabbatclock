@@ -206,11 +206,7 @@ struct ZmanimView: View {
 
     private func deleteAlarm(for zman: ZmanimService.Zman) {
         guard let alarm = alarmsByZmanType[zman.type.rawValue] else { return }
-        let context = alarm.modelContext
-        AlarmKitService.shared.cancelAlarm(for: alarm)
-        context?.delete(alarm)
-        try? context?.save()
-        AlarmKitService.shared.updateNextAlarmDate()
+        AlarmKitService.shared.delete(alarm)
     }
 
     // MARK: - Subviews
@@ -539,14 +535,10 @@ struct ZmanAlarmSheet: View {
                         .onChange(of: alarm.isEnabled) { _, newValue in
                             Task {
                                 if newValue {
-                                    if let newID = await alarmService.scheduleAlarm(for: alarm) {
-                                        alarm.alarmKitID = newID
-                                    }
+                                    await alarmService.enable(alarm)
                                 } else {
-                                    alarmService.cancelAlarm(for: alarm)
-                                    alarm.alarmKitID = nil
+                                    alarmService.disable(alarm)
                                 }
-                                alarmService.updateNextAlarmDate()
                             }
                         }
                 }
@@ -625,13 +617,11 @@ struct ZmanAlarmSheet: View {
         alarm.zmanMinutesBefore = newMinutes
 
         Task {
-            alarmService.cancelAlarm(for: alarm)
             if alarm.isEnabled {
-                if let newID = await alarmService.scheduleAlarm(for: alarm) {
-                    alarm.alarmKitID = newID
-                }
+                await alarmService.enable(alarm)
+            } else {
+                alarmService.disable(alarm)
             }
-            alarmService.updateNextAlarmDate()
         }
     }
 }
@@ -765,10 +755,7 @@ struct CreateAlarmFromZmanSheet: View {
 
         modelContext.insert(alarm)
         Task {
-            if let newID = await alarmService.scheduleAlarm(for: alarm) {
-                alarm.alarmKitID = newID
-            }
-            alarmService.updateNextAlarmDate()
+            await alarmService.enable(alarm)
         }
 
         dismiss()
