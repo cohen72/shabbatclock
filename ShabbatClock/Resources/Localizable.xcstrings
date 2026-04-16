@@ -1620,6 +1620,28 @@
         }
       }
     },
+    "UPCOMING" : {
+      "comment" : "Small label next to parasha name in hero card — indicates it's the upcoming Shabbat's parasha",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקרוב"
+          }
+        }
+      }
+    },
+    "in %@" : {
+      "comment" : "Long-form countdown: 'in 2d 4h', 'in 3h 12m', 'in 45m'. %@ is the duration string.",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בעוד %@"
+          }
+        }
+      }
+    },
     "Next Friday Evening" : {
       "extractionState" : "manual",
       "localizations" : {

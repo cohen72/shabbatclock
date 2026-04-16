@@ -183,9 +183,16 @@ struct MainClockView: View {
 
                     Spacer()
 
-                    Text(countdownText)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(.textSecondary)
+                    if zmanimService.daysUntilShabbat == 0 {
+                        Text("Shabbat Shalom!")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.goldAccent)
+                    } else {
+                        Text("UPCOMING")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.textSecondary.opacity(0.7))
+                            .tracking(1.5)
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
@@ -216,11 +223,20 @@ struct MainClockView: View {
                         .font(.system(size: 36, weight: .bold))
                         .foregroundStyle(.goldAccent)
                         .monospacedDigit()
+
+                    if hasValidLocation, let remaining = featuredEvent.timeUntil(from: currentTime) {
+                        Text(longCountdownText(from: remaining))
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.textSecondary)
+                    }
                 }
 
                 Spacer()
 
-                if hasValidLocation, let remaining = featuredEvent.timeUntil(from: currentTime) {
+                // Promote to ring only when imminent (<12h) — otherwise text countdown above is enough
+                if hasValidLocation,
+                   let remaining = featuredEvent.timeUntil(from: currentTime),
+                   remaining < 12 * 3600 {
                     CountdownRing(
                         progress: featuredEvent.progress(from: currentTime),
                         remaining: remaining
@@ -313,18 +329,24 @@ struct MainClockView: View {
         }
     }
 
-    private var countdownText: String {
-        let days = zmanimService.daysUntilShabbat
-        if days == 0 {
-            return AppLanguage.localized("Shabbat Shalom!")
-        } else if days == 1 {
-            return AppLanguage.localized("Tomorrow")
-        } else {
-            return String(format: AppLanguage.localized("In %d days"), days)
-        }
-    }
-
     // MARK: - Computed Properties
+
+    /// Long-form countdown text shown under hero time (e.g., "in 2d 4h", "in 3h 12m", "in 45m").
+    private func longCountdownText(from remaining: TimeInterval) -> String {
+        let totalMinutes = Int(remaining / 60)
+        let days = totalMinutes / (60 * 24)
+        let hours = (totalMinutes / 60) % 24
+        let minutes = totalMinutes % 60
+        let body: String
+        if days > 0 {
+            body = hours > 0 ? "\(days)d \(hours)h" : "\(days)d"
+        } else if hours > 0 {
+            body = minutes > 0 ? "\(hours)h \(minutes)m" : "\(hours)h"
+        } else {
+            body = "\(minutes)m"
+        }
+        return String(format: AppLanguage.localized("in %@"), body)
+    }
 
     private var digitalTimeString: String {
         let formatter = DateFormatter()
@@ -419,32 +441,32 @@ private struct CountdownRing: View {
                 )
                 .rotationEffect(.degrees(-90))
 
-            VStack(spacing: 0) {
+            VStack(spacing: 2) {
                 Text(remainingString)
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(.textPrimary)
                     .monospacedDigit()
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(1)
 
                 Text("LEFT")
                     .font(.system(size: 8, weight: .semibold))
                     .foregroundStyle(.textSecondary)
                     .tracking(1)
             }
+            .padding(14)
         }
     }
 
+    /// Compact form for inside the ring. Only runs when <12h remaining, so no "d" case.
     private var remainingString: String {
         let totalMinutes = Int(remaining / 60)
         let hours = totalMinutes / 60
         let minutes = totalMinutes % 60
-        if hours >= 24 {
-            let days = hours / 24
-            return "\(days)d"
-        }
         if hours > 0 {
-            return "\(hours)H \(minutes)M"
+            return "\(hours)h \(minutes)m"
         }
-        return "\(minutes)M"
+        return "\(minutes)m"
     }
 }
 
