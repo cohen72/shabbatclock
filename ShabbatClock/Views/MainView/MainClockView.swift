@@ -19,45 +19,53 @@ struct MainClockView: View {
         GeometryReader { geometry in
             let clockSize = min(geometry.size.width - 80, 240)
 
-            ZStack {
-                LinearGradient.nightSky
-                    .ignoresSafeArea()
+            NavigationStack {
+                ZStack {
+                    LinearGradient.nightSky
+                        .ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    // Header: title + Hebrew date + location
-                    header
-                        .padding(.top, 8)
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            // Analog clock
+                            AnalogClockView(size: clockSize)
+                                .padding(.top, 8)
+                                .padding(.bottom, 20)
 
-                    Spacer(minLength: 16)
+                            // Digital time
+                            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                Text(digitalTimeString)
+                                    .font(.system(size: 56, weight: .thin, design: .default))
+                                    .foregroundStyle(.textPrimary)
+                                    .monospacedDigit()
 
-                    // Analog clock
-                    AnalogClockView(size: clockSize)
+                                Text(periodString)
+                                    .font(.system(size: 22, weight: .thin, design: .default))
+                                    .foregroundStyle(.textSecondary.opacity(0.8))
+                            }
 
-                    Spacer().frame(height: 20)
+                            // Next alarm
+                            nextAlarmLabel
+                                .padding(.top, 2)
 
-                    // Digital time — matches alarm row style (thin, h:mm + AM/PM)
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(digitalTimeString)
-                            .font(.system(size: 56, weight: .thin, design: .default))
-                            .foregroundStyle(.textPrimary)
-                            .monospacedDigit()
+                            // Hebrew date · Location
+                            contextRow
+                                .padding(.top, 16)
+                                .padding(.bottom, 24)
 
-                        Text(periodString)
-                            .font(.system(size: 22, weight: .thin, design: .default))
-                            .foregroundStyle(.textSecondary.opacity(0.8))
+                            // Hero event card + secondary row
+                            shabbatDashboard
+                                .padding(.bottom, 120)
+                        }
+                        .padding(.horizontal, 20)
                     }
-
-                    // Next alarm
-                    nextAlarmLabel
-                        .padding(.top, 2)
-
-                    Spacer(minLength: 20)
-
-                    // Hero event card + secondary row
-                    shabbatDashboard
-                        .padding(.bottom, 16)
                 }
-                .padding(.horizontal, 20)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    // Empty toolbar — clean top edge with system blur
+                    ToolbarItem(placement: .principal) {
+                        Color.clear.frame(height: 0)
+                    }
+                }
             }
         }
         .onAppear {
@@ -89,29 +97,43 @@ struct MainClockView: View {
         }
     }
 
-    // MARK: - Header
+    // MARK: - Context Row (Hebrew date · Location)
 
-    private var header: some View {
-        VStack(spacing: 18) {
-            Text("SHABBAT CLOCK")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.textSecondary)
-                .tracking(3)
-
-            HStack(spacing: 10) {
+    private var contextRow: some View {
+        Button {
+            showingCitySearch = true
+        } label: {
+            HStack(spacing: 6) {
                 if !zmanimService.hebrewDateString.isEmpty {
                     Text(zmanimService.hebrewDateString)
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.goldAccent)
 
-                    Text("•")
+                    Text("·")
                         .font(.system(size: 10))
                         .foregroundStyle(.textSecondary.opacity(0.5))
                 }
 
-                LocationRow(locationManager: locationManager)
+                Image(systemName: "location.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.textSecondary.opacity(0.7))
+
+                if locationManager.locationName == "__unknown__" {
+                    Text("Unknown Location")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.textSecondary.opacity(0.7))
+                } else {
+                    Text(locationManager.locationName)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.textSecondary.opacity(0.7))
+                }
+
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.textSecondary.opacity(0.4))
             }
         }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Next Alarm Label

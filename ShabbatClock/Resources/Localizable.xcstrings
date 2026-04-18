@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "·" : {
+
+    },
     "/week" : {
       "localizations" : {
         "he" : {
@@ -20,6 +23,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "/שנה"
+          }
+        }
+      }
+    },
+    "%@ · %d min before" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$d דק׳ לפני"
+          }
+        }
+      }
+    },
+    "%@ · At zman time" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · בזמן הזמן"
           }
         }
       }
@@ -54,9 +79,6 @@
           }
         }
       }
-    },
-    "•" : {
-
     },
     "© %@ Shabbat Clock" : {
       "localizations" : {
@@ -732,6 +754,9 @@
         }
       }
     },
+    "Custom Alarm" : {
+
+    },
     "Custom Durations" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -878,6 +903,9 @@
           }
         }
       }
+    },
+    "Early Minyan" : {
+
     },
     "Eastern" : {
       "extractionState" : "manual",
@@ -1209,6 +1237,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "אני חי"
+          }
+        }
+      }
+    },
+    "in %@" : {
+      "comment" : "Long-form countdown: 'in 2d 4h', 'in 3h 12m', 'in 45m'. %@ is the duration string.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בעוד %@"
           }
         }
       }
@@ -1568,6 +1608,9 @@
         }
       }
     },
+    "Netz Minyan" : {
+
+    },
     "New Alarm" : {
       "localizations" : {
         "he" : {
@@ -1616,28 +1659,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "האירוע הבא"
-          }
-        }
-      }
-    },
-    "UPCOMING" : {
-      "comment" : "Small label next to parasha name in hero card — indicates it's the upcoming Shabbat's parasha",
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הקרוב"
-          }
-        }
-      }
-    },
-    "in %@" : {
-      "comment" : "Long-form countdown: 'in 2d 4h', 'in 3h 12m', 'in 45m'. %@ is the duration string.",
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בעוד %@"
           }
         }
       }
@@ -2054,6 +2075,12 @@
         }
       }
     },
+    "Remove" : {
+
+    },
+    "Remove Alarm" : {
+
+    },
     "Repeat" : {
       "localizations" : {
         "he" : {
@@ -2114,6 +2141,63 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שחזור רכישות"
+          }
+        }
+      }
+    },
+    "Ring at %@ time" : {
+      "comment" : "Offset label when alarm is set at exact zman time. %@ is the zman English name.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צלצל בזמן %@"
+          }
+        }
+      }
+    },
+    "Ring before %@" : {
+      "comment" : "Offset label when alarm is set before a zman. %@ is the zman English name.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צלצל לפני %@"
+          }
+        }
+      }
+    },
+    "Rings %@ · %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצלצל %1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "Rings %@ · Today" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצלצל %@ · היום"
+          }
+        }
+      }
+    },
+    "Rings %@ · Tomorrow" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצלצל %@ · מחר"
           }
         }
       }
@@ -2186,6 +2270,7 @@
 
     },
     "Save Alarm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2281,6 +2366,7 @@
       }
     },
     "SHABBAT CLOCK" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2321,8 +2407,27 @@
         }
       }
     },
+    "Shabbat Mincha" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנחה שבת"
+          }
+        }
+      }
+    },
+    "Shabbat Shacharit" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שחרית שבת"
+          }
+        }
+      }
+    },
     "Shabbat Shalom!" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2645,6 +2750,9 @@
         }
       }
     },
+    "This will remove the alarm for this zman." : {
+
+    },
     "Thursday" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2784,6 +2892,17 @@
         }
       }
     },
+    "UPCOMING" : {
+      "comment" : "Small label next to parasha name in hero card — indicates it's the upcoming Shabbat's parasha",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקרוב"
+          }
+        }
+      }
+    },
     "Upgrade" : {
       "localizations" : {
         "he" : {
@@ -2856,6 +2975,7 @@
       }
     },
     "Wake up before" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -3000,6 +3120,9 @@
           }
         }
       }
+    },
+    "Zman" : {
+
     },
     "Zmanim" : {
       "localizations" : {

@@ -63,6 +63,7 @@ struct ContentView: View {
         .id("lang-\(appLanguage)") // Force full view rebuild when language changes
         .onAppear {
             alarmService.configure(with: modelContext)
+            ZmanAlarmSyncService.shared.configure(with: modelContext)
             if !hasCompletedOnboarding {
                 var transaction = Transaction()
                 transaction.disablesAnimations = true

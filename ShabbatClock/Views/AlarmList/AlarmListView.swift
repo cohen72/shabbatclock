@@ -6,11 +6,15 @@ struct AlarmListView: View {
   @Environment(\.modelContext) private var modelContext
   @Query(sort: \Alarm.hour) private var alarms: [Alarm]
   @Environment(AlarmKitService.self) private var alarmService
+  @StateObject private var zmanimService = ZmanimService.shared
   
   @State private var selectedAlarm: Alarm?
   @State private var newAlarm: Alarm?
   @State private var showingPremiumAlert = false
   @State private var showingPremium = false
+  
+  // Zman alarm sheet: triggered when tapping a zman alarm in the list
+  @State private var zmanSheetAlarm: Alarm?
   
   // Free tier limit
   private let freeAlarmLimit = 3
@@ -32,7 +36,13 @@ struct AlarmListView: View {
               }
               .contentShape(Rectangle())
               .onTapGesture {
-                selectedAlarm = alarm
+                if alarm.zmanTypeRawValue != nil {
+                  // Zman alarm → open zman sheet
+                  zmanSheetAlarm = alarm
+                } else {
+                  // Regular alarm → open edit view
+                  selectedAlarm = alarm
+                }
               }
               .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
               .listRowBackground(Color.clear)
@@ -78,17 +88,79 @@ struct AlarmListView: View {
               }
             }
             
-            // Add alarm button
-            Button {
-              if canAddAlarm {
-                newAlarm = Alarm()
-              } else {
-                showingPremiumAlert = true
+            // Add alarm menu (+)
+            if canAddAlarm {
+              Menu {
+                Button {
+                  newAlarm = Alarm()
+                } label: {
+                  Label("Custom Alarm", systemImage: "clock")
+                }
+                
+                Divider()
+                
+                // Shabbat presets
+                Section {
+                  Button {
+                    createPresetAlarm(
+                      label: String(localized: "Shabbat Shacharit"),
+                      hour: 7, minute: 30,
+                      repeatDays: [6]
+                    )
+                  } label: {
+                    Label(String(localized: "Shabbat Shacharit"), systemImage: "sunrise")
+                  }
+
+                  Button {
+                    createPresetAlarm(
+                      label: String(localized: "Shabbat Mincha"),
+                      hour: 12, minute: 30,
+                      repeatDays: [6]
+                    )
+                  } label: {
+                    Label(String(localized: "Shabbat Mincha"), systemImage: "sun.max")
+                  }
+                } header: {
+                  Label("Shabbat", systemImage: "star.of.david")
+                }
+                
+                // Zman presets
+                Section {
+                  Button {
+                    createZmanPresetAlarm(
+                      zmanType: .netz,
+                      minutesBefore: 0,
+                      label: String(localized: "Netz Minyan")
+                    )
+                  } label: {
+                    Label(String(localized: "Netz Minyan"), systemImage: "sunrise.fill")
+                  }
+                  
+                  Button {
+                    createZmanPresetAlarm(
+                      zmanType: .alotHashachar,
+                      minutesBefore: 30,
+                      label: String(localized: "Early Minyan")
+                    )
+                  } label: {
+                    Label(String(localized: "Early Minyan"), systemImage: "moon.stars")
+                  }
+                } header: {
+                  Label("Zmanim", systemImage: "sun.min")
+                }
+              } label: {
+                Image(systemName: "plus")
+                  .font(.system(size: 20, weight: .semibold))
+                  .foregroundStyle(.goldAccent)
               }
-            } label: {
-              Image(systemName: canAddAlarm ? "plus" : "lock.fill")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(.goldAccent)
+            } else {
+              Button {
+                showingPremiumAlert = true
+              } label: {
+                Image(systemName: "lock.fill")
+                  .font(.system(size: 20, weight: .semibold))
+                  .foregroundStyle(.goldAccent)
+              }
             }
           }
         }
@@ -101,6 +173,26 @@ struct AlarmListView: View {
     .sheet(item: $newAlarm) { alarm in
       AlarmEditView(alarm: alarm, isNew: true)
         .applyLanguageOverride(AppLanguage.current)
+    }
+    .onAppear {
+      // Ensure zmanim are loaded so zman alarm sheets can find their zman
+      if zmanimService.todayZmanim.isEmpty {
+        zmanimService.calculateTodayZmanim()
+      }
+    }
+    .sheet(item: $zmanSheetAlarm) { alarm in
+      // Find the matching zman for this alarm
+      if let rawValue = alarm.zmanTypeRawValue,
+         let zman = zmanimService.todayZmanim.first(where: { $0.type.rawValue == rawValue }) {
+        ZmanAlarmSheet(
+          zman: zman,
+          existingAlarm: alarm,
+          onDelete: {
+            deleteAlarm(alarm)
+          }
+        )
+        .applyLanguageOverride(AppLanguage.current)
+      }
     }
     .alert("Upgrade to Premium", isPresented: $showingPremiumAlert) {
       Button("Maybe Later", role: .cancel) {}
@@ -161,6 +253,54 @@ struct AlarmListView: View {
       } else {
         alarmService.disable(alarm)
       }
+    }
+  }
+  
+  // MARK: - Presets
+  
+  /// Create a Shabbat preset alarm and open it in the editor for customization.
+  private func createPresetAlarm(label: String, hour: Int, minute: Int, repeatDays: [Int]) {
+    let alarm = Alarm(
+      hour: hour,
+      minute: minute,
+      isEnabled: true,
+      label: label,
+      repeatDays: repeatDays
+    )
+    newAlarm = alarm
+  }
+  
+  /// Create a zman-linked preset alarm, or open the existing one if it already exists.
+  private func createZmanPresetAlarm(zmanType: ZmanimService.ZmanType, minutesBefore: Int, label: String) {
+    // Check if a zman alarm already exists for this type
+    if let existing = alarms.first(where: { $0.zmanTypeRawValue == zmanType.rawValue }) {
+      zmanSheetAlarm = existing
+      return
+    }
+
+    guard let zman = zmanimService.todayZmanim.first(where: { $0.type == zmanType }) else {
+      // Zmanim not loaded — create with default time, sync will fix it
+      let alarm = Alarm(label: label)
+      alarm.zmanTypeRawValue = zmanType.rawValue
+      alarm.zmanMinutesBefore = minutesBefore
+      newAlarm = alarm
+      return
+    }
+
+    let fireTime = zman.time.addingTimeInterval(-Double(minutesBefore * 60))
+    let calendar = Calendar.current
+    let alarm = Alarm(
+      hour: calendar.component(.hour, from: fireTime),
+      minute: calendar.component(.minute, from: fireTime),
+      isEnabled: true,
+      label: label
+    )
+    alarm.zmanTypeRawValue = zmanType.rawValue
+    alarm.zmanMinutesBefore = minutesBefore
+    
+    modelContext.insert(alarm)
+    Task {
+      await alarmService.enable(alarm)
     }
   }
 }

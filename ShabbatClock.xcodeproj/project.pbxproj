@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		27A8F7D5C4375871A26FD7D4 /* AlarmSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */; };
 		AAA00001 /* ShabbatClockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00001 /* ShabbatClockApp.swift */; };
 		AAA00002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00002 /* ContentView.swift */; };
 		AAA00010 /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00010 /* Alarm.swift */; };
@@ -34,6 +35,8 @@
 		AAA00102 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00102 /* DebugView.swift */; };
 		AAA00103 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00103 /* OnboardingView.swift */; };
 		AAA00200 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = BBB00200 /* Sounds */; };
+		BF7213DF338B8C9C1EB62A43 /* ZmanAlarmSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */; };
+		D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A4226EB6DEE08BEB8E2C17 /* ZmanAlarmSheet.swift */; };
 		DD112234 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112233 /* Localizable.xcstrings */; };
 		DD112236 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112235 /* InfoPlist.xcstrings */; };
 		DD8859E3 /* LocationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBA /* LocationRow.swift */; };
@@ -72,6 +75,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZmanAlarmSyncService.swift; sourceTree = "<group>"; };
+		20A4226EB6DEE08BEB8E2C17 /* ZmanAlarmSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZmanAlarmSheet.swift; sourceTree = "<group>"; };
 		BBB00001 /* ShabbatClockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShabbatClockApp.swift; sourceTree = "<group>"; };
 		BBB00002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BBB00010 /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
@@ -106,6 +111,7 @@
 		CC27FEBC /* SwipeToDelete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeToDelete.swift; sourceTree = "<group>"; };
 		CCC00001 /* ShabbatClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShabbatClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCE4824B /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
+		D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlarmSettingsSection.swift; sourceTree = "<group>"; };
 		DD112233 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		DD112235 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = widgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -115,7 +121,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		EDE72F4C2F8BFB3200E40DFF /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		EDE72F4C2F8BFB3200E40DFF /* Exceptions for "widgets" folder in "widgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -125,7 +131,18 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		EDE72F3F2F8BFB3100E40DFF /* widgets */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (EDE72F4C2F8BFB3200E40DFF /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = widgets; sourceTree = "<group>"; };
+		EDE72F3F2F8BFB3100E40DFF /* widgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EDE72F4C2F8BFB3200E40DFF /* Exceptions for "widgets" folder in "widgetsExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = widgets;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,6 +229,7 @@
 				BBB00027 /* StoreManager.swift */,
 				BBB00023 /* LocationManager.swift */,
 				BBB00024 /* ZmanimService.swift */,
+				028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -257,6 +275,7 @@
 				CC27FEBA /* LocationRow.swift */,
 				CC27FEBB /* PermissionPromptView.swift */,
 				CC27FEBC /* SwipeToDelete.swift */,
+				D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -293,6 +312,7 @@
 			isa = PBXGroup;
 			children = (
 				BBB00090 /* ZmanimView.swift */,
+				20A4226EB6DEE08BEB8E2C17 /* ZmanAlarmSheet.swift */,
 			);
 			path = Zmanim;
 			sourceTree = "<group>";
@@ -343,8 +363,6 @@
 				EDE72F3F2F8BFB3100E40DFF /* widgets */,
 			);
 			name = widgetsExtension;
-			packageProductDependencies = (
-			);
 			productName = widgetsExtension;
 			productReference = EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -475,6 +493,9 @@
 				AAA00102 /* DebugView.swift in Sources */,
 				AAA00103 /* OnboardingView.swift in Sources */,
 				AAA00101 /* PremiumView.swift in Sources */,
+				BF7213DF338B8C9C1EB62A43 /* ZmanAlarmSyncService.swift in Sources */,
+				27A8F7D5C4375871A26FD7D4 /* AlarmSettingsSection.swift in Sources */,
+				D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

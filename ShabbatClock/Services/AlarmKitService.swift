@@ -38,6 +38,12 @@ final class AlarmKitService: NSObject {
     static let fallbackMaxDuration: Int = 30
 
     private var modelContext: ModelContext?
+    private var modelContainer: ModelContainer?
+    private var isConfigured = false
+
+    /// Tracks alarm IDs currently being scheduled to prevent concurrent enable() calls
+    /// from creating duplicate AlarmKit alarms for the same logical alarm.
+    private var alarmsBeingScheduled: Set<UUID> = []
 
     /// Shared UserDefaults for widget communication.
     private let sharedDefaults = UserDefaults(suiteName: appGroupID)
@@ -49,8 +55,19 @@ final class AlarmKitService: NSObject {
 
     // MARK: - Setup
 
+    /// Called early from App.init() to ensure background notification handlers
+    /// can create a ModelContext even before configure() runs.
+    func setContainer(_ container: ModelContainer) {
+        self.modelContainer = container
+    }
+
     func configure(with modelContext: ModelContext) {
         self.modelContext = modelContext
+        self.modelContainer = modelContext.container
+
+        // Guard against multiple configure() calls (onAppear can fire multiple times)
+        guard !isConfigured else { return }
+        isConfigured = true
 
         // Check current authorization state without prompting
         isAuthorized = AlarmManager.shared.authorizationState == .authorized
@@ -165,7 +182,18 @@ final class AlarmKitService: NSObject {
     /// Turn an alarm on (or re-arm an already-on alarm after edits).
     /// Idempotent: cancels any prior AlarmKit alarm + notifications before scheduling fresh.
     /// Assigns the new AlarmKit ID to the model and saves.
+    /// Serialized per-alarm: if enable() is already in-flight for this alarm, the call is skipped.
     func enable(_ alarm: Alarm) async {
+        // Prevent concurrent enable() calls for the same alarm (the await inside
+        // scheduleAlarm yields, which can let a second enable() interleave and
+        // create a duplicate AlarmKit alarm).
+        guard !alarmsBeingScheduled.contains(alarm.id) else {
+            print("[AlarmKitService] Skipping enable() for \(alarm.label) — already in-flight")
+            return
+        }
+        alarmsBeingScheduled.insert(alarm.id)
+        defer { alarmsBeingScheduled.remove(alarm.id) }
+
         // Clear any prior state — prior AlarmKit alarm, prior auto-stop, prior fallback.
         if let priorID = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: priorID)
@@ -386,6 +414,8 @@ final class AlarmKitService: NSObject {
     }
 
     /// Sync all enabled SwiftData alarms to AlarmKit.
+    /// Only schedules alarms that don't already have an alarmKitID — avoids duplicates
+    /// when activeAlarms hasn't been populated yet from the async alarmUpdates stream.
     func syncAllAlarms() {
         guard let modelContext else { return }
 
@@ -395,19 +425,22 @@ final class AlarmKitService: NSObject {
 
         do {
             let alarms = try modelContext.fetch(descriptor)
+            // Only schedule alarms that have no AlarmKit ID — they were never scheduled
+            // or their ID was cleared (e.g., after a one-time alarm fired).
+            // Alarms with an existing alarmKitID are already registered with AlarmKit.
+            let unscheduled = alarms.filter { $0.alarmKitID == nil }
+            guard !unscheduled.isEmpty else {
+                print("[AlarmKitService] All \(alarms.count) alarms already scheduled")
+                return
+            }
             Task {
-                for alarm in alarms {
-                    // Skip if already scheduled in AlarmKit (has a valid alarmKitID that's active)
-                    if let existingID = alarm.alarmKitID,
-                       activeAlarms.contains(where: { $0.id == existingID }) {
-                        continue // Already scheduled, don't double-schedule
-                    }
+                for alarm in unscheduled {
                     if let newID = await scheduleAlarm(for: alarm) {
                         alarm.alarmKitID = newID
                     }
                 }
                 try? modelContext.save()
-                print("[AlarmKitService] Synced \(alarms.count) alarms to AlarmKit")
+                print("[AlarmKitService] Synced \(unscheduled.count) new alarms to AlarmKit (\(alarms.count - unscheduled.count) already scheduled)")
             }
         } catch {
             print("[AlarmKitService] Failed to fetch alarms for sync: \(error)")
@@ -591,7 +624,8 @@ final class AlarmKitService: NSObject {
         removeAutoStopNotifications(for: alarmKitID, repeatDays: alarm.repeatDays)
 
         if alarm.repeatDays.isEmpty {
-            // One-time alarm: AlarmKit itself removes the schedule. Mirror in our model.
+            // One-time alarm: explicitly cancel in AlarmKit and mirror in our model.
+            try? AlarmManager.shared.cancel(id: alarmKitID)
             alarm.isEnabled = false
             alarm.alarmKitID = nil
             try? modelContext.save()
@@ -625,16 +659,32 @@ final class AlarmKitService: NSObject {
         }
 
         // Disable one-time alarms after firing (like iOS built-in clock)
-        guard let modelContext else { return }
+        // Use existing context, or create a fresh one if app was launched in background
+        // (before ContentView.onAppear had a chance to call configure())
+        let context: ModelContext
+        if let mc = modelContext {
+            context = mc
+        } else if let container = modelContainer {
+            context = ModelContext(container)
+            print("[AlarmKitService] Auto-stop: created fresh ModelContext (background launch)")
+        } else {
+            print("[AlarmKitService] Auto-stop: no ModelContext or ModelContainer available")
+            return
+        }
+
         let descriptor = FetchDescriptor<Alarm>()
-        guard let alarms = try? modelContext.fetch(descriptor),
+        guard let alarms = try? context.fetch(descriptor),
               let alarm = alarms.first(where: { $0.alarmKitID == uuid }) else { return }
 
         if alarm.repeatDays.isEmpty {
+            // Cancel the AlarmKit registration entirely (stop only stops alerting,
+            // the alarm may still be registered in the system)
+            try? AlarmManager.shared.cancel(id: uuid)
+            removeAutoStopNotifications(for: uuid, repeatDays: alarm.repeatDays)
             alarm.isEnabled = false
             alarm.alarmKitID = nil  // Clear so syncAllAlarms won't try to re-schedule it
-            try? modelContext.save()
-            print("[AlarmKitService] One-time alarm '\(alarm.label)' disabled after firing")
+            try? context.save()
+            print("[AlarmKitService] One-time alarm '\(alarm.label)' disabled and cancelled after firing")
         }
     }
 

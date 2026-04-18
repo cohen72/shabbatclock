@@ -211,25 +211,13 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Appearance", icon: "circle.lefthalf.filled")
 
-            VStack(spacing: 0) {
-                HStack {
-                    Text("Theme")
-                        .font(AppFont.body())
-                        .foregroundStyle(.textPrimary)
-                        .lineLimit(1)
-
-                    Spacer()
-
-                    Picker("Theme", selection: $appearanceMode) {
-                        Text("System").tag(AppearanceMode.system.rawValue)
-                        Text("Light").tag(AppearanceMode.light.rawValue)
-                        Text("Dark").tag(AppearanceMode.dark.rawValue)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 200)
-                }
-                .padding(16)
+            Picker("Theme", selection: $appearanceMode) {
+                Text("System").tag(AppearanceMode.system.rawValue)
+                Text("Light").tag(AppearanceMode.light.rawValue)
+                Text("Dark").tag(AppearanceMode.dark.rawValue)
             }
+            .pickerStyle(.segmented)
+            .padding(16)
             .settingsCard()
         }
     }
@@ -240,25 +228,13 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Language", icon: "globe")
 
-            VStack(spacing: 0) {
-                HStack {
-                    Text("Language")
-                        .font(AppFont.body())
-                        .foregroundStyle(.textPrimary)
-                        .lineLimit(1)
-
-                    Spacer()
-
-                    Picker("Language", selection: $appLanguage) {
-                        Text("System").tag(AppLanguage.system.rawValue)
-                        Text(verbatim: "English").tag(AppLanguage.english.rawValue)
-                        Text(verbatim: "עברית").tag(AppLanguage.hebrew.rawValue)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 220)
-                }
-                .padding(16)
+            Picker("Language", selection: $appLanguage) {
+                Text("System").tag(AppLanguage.system.rawValue)
+                Text(verbatim: "English").tag(AppLanguage.english.rawValue)
+                Text(verbatim: "עברית").tag(AppLanguage.hebrew.rawValue)
             }
+            .pickerStyle(.segmented)
+            .padding(16)
             .settingsCard()
         }
     }

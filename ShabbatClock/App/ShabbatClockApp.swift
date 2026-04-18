@@ -16,6 +16,10 @@ struct ShabbatClockApp: App {
         } catch {
             fatalError("Failed to initialize ModelContainer: \(error)")
         }
+
+        // Give AlarmKitService early access to the container so it can handle
+        // background notifications even before ContentView.onAppear fires.
+        AlarmKitService.shared.setContainer(container)
     }
 
     var body: some Scene {

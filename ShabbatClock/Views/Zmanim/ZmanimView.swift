@@ -10,8 +10,7 @@ struct ZmanimView: View {
     @State private var showingCitySearch = false
     @State private var showingLocationPrompt = false
     @State private var showingPremiumAlert = false
-    @State private var createSheetZman: ZmanimService.Zman?
-    @State private var manageSheetZman: ZmanimService.Zman?
+    @State private var sheetZman: ZmanimService.Zman?
 
     // Premium
     private let freeAlarmLimit = 3
@@ -66,16 +65,12 @@ struct ZmanimView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 0) {
-                            locationInfoView
-                                .padding(.horizontal, 24)
-                                .padding(.bottom, 8)
-
                             let nextZmanId = zmanimService.todayZmanim.first(where: { $0.time > Date() })?.id
 
                             ForEach(ZmanSection.allCases, id: \.self) { section in
                                 let sectionZmanim = zmanimService.todayZmanim.filter { section.types.contains($0.type) }
                                 if !sectionZmanim.isEmpty {
-                                    sectionHeader(section.localizedTitle)
+                                    sectionHeader(section.localizedTitle, showDate: section == .morning)
 
                                     LazyVStack(spacing: 6) {
                                         ForEach(sectionZmanim) { zman in
@@ -83,7 +78,7 @@ struct ZmanimView: View {
                                             ZmanRowView(
                                                 zman: zman,
                                                 isNext: zman.id == nextZmanId,
-                                                isPast: zman.time <= Date(),
+                                                isPast: nextZmanId != nil && zman.time <= Date(),
                                                 linkedAlarm: linkedAlarm,
                                                 onBellTap: {
                                                     handleBellTap(for: zman, existingAlarm: linkedAlarm)
@@ -155,17 +150,16 @@ struct ZmanimView: View {
         .onChange(of: locationManager.location) { _, _ in
             zmanimService.calculateTodayZmanim()
         }
-        .sheet(item: $createSheetZman) { zman in
-            CreateAlarmFromZmanSheet(zman: zman)
-                .applyLanguageOverride(AppLanguage.current)
-        }
-        .sheet(item: $manageSheetZman) { zman in
-            if let alarm = alarmsByZmanType[zman.type.rawValue] {
-                ZmanAlarmSheet(zman: zman, alarm: alarm, onDelete: {
+        .sheet(item: $sheetZman) { zman in
+            let linkedAlarm = alarmsByZmanType[zman.type.rawValue]
+            ZmanAlarmSheet(
+                zman: zman,
+                existingAlarm: linkedAlarm,
+                onDelete: {
                     deleteAlarm(for: zman)
-                })
-                .applyLanguageOverride(AppLanguage.current)
-            }
+                }
+            )
+            .applyLanguageOverride(AppLanguage.current)
         }
         .alert("Upgrade to Premium", isPresented: $showingPremiumAlert) {
             Button("Maybe Later", role: .cancel) {}
@@ -190,9 +184,11 @@ struct ZmanimView: View {
 
     private func handleBellTap(for zman: ZmanimService.Zman, existingAlarm: Alarm?) {
         if existingAlarm != nil {
-            manageSheetZman = zman
+            // Open unified sheet for existing alarm
+            sheetZman = zman
         } else if canAddAlarm {
-            createSheetZman = zman
+            // Open unified sheet for new alarm
+            sheetZman = zman
         } else {
             showingPremiumAlert = true
         }
@@ -205,22 +201,24 @@ struct ZmanimView: View {
 
     // MARK: - Subviews
 
-    private func sectionHeader(_ title: LocalizedStringKey) -> some View {
-        Text(title)
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(.textSecondary.opacity(0.6))
-            .textCase(.uppercase)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.top, 24)
-            .padding(.bottom, 12)
-    }
+    private func sectionHeader(_ title: LocalizedStringKey, showDate: Bool = false) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.textSecondary.opacity(0.6))
+                .textCase(.uppercase)
 
-    private var locationInfoView: some View {
-        Text(dateString)
-            .font(AppFont.caption(12))
-            .foregroundStyle(.textSecondary.opacity(0.7))
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer()
+
+            if showDate {
+                Text(dateString)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundStyle(.textSecondary.opacity(0.5))
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 24)
+        .padding(.bottom, 12)
     }
 
     private var loadingView: some View {
@@ -305,12 +303,10 @@ struct ZmanRowView: View {
         return alarm.isEnabled ? Color.accentPurple.opacity(0.15) : .surfaceSubtle
     }
 
+    /// Concrete ring time subtitle (e.g., "Rings 4:53 AM · Tomorrow")
     private var alarmSubtitle: String? {
-        guard let alarm = linkedAlarm, let minutes = alarm.zmanMinutesBefore else { return nil }
-        if minutes == 0 {
-            return AppLanguage.localized("At zman time")
-        }
-        return String(format: AppLanguage.localized("%d min before"), minutes)
+        guard let alarm = linkedAlarm, alarm.isEnabled else { return nil }
+        return ZmanAlarmSyncService.shared.ringTimeDescription(for: alarm)
     }
 
     /// Countdown string for the next zman (e.g., "in 47 min")
@@ -365,10 +361,12 @@ struct ZmanRowView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
-                Text(alarmSubtitle ?? " ")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.textSecondary.opacity(0.7))
-                    .opacity(alarmSubtitle == nil ? 0 : 1)
+                // Show concrete ring time when alarm is set and enabled
+                if let subtitle = alarmSubtitle {
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.accentPurple.opacity(0.8))
+                }
             }
 
             Spacer()
@@ -418,6 +416,7 @@ struct ZmanRowView: View {
                         .stroke(Color.goldAccent.opacity(0.2), lineWidth: 1) : nil
                 )
         )
+        .opacity(isPast ? 0.45 : 1)
         .onTapGesture {
             showingInfo = true
         }
@@ -470,287 +469,6 @@ struct ZmanInfoSheet: View {
             }
         }
         .presentationDetents([.height(300)])
-    }
-}
-
-// MARK: - Zman Alarm Management Sheet
-
-struct ZmanAlarmSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
-    @Environment(AlarmKitService.self) private var alarmService
-
-    let zman: ZmanimService.Zman
-    @Bindable var alarm: Alarm
-    let onDelete: () -> Void
-
-    @State private var minutesBefore: Int
-
-    init(zman: ZmanimService.Zman, alarm: Alarm, onDelete: @escaping () -> Void) {
-        self.zman = zman
-        self.alarm = alarm
-        self.onDelete = onDelete
-        self._minutesBefore = State(initialValue: alarm.zmanMinutesBefore ?? 0)
-    }
-
-    var body: some View {
-        ZStack {
-            LinearGradient.nightSky
-                .ignoresSafeArea()
-
-            VStack(spacing: 20) {
-                // Handle
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.textSecondary.opacity(0.4))
-                    .frame(width: 40, height: 4)
-                    .padding(.top, 12)
-
-                // Zman name
-                VStack(spacing: 4) {
-                    Text(zman.hebrewName)
-                        .font(.system(size: 22))
-                        .foregroundStyle(.goldAccent)
-                    Text(zman.englishName)
-                        .font(AppFont.header(18))
-                        .foregroundStyle(.textPrimary)
-                }
-
-                // Enable/disable toggle
-                HStack {
-                    Text("Alarm Enabled")
-                        .font(AppFont.body(15))
-                        .foregroundStyle(.textPrimary)
-                    Spacer()
-                    Toggle("", isOn: $alarm.isEnabled)
-                        .labelsHidden()
-                        .tint(.accentPurple)
-                        .onChange(of: alarm.isEnabled) { _, newValue in
-                            Task {
-                                if newValue {
-                                    await alarmService.enable(alarm)
-                                } else {
-                                    alarmService.disable(alarm)
-                                }
-                            }
-                        }
-                }
-                .padding(.horizontal, 24)
-
-                // Offset picker
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Wake up before")
-                        .font(AppFont.caption(12))
-                        .foregroundStyle(.textSecondary)
-
-                    Picker("Minutes before", selection: $minutesBefore) {
-                        Text("At time").tag(0)
-                        Text("5 min").tag(5)
-                        Text("10 min").tag(10)
-                        Text("15 min").tag(15)
-                        Text("30 min").tag(30)
-                    }
-                    .pickerStyle(.segmented)
-                    .colorScheme(.dark)
-                    .onChange(of: minutesBefore) { _, newValue in
-                        updateAlarmOffset(to: newValue)
-                    }
-                }
-                .padding(.horizontal, 24)
-
-                // Resulting alarm time
-                VStack(spacing: 4) {
-                    Text("Alarm will ring at")
-                        .font(AppFont.caption(12))
-                        .foregroundStyle(.textSecondary)
-                    Text(alarmTimeString)
-                        .font(AppFont.timeDisplay(32))
-                        .foregroundStyle(.goldAccent)
-                }
-
-                Spacer()
-
-                // Delete button
-                Button(role: .destructive) {
-                    dismiss()
-                    onDelete()
-                } label: {
-                    HStack {
-                        Image(systemName: "trash")
-                        Text("Delete Alarm")
-                    }
-                    .font(AppFont.body(15))
-                    .foregroundStyle(.red)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.red.opacity(0.1))
-                    )
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 16)
-            }
-        }
-        .presentationDetents([.height(380)])
-    }
-
-    private var alarmTimeString: String {
-        let alarmTime = zman.time.addingTimeInterval(-Double(minutesBefore * 60))
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        return formatter.string(from: alarmTime)
-    }
-
-    private func updateAlarmOffset(to newMinutes: Int) {
-        let alarmTime = zman.time.addingTimeInterval(-Double(newMinutes * 60))
-        let calendar = Calendar.current
-        alarm.hour = calendar.component(.hour, from: alarmTime)
-        alarm.minute = calendar.component(.minute, from: alarmTime)
-        alarm.zmanMinutesBefore = newMinutes
-
-        Task {
-            if alarm.isEnabled {
-                await alarmService.enable(alarm)
-            } else {
-                alarmService.disable(alarm)
-            }
-        }
-    }
-}
-
-// MARK: - Create Alarm from Zman Sheet
-
-struct CreateAlarmFromZmanSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
-    @Environment(AlarmKitService.self) private var alarmService
-
-    let zman: ZmanimService.Zman
-
-    @State private var minutesBefore: Int = 0
-
-    var body: some View {
-        ZStack {
-            LinearGradient.nightSky
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .foregroundStyle(.textSecondary)
-
-                    Spacer()
-
-                    Text("Set Alarm")
-                        .font(AppFont.header(18))
-                        .foregroundStyle(.textPrimary)
-
-                    Spacer()
-
-                    // Invisible spacer to center title
-                    Text("Cancel").opacity(0)
-                }
-                .padding()
-
-                // Zman info
-                VStack(spacing: 8) {
-                    Text(zman.hebrewName)
-                        .font(.system(size: 22))
-                        .foregroundStyle(.goldAccent)
-                    Text(zman.englishName)
-                        .font(AppFont.header(18))
-                        .foregroundStyle(.textPrimary)
-                    Text(zman.timeString)
-                        .font(AppFont.body())
-                        .foregroundStyle(.textSecondary)
-                }
-                .padding(.bottom, 24)
-
-                // Minutes before picker
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Wake up before")
-                        .font(AppFont.caption(12))
-                        .foregroundStyle(.textSecondary)
-
-                    Picker("Minutes before", selection: $minutesBefore) {
-                        Text("At time").tag(0)
-                        Text("5 min").tag(5)
-                        Text("10 min").tag(10)
-                        Text("15 min").tag(15)
-                        Text("30 min").tag(30)
-                    }
-                    .pickerStyle(.segmented)
-                    .colorScheme(.dark)
-                }
-                .padding(.horizontal, 24)
-
-                // Resulting alarm time
-                VStack(spacing: 4) {
-                    Text("Alarm will ring at")
-                        .font(AppFont.caption(12))
-                        .foregroundStyle(.textSecondary)
-
-                    Text(alarmTimeString)
-                        .font(AppFont.timeDisplay(36))
-                        .foregroundStyle(.goldAccent)
-                }
-                .padding(.top, 24)
-
-                Spacer()
-
-                // Save button
-                Button {
-                    createAlarm()
-                } label: {
-                    Text("Save Alarm")
-                        .font(AppFont.body(16))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color.accentPurple)
-                        )
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
-            }
-        }
-        .presentationDetents([.medium])
-    }
-
-    private var alarmTimeString: String {
-        let alarmTime = zman.time.addingTimeInterval(-Double(minutesBefore * 60))
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        return formatter.string(from: alarmTime)
-    }
-
-    private func createAlarm() {
-        let alarmTime = zman.time.addingTimeInterval(-Double(minutesBefore * 60))
-        let calendar = Calendar.current
-        let hour = calendar.component(.hour, from: alarmTime)
-        let minute = calendar.component(.minute, from: alarmTime)
-
-        let alarm = Alarm(
-            hour: hour,
-            minute: minute,
-            isEnabled: true,
-            label: zman.englishName
-        )
-        alarm.zmanTypeRawValue = zman.type.rawValue
-        alarm.zmanMinutesBefore = minutesBefore
-
-        modelContext.insert(alarm)
-        Task {
-            await alarmService.enable(alarm)
-        }
-
-        dismiss()
     }
 }
 
