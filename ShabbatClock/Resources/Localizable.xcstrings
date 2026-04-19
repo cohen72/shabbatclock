@@ -373,12 +373,11 @@
       }
     },
     "Alarm stopped automatically" : {
-      "comment" : "Auto-stop notification body — shown when alarm ends after set duration",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ההתראה הופסקה אוטומטית"
+            "value" : "ההתראה נעצרה אוטומטית"
           }
         }
       }
@@ -559,6 +558,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "כיבוי אוטומטי"
+          }
+        }
+      }
+    },
+    "Auto-stop requires the app to be running in the background. Don't force-quit before Shabbat." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עצירה אוטומטית דורשת שהאפליקציה תרוץ ברקע. אל תסגרו בכוח לפני שבת."
           }
         }
       }
@@ -1326,6 +1335,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "קצת מעצבן"
+          }
+        }
+      }
+    },
+    "Keep the app in the background" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השאירו את האפליקציה ברקע"
+          }
+        }
+      }
+    },
+    "Keep the app open in the background for auto-stop to work. Don't force-quit before Shabbat." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השאירו את האפליקציה פתוחה ברקע כדי שהעצירה האוטומטית תעבוד. אל תסגרו בכוח לפני שבת."
           }
         }
       }
@@ -2433,6 +2462,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שבת שלום!"
+          }
+        }
+      }
+    },
+    "Shabbat Tip" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טיפ לשבת"
           }
         }
       }

@@ -152,6 +152,20 @@ struct AlarmSettingsSection: View {
                     .padding(.horizontal, 16)
                 }
             }
+
+            // Auto-stop background requirement hint
+            if !alarmService.isFallbackMode {
+                HStack(spacing: 6) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 11))
+                    Text("Keep the app open in the background for auto-stop to work. Don't force-quit before Shabbat.")
+                        .font(.system(size: 11))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                }
+                .foregroundStyle(.textSecondary.opacity(0.5))
+                .padding(.horizontal, 16)
+            }
         }
     }
 

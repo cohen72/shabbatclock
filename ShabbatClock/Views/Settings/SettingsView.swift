@@ -36,6 +36,11 @@ struct SettingsView: View {
                         // Vibration hint (alarm vibration is iOS-controlled)
                         vibrationSection
 
+                        // Shabbat auto-stop tip
+                        if !alarmService.isFallbackMode {
+                            shabbatTipSection
+                        }
+
                         // Location section
                         locationSection
 
@@ -153,6 +158,36 @@ struct SettingsView: View {
                         .font(AppFont.caption(12))
                         .foregroundStyle(.textSecondary)
                         .lineLimit(2)
+                }
+
+                Spacer()
+            }
+            .padding(16)
+            .settingsCard()
+        }
+    }
+
+    // MARK: - Shabbat Tip Section
+
+    private var shabbatTipSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Shabbat Tip", icon: "flame.fill")
+
+            HStack(spacing: 12) {
+                Image(systemName: "app.badge.checkmark")
+                    .font(.system(size: 20))
+                    .foregroundStyle(.goldAccent)
+                    .frame(width: 32)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Keep the app in the background")
+                        .font(AppFont.body())
+                        .foregroundStyle(.textPrimary)
+
+                    Text("Auto-stop requires the app to be running in the background. Don't force-quit before Shabbat.")
+                        .font(AppFont.caption(12))
+                        .foregroundStyle(.textSecondary)
+                        .lineLimit(3)
                 }
 
                 Spacer()

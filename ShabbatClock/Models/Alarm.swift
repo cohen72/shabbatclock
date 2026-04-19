@@ -13,6 +13,8 @@ final class Alarm {
     var createdAt: Date
     var lastFiredAt: Date?
     var alarmKitID: UUID?
+    /// AlarmKit ID for the silent auto-stop alarm (fires at alarmTime + duration to replace the main alarm's sound).
+    var autoStopAlarmKitID: UUID?
     var snoozeDurationSecondsValue: Int?
     var snoozeEnabledValue: Bool?
     var alarmDurationSecondsValue: Int?
