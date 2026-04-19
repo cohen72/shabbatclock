@@ -22,8 +22,13 @@ final class ZmanimService: ObservableObject {
   @Published var parashaHebrew: String = ""
   @Published var parashaEnglish: String = ""
   @Published var hebrewDateString: String = ""
+  @Published var hebrewDateEnglish: String = ""
   @Published var daysUntilShabbat: Int = 0
   @Published var nextShabbatDate: Date?
+
+  // Daf Yomi
+  @Published var dafYomiEnglish: String = ""
+  @Published var dafYomiHebrew: String = ""
 
   private let locationManager = LocationManager.shared
   private var locationObservation: Any?
@@ -118,160 +123,126 @@ final class ZmanimService: ObservableObject {
   }
   
   // MARK: - Calculate Zmanim
-  
+
   /// Calculate today's zmanim for the current location using KosherSwift.
   func calculateTodayZmanim() {
     isLoading = true
-    
+
+    todayZmanim = calculateZmanim(for: Date())
+    lastUpdated = Date()
+    isLoading = false
+
+    // Store sunrise/sunset
     let location = locationManager.currentOrDefaultLocation
-    let today = Date()
-    
-    // Create GeoLocation for KosherSwift
     let geoLocation = GeoLocation(
       locationName: locationManager.locationName,
       latitude: location.coordinate.latitude,
       longitude: location.coordinate.longitude,
       timeZone: locationManager.locationTimeZone
     )
-    
-    // Create ComplexZmanimCalendar
-    let calendar = ComplexZmanimCalendar(location: geoLocation)
-    calendar.workingDate = today
-    
-    // Calculate all zmanim
-    var zmanim: [Zman] = []
-    
-    // Alot HaShachar (72 minutes before sunrise - GRA)
-    if let alot = calendar.getAlos72() {
-      zmanim.append(Zman(
-        type: .alotHashachar,
-        time: alot,
-        hebrewName: ZmanType.alotHashachar.hebrewName,
-        englishName: ZmanType.alotHashachar.englishName,
-        description: ZmanType.alotHashachar.description
-      ))
-    }
-    
-    // Misheyakir (earliest tallit - 36 minutes before sunrise)
-    if let misheyakir = calendar.getMisheyakir10Point2Degrees() {
-      zmanim.append(Zman(
-        type: .misheyakir,
-        time: misheyakir,
-        hebrewName: ZmanType.misheyakir.hebrewName,
-        englishName: ZmanType.misheyakir.englishName,
-        description: ZmanType.misheyakir.description
-      ))
-    }
-    
-    // Netz (Sunrise)
-    if let sunrise = calendar.getSunrise() {
-      zmanim.append(Zman(
-        type: .netz,
-        time: sunrise,
-        hebrewName: ZmanType.netz.hebrewName,
-        englishName: ZmanType.netz.englishName,
-        description: ZmanType.netz.description
-      ))
-    }
-    
-    // Sof Zman Shma (Latest Shema - GRA)
-    if let sofShma = calendar.getSofZmanShmaGRA() {
-      zmanim.append(Zman(
-        type: .sofZmanShma,
-        time: sofShma,
-        hebrewName: ZmanType.sofZmanShma.hebrewName,
-        englishName: ZmanType.sofZmanShma.englishName,
-        description: ZmanType.sofZmanShma.description
-      ))
-    }
-    
-    // Sof Zman Tefila (Latest Shacharit - GRA)
-    if let sofTefila = calendar.getSofZmanTfilaGRA() {
-      zmanim.append(Zman(
-        type: .sofZmanTefila,
-        time: sofTefila,
-        hebrewName: ZmanType.sofZmanTefila.hebrewName,
-        englishName: ZmanType.sofZmanTefila.englishName,
-        description: ZmanType.sofZmanTefila.description
-      ))
-    }
-    
-    // Chatzot (Midday)
-    if let chatzot = calendar.getChatzos() {
-      zmanim.append(Zman(
-        type: .chatzot,
-        time: chatzot,
-        hebrewName: ZmanType.chatzot.hebrewName,
-        englishName: ZmanType.chatzot.englishName,
-        description: ZmanType.chatzot.description
-      ))
-    }
-    
-    // Mincha Gedola (Earliest Mincha - 30 minutes after chatzot)
-    if let minchaGedola = calendar.getMinchaGedola() {
-      zmanim.append(Zman(
-        type: .minchaGedola,
-        time: minchaGedola,
-        hebrewName: ZmanType.minchaGedola.hebrewName,
-        englishName: ZmanType.minchaGedola.englishName,
-        description: ZmanType.minchaGedola.description
-      ))
-    }
-    
-    // Mincha Ketana (Preferable Mincha time)
-    if let minchaKetana = calendar.getMinchaKetana() {
-      zmanim.append(Zman(
-        type: .minchaKetana,
-        time: minchaKetana,
-        hebrewName: ZmanType.minchaKetana.hebrewName,
-        englishName: ZmanType.minchaKetana.englishName,
-        description: ZmanType.minchaKetana.description
-      ))
-    }
-    
-    // Plag HaMincha
-    if let plag = calendar.getPlagHamincha() {
-      zmanim.append(Zman(
-        type: .plagHamincha,
-        time: plag,
-        hebrewName: ZmanType.plagHamincha.hebrewName,
-        englishName: ZmanType.plagHamincha.englishName,
-        description: ZmanType.plagHamincha.description
-      ))
-    }
-    
-    // Shkia (Sunset)
-    if let sunset = calendar.getSunset() {
-      zmanim.append(Zman(
-        type: .shkia,
-        time: sunset,
-        hebrewName: ZmanType.shkia.hebrewName,
-        englishName: ZmanType.shkia.englishName,
-        description: ZmanType.shkia.description
-      ))
-    }
-    
-    // Tzeis HaKochavim (Nightfall - 3 medium stars)
-    if let tzeis = calendar.getTzais() {
-      zmanim.append(Zman(
-        type: .tzeitHakochavim,
-        time: tzeis,
-        hebrewName: ZmanType.tzeitHakochavim.hebrewName,
-        englishName: ZmanType.tzeitHakochavim.englishName,
-        description: ZmanType.tzeitHakochavim.description
-      ))
-    }
-    
-    todayZmanim = zmanim
-    lastUpdated = Date()
-    isLoading = false
-
-    // Store sunrise/sunset for the daylight arc
-    sunriseTime = calendar.getSunrise()
-    sunsetTime = calendar.getSunset()
+    let cal = ComplexZmanimCalendar(location: geoLocation)
+    cal.workingDate = Date()
+    sunriseTime = cal.getSunrise()
+    sunsetTime = cal.getSunset()
 
     // Calculate Shabbat times
     calculateShabbatTimes()
+  }
+
+  /// Calculate zmanim for a specific date and the current location.
+  func calculateZmanim(for date: Date) -> [Zman] {
+    let location = locationManager.currentOrDefaultLocation
+
+    let geoLocation = GeoLocation(
+      locationName: locationManager.locationName,
+      latitude: location.coordinate.latitude,
+      longitude: location.coordinate.longitude,
+      timeZone: locationManager.locationTimeZone
+    )
+
+    let calendar = ComplexZmanimCalendar(location: geoLocation)
+    calendar.workingDate = date
+
+    var zmanim: [Zman] = []
+
+    if let alot = calendar.getAlos72() {
+      zmanim.append(Zman(type: .alotHashachar, time: alot,
+        hebrewName: ZmanType.alotHashachar.hebrewName,
+        englishName: ZmanType.alotHashachar.englishName,
+        description: ZmanType.alotHashachar.description))
+    }
+
+    if let misheyakir = calendar.getMisheyakir10Point2Degrees() {
+      zmanim.append(Zman(type: .misheyakir, time: misheyakir,
+        hebrewName: ZmanType.misheyakir.hebrewName,
+        englishName: ZmanType.misheyakir.englishName,
+        description: ZmanType.misheyakir.description))
+    }
+
+    if let sunrise = calendar.getSunrise() {
+      zmanim.append(Zman(type: .netz, time: sunrise,
+        hebrewName: ZmanType.netz.hebrewName,
+        englishName: ZmanType.netz.englishName,
+        description: ZmanType.netz.description))
+    }
+
+    if let sofShma = calendar.getSofZmanShmaGRA() {
+      zmanim.append(Zman(type: .sofZmanShma, time: sofShma,
+        hebrewName: ZmanType.sofZmanShma.hebrewName,
+        englishName: ZmanType.sofZmanShma.englishName,
+        description: ZmanType.sofZmanShma.description))
+    }
+
+    if let sofTefila = calendar.getSofZmanTfilaGRA() {
+      zmanim.append(Zman(type: .sofZmanTefila, time: sofTefila,
+        hebrewName: ZmanType.sofZmanTefila.hebrewName,
+        englishName: ZmanType.sofZmanTefila.englishName,
+        description: ZmanType.sofZmanTefila.description))
+    }
+
+    if let chatzot = calendar.getChatzos() {
+      zmanim.append(Zman(type: .chatzot, time: chatzot,
+        hebrewName: ZmanType.chatzot.hebrewName,
+        englishName: ZmanType.chatzot.englishName,
+        description: ZmanType.chatzot.description))
+    }
+
+    if let minchaGedola = calendar.getMinchaGedola() {
+      zmanim.append(Zman(type: .minchaGedola, time: minchaGedola,
+        hebrewName: ZmanType.minchaGedola.hebrewName,
+        englishName: ZmanType.minchaGedola.englishName,
+        description: ZmanType.minchaGedola.description))
+    }
+
+    if let minchaKetana = calendar.getMinchaKetana() {
+      zmanim.append(Zman(type: .minchaKetana, time: minchaKetana,
+        hebrewName: ZmanType.minchaKetana.hebrewName,
+        englishName: ZmanType.minchaKetana.englishName,
+        description: ZmanType.minchaKetana.description))
+    }
+
+    if let plag = calendar.getPlagHamincha() {
+      zmanim.append(Zman(type: .plagHamincha, time: plag,
+        hebrewName: ZmanType.plagHamincha.hebrewName,
+        englishName: ZmanType.plagHamincha.englishName,
+        description: ZmanType.plagHamincha.description))
+    }
+
+    if let sunset = calendar.getSunset() {
+      zmanim.append(Zman(type: .shkia, time: sunset,
+        hebrewName: ZmanType.shkia.hebrewName,
+        englishName: ZmanType.shkia.englishName,
+        description: ZmanType.shkia.description))
+    }
+
+    if let tzeis = calendar.getTzais() {
+      zmanim.append(Zman(type: .tzeitHakochavim, time: tzeis,
+        hebrewName: ZmanType.tzeitHakochavim.hebrewName,
+        englishName: ZmanType.tzeitHakochavim.englishName,
+        description: ZmanType.tzeitHakochavim.description))
+    }
+
+    return zmanim
   }
 
   // MARK: - Shabbat Times
@@ -350,6 +321,18 @@ final class ZmanimService: ObservableObject {
     let hdf = HebrewDateFormatter()
     hdf.hebrewFormat = true
     hebrewDateString = hdf.format(jewishCalendar: todayJewish)
+
+    hdf.hebrewFormat = false
+    hebrewDateEnglish = hdf.format(jewishCalendar: todayJewish)
+
+    // Daf Yomi Bavli
+    if let daf = todayJewish.getDafYomiBavli() {
+      dafYomiEnglish = "\(daf.getMasechtaTransliterated()) \(daf.getDaf())"
+      dafYomiHebrew = "\(daf.getMasechta()) \(daf.getDaf())"
+    }
+
+    // Reschedule pre-Shabbat reminder with updated candle lighting time
+    ShabbatReminderService.shared.reschedule()
   }
 
   // MARK: - Helper Methods

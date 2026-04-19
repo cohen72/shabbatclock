@@ -7,6 +7,7 @@ import CoreLocation
 struct DebugView: View {
     @Environment(AlarmKitService.self) private var alarmService
     @StateObject private var locationManager = LocationManager.shared
+    @ObservedObject private var storeManager = StoreManager.shared
 
     @State private var showingLocationPrompt = false
     @State private var showingAlarmPrompt = false
@@ -14,6 +15,7 @@ struct DebugView: View {
     @State private var showingOnboarding = false
 
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("debugSimulateFriday") private var simulateFriday = false
 
     var body: some View {
         ZStack {
@@ -22,6 +24,12 @@ struct DebugView: View {
 
             ScrollView {
                 VStack(spacing: 24) {
+                    // Premium Override
+                    premiumSection
+
+                    // Simulate Friday
+                    simulationSection
+
                     // Onboarding
                     onboardingSection
 
@@ -69,6 +77,96 @@ struct DebugView: View {
                 showingOnboarding = false
             }
             .applyLanguageOverride(AppLanguage.current)
+        }
+    }
+
+    // MARK: - Premium Override
+
+    private var premiumSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Premium", icon: "crown.fill")
+
+            VStack(spacing: 1) {
+                HStack {
+                    Text("Override Premium")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.textPrimary)
+                    Spacer()
+                    Toggle("", isOn: Binding(
+                        get: { storeManager.debugPremiumOverride != nil },
+                        set: { enabled in
+                            storeManager.debugPremiumOverride = enabled ? false : nil
+                            storeManager.syncAppStorage()
+                        }
+                    ))
+                    .labelsHidden()
+                    .tint(.goldAccent)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 11)
+                .background(Color.surfaceCard)
+
+                if storeManager.debugPremiumOverride != nil {
+                    HStack {
+                        Text("Premium State")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.textPrimary)
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { storeManager.debugPremiumOverride ?? false },
+                            set: { newValue in
+                                storeManager.debugPremiumOverride = newValue
+                                storeManager.syncAppStorage()
+                            }
+                        ))
+                        .labelsHidden()
+                        .tint(.goldAccent)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 11)
+                    .background(Color.surfaceCard)
+                }
+
+                stateRow("Actual Subscriptions", value: storeManager.purchasedProductIDs.isEmpty ? "None" : "Active")
+                stateRow("Effective isPremium", value: storeManager.isPremium ? "Yes" : "No")
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
+        }
+    }
+
+    // MARK: - Simulation
+
+    private var simulationSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Simulation", icon: "wand.and.stars")
+
+            VStack(spacing: 1) {
+                HStack {
+                    Text("Simulate Friday")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.textPrimary)
+                    Spacer()
+                    Toggle("", isOn: $simulateFriday)
+                        .labelsHidden()
+                        .tint(.goldAccent)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 11)
+                .background(Color.surfaceCard)
+
+                if simulateFriday {
+                    stateRow("Effect", value: "Shabbat banners visible")
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
         }
     }
 

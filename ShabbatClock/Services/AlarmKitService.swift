@@ -28,6 +28,10 @@ final class AlarmKitService: NSObject {
     /// False when authorization is undetermined (user hasn't been asked yet).
     var isFallbackMode: Bool { !isAuthorized && hasBeenAskedForAuthorization }
 
+    /// True when BOTH AlarmKit AND notifications are denied — alarms cannot work at all.
+    /// Distinct from isFallbackMode (AlarmKit denied but notifications available).
+    var isBothDenied: Bool { !isAuthorized && !isNotificationAuthorized && hasBeenAskedForAuthorization }
+
     /// Whether the user has been prompted for AlarmKit authorization at least once.
     var hasBeenAskedForAuthorization: Bool {
         // If state is not .notDetermined, user has been asked
@@ -125,6 +129,16 @@ final class AlarmKitService: NSObject {
         }
     }
 
+    /// Re-check notification permission status without prompting.
+    /// Call on foreground return so the UI reflects Settings changes.
+    func refreshNotificationAuthorization() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            Task { @MainActor in
+                self.isNotificationAuthorized = settings.authorizationStatus == .authorized
+            }
+        }
+    }
+
     /// Request notification permission (for auto-stop and fallback alarms). Call contextually, not at launch.
     func requestNotificationAuthorization() async {
         let center = UNUserNotificationCenter.current()
@@ -194,7 +208,7 @@ final class AlarmKitService: NSObject {
         alarmsBeingScheduled.insert(alarm.id)
         defer { alarmsBeingScheduled.remove(alarm.id) }
 
-        // Clear any prior state — prior AlarmKit alarm, prior auto-stop, prior fallback.
+        // Clear any prior state — prior AlarmKit alarm, auto-stop alarm, notifications, fallback.
         if let priorID = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: priorID)
             removeAutoStopNotifications(for: priorID, repeatDays: alarm.repeatDays)
@@ -241,7 +255,7 @@ final class AlarmKitService: NSObject {
         let repeatDays = alarm.repeatDays
         let alarmID = alarm.id
 
-        // Cancel AlarmKit alarm
+        // Cancel AlarmKit alarm + auto-stop notifications
         if let id = alarmKitID {
             try? AlarmManager.shared.cancel(id: id)
             removeAutoStopNotifications(for: id, repeatDays: repeatDays)
@@ -339,7 +353,7 @@ final class AlarmKitService: NSObject {
         do {
             _ = try await AlarmManager.shared.schedule(id: alarmKitID, configuration: config)
 
-            // Schedule auto-stop notification at alarm fire time + duration
+            // Schedule auto-stop notification at alarm fire time + duration (works when app is backgrounded)
             scheduleAutoStopNotification(
                 alarmKitID: alarmKitID,
                 alarm: alarm
@@ -501,10 +515,10 @@ final class AlarmKitService: NSObject {
         // Build shared notification content
         func makeContent() -> UNMutableNotificationContent {
             let content = UNMutableNotificationContent()
-            content.categoryIdentifier = Self.autoStopCategoryID
             content.userInfo = ["alarmKitID": alarmKitID.uuidString, "action": "autoStop"]
-            content.title = alarm.label
-            content.body = String(localized: "Alarm stopped automatically")
+            // Silent — no title, body, badge, or sound.
+            // timeSensitive ensures delivery isn't deferred by Focus modes.
+            // The delegate callback still fires to execute the auto-stop code.
             content.sound = nil
             content.interruptionLevel = .timeSensitive
             return content

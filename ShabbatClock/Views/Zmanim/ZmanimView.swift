@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// View displaying today's Zmanim (halachic times) with one-tap alarm management.
+/// View displaying today's or tomorrow's Zmanim (halachic times) with one-tap alarm management.
 struct ZmanimView: View {
     @StateObject private var zmanimService = ZmanimService.shared
     @StateObject private var locationManager = LocationManager.shared
@@ -10,17 +10,55 @@ struct ZmanimView: View {
     @State private var showingCitySearch = false
     @State private var showingLocationPrompt = false
     @State private var showingPremiumAlert = false
+    @State private var showingPremium = false
     @State private var sheetZman: ZmanimService.Zman?
+    @State private var selectedDay: ZmanimDay = .today
+    @State private var tomorrowZmanim: [ZmanimService.Zman] = []
+
+    enum ZmanimDay: String, CaseIterable {
+        case today, tomorrow
+    }
+
+    /// The zmanim to display based on selected day.
+    private var displayedZmanim: [ZmanimService.Zman] {
+        selectedDay == .today ? zmanimService.todayZmanim : tomorrowZmanim
+    }
 
     // Premium
     private let freeAlarmLimit = 3
     @AppStorage("isPremium") private var isPremium = false
 
-    /// Lookup: zmanType rawValue → linked Alarm
-    private var alarmsByZmanType: [String: Alarm] {
+    /// All zman-linked alarms by type (unfiltered). Used for tap handling
+    /// to prevent duplicate alarm creation when an alarm exists but fires on a different day.
+    private var allAlarmsByZmanType: [String: Alarm] {
         Dictionary(
             allAlarms.compactMap { alarm in
                 guard let raw = alarm.zmanTypeRawValue else { return nil }
+                return (raw, alarm)
+            },
+            uniquingKeysWith: { first, _ in first }
+        )
+    }
+
+    /// Lookup: zmanType rawValue → linked Alarm, filtered to the selected day.
+    /// A zman alarm's bell icon only shows on the day tab matching its next fire date,
+    /// so a past-zman alarm (firing tomorrow) won't show as "set" on today's row.
+    private var displayedAlarmsByZmanType: [String: Alarm] {
+        let calendar = Calendar.current
+        let isToday = selectedDay == .today
+
+        return Dictionary(
+            allAlarms.compactMap { alarm -> (String, Alarm)? in
+                guard let raw = alarm.zmanTypeRawValue else { return nil }
+
+                // Determine which day this alarm actually fires on
+                if let fireDate = alarm.nextFireDate() {
+                    let firesOnToday = calendar.isDateInToday(fireDate)
+                    // Show bell only on the tab matching the fire date
+                    if isToday && !firesOnToday { return nil }
+                    if !isToday && firesOnToday { return nil }
+                }
+
                 return (raw, alarm)
             },
             uniquingKeysWith: { first, _ in first }
@@ -65,27 +103,35 @@ struct ZmanimView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 0) {
-                            let nextZmanId = zmanimService.todayZmanim.first(where: { $0.time > Date() })?.id
+                            // Today / Tomorrow toggle
+                            dayPicker
+                                .padding(.top, 8)
+
+                            let isToday = selectedDay == .today
+                            let nextZmanId = isToday
+                                ? displayedZmanim.first(where: { $0.time > Date() })?.id
+                                : nil // No "next" concept for tomorrow
 
                             ForEach(ZmanSection.allCases, id: \.self) { section in
-                                let sectionZmanim = zmanimService.todayZmanim.filter { section.types.contains($0.type) }
+                                let sectionZmanim = displayedZmanim.filter { section.types.contains($0.type) }
                                 if !sectionZmanim.isEmpty {
                                     sectionHeader(section.localizedTitle, showDate: section == .morning)
 
                                     LazyVStack(spacing: 6) {
                                         ForEach(sectionZmanim) { zman in
-                                            let linkedAlarm = alarmsByZmanType[zman.type.rawValue]
+                                            let displayAlarm = displayedAlarmsByZmanType[zman.type.rawValue]
+                                            let globalAlarm = allAlarmsByZmanType[zman.type.rawValue]
                                             ZmanRowView(
                                                 zman: zman,
                                                 isNext: zman.id == nextZmanId,
-                                                isPast: nextZmanId != nil && zman.time <= Date(),
-                                                linkedAlarm: linkedAlarm,
+                                                isPast: isToday && zman.time <= Date(),
+                                                linkedAlarm: displayAlarm,
                                                 onBellTap: {
-                                                    handleBellTap(for: zman, existingAlarm: linkedAlarm)
+                                                    handleBellTap(for: zman, existingAlarm: globalAlarm)
                                                 }
                                             )
                                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                                if linkedAlarm != nil {
+                                                if globalAlarm != nil {
                                                     Button(role: .destructive) {
                                                         deleteAlarm(for: zman)
                                                     } label: {
@@ -106,6 +152,7 @@ struct ZmanimView: View {
                             locationManager.requestLocation()
                         }
                         zmanimService.calculateTodayZmanim()
+                        recalculateTomorrow()
                     }
                 }
             }
@@ -146,12 +193,14 @@ struct ZmanimView: View {
                 }
                 zmanimService.calculateTodayZmanim()
             }
+            recalculateTomorrow()
         }
         .onChange(of: locationManager.location) { _, _ in
             zmanimService.calculateTodayZmanim()
+            recalculateTomorrow()
         }
         .sheet(item: $sheetZman) { zman in
-            let linkedAlarm = alarmsByZmanType[zman.type.rawValue]
+            let linkedAlarm = allAlarmsByZmanType[zman.type.rawValue]
             ZmanAlarmSheet(
                 zman: zman,
                 existingAlarm: linkedAlarm,
@@ -163,9 +212,15 @@ struct ZmanimView: View {
         }
         .alert("Upgrade to Premium", isPresented: $showingPremiumAlert) {
             Button("Maybe Later", role: .cancel) {}
-            Button("Upgrade") {}
+            Button("Upgrade") {
+                showingPremium = true
+            }
         } message: {
             Text("Free users can create up to \(freeAlarmLimit) alarms. Upgrade to Premium for unlimited alarms and more sounds!")
+        }
+        .sheet(isPresented: $showingPremium) {
+            PremiumView()
+                .applyLanguageOverride(AppLanguage.current)
         }
         .fullScreenCover(isPresented: $showingLocationPrompt) {
             PermissionPromptView.location(
@@ -195,8 +250,24 @@ struct ZmanimView: View {
     }
 
     private func deleteAlarm(for zman: ZmanimService.Zman) {
-        guard let alarm = alarmsByZmanType[zman.type.rawValue] else { return }
+        guard let alarm = allAlarmsByZmanType[zman.type.rawValue] else { return }
         AlarmKitService.shared.delete(alarm)
+    }
+
+    // MARK: - Day Picker
+
+    private var dayPicker: some View {
+        Picker("Day", selection: $selectedDay) {
+            Text("Today").tag(ZmanimDay.today)
+            Text("Tomorrow").tag(ZmanimDay.tomorrow)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, 16)
+    }
+
+    private func recalculateTomorrow() {
+        guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) else { return }
+        tomorrowZmanim = zmanimService.calculateZmanim(for: tomorrow)
     }
 
     // MARK: - Subviews
@@ -273,7 +344,14 @@ struct ZmanimView: View {
         let formatter = DateFormatter()
         formatter.locale = AppLanguage.current.effectiveLocale
         formatter.dateStyle = .full
-        return formatter.string(from: Date())
+        let date: Date
+        if selectedDay == .tomorrow,
+           let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
+            date = tomorrow
+        } else {
+            date = Date()
+        }
+        return formatter.string(from: date)
     }
 }
 
@@ -357,16 +435,19 @@ struct ZmanRowView: View {
 
                 Text(zman.englishName)
                     .font(.system(size: 12))
-                    .foregroundStyle(.textSecondary)
+                    .foregroundStyle(alarmSubtitle != nil ? .clear : .textSecondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-
-                // Show concrete ring time when alarm is set and enabled
-                if let subtitle = alarmSubtitle {
-                    Text(subtitle)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.accentPurple.opacity(0.8))
-                }
+                    .overlay(alignment: .leading) {
+                        // Show concrete ring time when alarm is set, replacing English name
+                        // Uses overlay so row height stays constant
+                        if let subtitle = alarmSubtitle {
+                            Text(subtitle)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.accentPurple.opacity(0.8))
+                                .lineLimit(1)
+                        }
+                    }
             }
 
             Spacer()
@@ -384,26 +465,28 @@ struct ZmanRowView: View {
                 }
             }
 
-            // Bell button
-            Button(action: onBellTap) {
-                Image(systemName: bellIconName)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(bellColor)
-                    .frame(width: 36, height: 36)
-                    .background(
-                        Circle()
-                            .fill(bellBackground)
-                            .overlay(
-                                Circle()
-                                    .stroke(linkedAlarm?.isEnabled == true
-                                            ? Color.accentPurple.opacity(0.4)
-                                            : Color.surfaceBorder,
-                                            lineWidth: 1)
-                            )
-                    )
+            // Bell button — hidden for past zmanim with no alarm on this day
+            if !isPast || linkedAlarm != nil {
+                Button(action: onBellTap) {
+                    Image(systemName: bellIconName)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(bellColor)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            Circle()
+                                .fill(bellBackground)
+                                .overlay(
+                                    Circle()
+                                        .stroke(linkedAlarm?.isEnabled == true
+                                                ? Color.accentPurple.opacity(0.4)
+                                                : Color.surfaceBorder,
+                                                lineWidth: 1)
+                                )
+                        )
+                }
+                .buttonStyle(.plain)
+                .contentShape(Circle())
             }
-            .buttonStyle(.plain)
-            .contentShape(Circle())
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)

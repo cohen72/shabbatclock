@@ -19,7 +19,6 @@ struct ZmanAlarmSheet: View {
     let onDelete: (() -> Void)?
 
     // Draft state
-    @State private var isEnabled: Bool
     @State private var minutesBefore: Int
     @State private var draftSoundName: String
     @State private var draftAlarmDuration: Int
@@ -42,9 +41,9 @@ struct ZmanAlarmSheet: View {
         self.onDelete = onDelete
 
         let alarm = existingAlarm
-        _isEnabled = State(initialValue: alarm?.isEnabled ?? false)
         _minutesBefore = State(initialValue: alarm?.zmanMinutesBefore ?? 0)
-        _draftSoundName = State(initialValue: alarm?.soundName ?? "Lecha Dodi")
+        let fallbackSound = UserDefaults.standard.string(forKey: "defaultSound") ?? "Lecha Dodi"
+        _draftSoundName = State(initialValue: alarm?.soundName ?? fallbackSound)
         _draftAlarmDuration = State(initialValue: alarm?.alarmDurationSeconds ?? 30)
         _draftLabel = State(initialValue: alarm?.label ?? zman.englishName)
     }
@@ -86,23 +85,22 @@ struct ZmanAlarmSheet: View {
 
                 ScrollView {
                     VStack(spacing: 16) {
-                        // Hero card: zman identity + enable toggle
-                        heroHeader
+                        // Auto-stop background reminder
+                        AutoStopBackgroundBanner()
                             .padding(.top, 12)
 
-                        // Offset picker + fire time
-                        if isEnabled || existingAlarm != nil {
-                            offsetCard
-                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        // Hero card: zman identity
+                        heroHeader
 
-                            // Alarm settings (sound, auto-stop, label)
-                            AlarmSettingsSection(
-                                soundName: $draftSoundName,
-                                alarmDuration: $draftAlarmDuration,
-                                label: $draftLabel
-                            )
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
+                        // Offset picker + fire time
+                        offsetCard
+
+                        // Alarm settings (sound, auto-stop, label)
+                        AlarmSettingsSection(
+                            soundName: $draftSoundName,
+                            alarmDuration: $draftAlarmDuration,
+                            label: $draftLabel
+                        )
 
                         // Remove button (existing alarms only)
                         if existingAlarm != nil {
@@ -115,7 +113,6 @@ struct ZmanAlarmSheet: View {
                 }
             }
             .scrollDismissesKeyboard(.immediately)
-            .animation(.easeInOut(duration: 0.25), value: isEnabled)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -124,8 +121,8 @@ struct ZmanAlarmSheet: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    // Show Save when: editing existing alarm with changes, or creating new with toggle ON
-                    if (existingAlarm != nil && hasChanges) || (existingAlarm == nil && isEnabled) {
+                    // New alarm: always show Save. Existing: show when changes made.
+                    if existingAlarm == nil || hasChanges {
                         Button("Save") {
                             saveAlarm()
                         }
@@ -139,7 +136,6 @@ struct ZmanAlarmSheet: View {
         .onChange(of: draftSoundName) { _, _ in hasChanges = true }
         .onChange(of: draftAlarmDuration) { _, _ in hasChanges = true }
         .onChange(of: draftLabel) { _, _ in hasChanges = true }
-        .onChange(of: isEnabled) { _, _ in hasChanges = true }
         .confirmationDialog("Remove Alarm", isPresented: $showingDeleteConfirmation) {
             Button("Remove", role: .destructive) {
                 dismiss()
@@ -187,47 +183,22 @@ struct ZmanAlarmSheet: View {
 
     // MARK: - Hero Header
 
-    /// Matches the main tab hero card visual language: small caps label, large name, time, inline toggle.
     private var heroHeader: some View {
-        VStack(spacing: 0) {
-            // Zman identity
-            VStack(spacing: 4) {
-                Text(zman.hebrewName)
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(.goldAccent)
+        VStack(spacing: 4) {
+            Text(zman.hebrewName)
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(.goldAccent)
 
-                Text(zman.englishName)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.textPrimary)
+            Text(zman.englishName)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.textPrimary)
 
-                Text(zmanTimeString)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.textSecondary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-
-            Divider().overlay(Color.surfaceBorder)
-
-            // Inline enable toggle
-            HStack(spacing: 10) {
-                Image(systemName: isEnabled ? "bell.fill" : "bell")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(isEnabled ? .goldAccent : .textSecondary)
-
-                Text(existingAlarm != nil ? "Alarm Enabled" : "Set Alarm")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(.textPrimary)
-
-                Spacer()
-
-                Toggle("", isOn: $isEnabled)
-                    .labelsHidden()
-                    .tint(.accentPurple)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            Text(zmanTimeString)
+                .font(.system(size: 13))
+                .foregroundStyle(.textSecondary)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
         .themeCard(cornerRadius: 14)
     }
 
@@ -346,12 +317,6 @@ struct ZmanAlarmSheet: View {
     }
 
     private func commitSave() {
-        // Don't create a new alarm if the user never enabled it
-        if existingAlarm == nil && !isEnabled {
-            dismiss()
-            return
-        }
-
         let alarm: Alarm
         let isNew: Bool
 
@@ -367,9 +332,10 @@ struct ZmanAlarmSheet: View {
         let calendar = Calendar.current
         alarm.hour = calendar.component(.hour, from: fireTime)
         alarm.minute = calendar.component(.minute, from: fireTime)
-        alarm.isEnabled = isEnabled
+        alarm.isEnabled = true
         alarm.label = draftLabel
         alarm.soundName = draftSoundName
+        alarm.snoozeEnabled = false
         alarm.zmanTypeRawValue = zman.type.rawValue
         alarm.zmanMinutesBefore = minutesBefore
 
@@ -383,13 +349,8 @@ struct ZmanAlarmSheet: View {
             modelContext.insert(alarm)
         }
 
-        if alarm.isEnabled {
-            Task {
-                await alarmService.enable(alarm)
-                dismiss()
-            }
-        } else {
-            alarmService.disable(alarm)
+        Task {
+            await alarmService.enable(alarm)
             dismiss()
         }
     }

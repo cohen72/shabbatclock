@@ -26,6 +26,7 @@ struct AlarmEditView: View {
   @State private var showingFallbackAlert = false
   
   @AppStorage("isPremium") private var isPremium = false
+  @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
   
   private let snoozeDurationOptions: [(String, Int)] = [
     ("1 min", 60),
@@ -43,6 +44,9 @@ struct AlarmEditView: View {
         
         ScrollView {
           VStack(spacing: 16) {
+            // Auto-stop background reminder
+            AutoStopBackgroundBanner()
+
             // Time picker
             timePickerSection
               .padding(.bottom, 8)
@@ -93,7 +97,7 @@ struct AlarmEditView: View {
       draftHour = alarm.hour
       draftMinute = alarm.minute
       draftLabel = alarm.label
-      draftSoundName = alarm.soundName
+      draftSoundName = isNew ? defaultSound : alarm.soundName
       draftRepeatDays = alarm.repeatDays
       draftSnoozeEnabled = alarm.snoozeEnabled
       draftSnoozeDuration = alarm.snoozeDurationSeconds

@@ -179,9 +179,9 @@ final class ZmanAlarmSyncService: ObservableObject {
     func ringTimeDescription(for alarm: Alarm) -> String? {
         guard let fireDate = nextFireDate(for: alarm) else { return nil }
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        let timeStr = formatter.string(from: fireDate)
+        // Use the alarm's stored hour/minute for display (not the recomputed Date)
+        // so it always matches the zman time shown in the row.
+        let timeStr = alarm.formattedTime
 
         let calendar = Calendar.current
         if calendar.isDateInToday(fireDate) {

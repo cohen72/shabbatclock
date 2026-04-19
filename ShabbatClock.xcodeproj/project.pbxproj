@@ -48,6 +48,7 @@
 		EDE72F4B2F8BFB3200E40DFF /* widgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EDF6A1E02F23A6860052797F /* KosherSwift in Frameworks */ = {isa = PBXBuildFile; productRef = EDF6A1DF2F23A6860052797F /* KosherSwift */; };
 		EDF6A1E52F23BA5C0052797F /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDF6A1E42F23BA5C0052797F /* Media.xcassets */; };
+		FC9AFE400A4C3BA8F9DC6356 /* ShabbatReminderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +107,7 @@
 		BBB00103 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BBB00200 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		BBB00201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatReminderService.swift; sourceTree = "<group>"; };
 		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
 		CC27FEBB /* PermissionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPromptView.swift; sourceTree = "<group>"; };
 		CC27FEBC /* SwipeToDelete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeToDelete.swift; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 				BBB00023 /* LocationManager.swift */,
 				BBB00024 /* ZmanimService.swift */,
 				028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */,
+				C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -496,6 +499,7 @@
 				BF7213DF338B8C9C1EB62A43 /* ZmanAlarmSyncService.swift in Sources */,
 				27A8F7D5C4375871A26FD7D4 /* AlarmSettingsSection.swift in Sources */,
 				D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */,
+				FC9AFE400A4C3BA8F9DC6356 /* ShabbatReminderService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

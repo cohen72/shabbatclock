@@ -4,7 +4,7 @@
     "" : {
 
     },
-    "·" : {
+    "--:--" : {
 
     },
     "/week" : {
@@ -91,10 +91,35 @@
       }
     },
     "$0.99/week" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "$0.99/שבוע"
+          }
+        }
+      }
     },
     "$14.99/year" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "$14.99/שנה"
+          }
+        }
+      }
+    },
+    "1 hour" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעה"
+          }
+        }
+      }
     },
     "1.0.0" : {
 
@@ -106,6 +131,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שעה ורבע לפני השקיעה"
+          }
+        }
+      }
+    },
+    "2 hours" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעתיים"
+          }
+        }
+      }
+    },
+    "3 hours" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 שעות"
+          }
+        }
+      }
+    },
+    "4 hours" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 שעות"
           }
         }
       }
@@ -195,7 +253,14 @@
       }
     },
     "30 sec" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 שנ׳"
+          }
+        }
+      }
     },
     "42 beautiful sounds including Shabbat melodies" : {
       "localizations" : {
@@ -323,6 +388,7 @@
       }
     },
     "Alarm Enabled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -373,6 +439,7 @@
       }
     },
     "Alarm stopped automatically" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -383,6 +450,7 @@
       }
     },
     "Alarm Vibration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -422,6 +490,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "התראות"
+          }
+        }
+      }
+    },
+    "Alarms Can't Ring" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראות לא יצלצלו"
           }
         }
       }
@@ -467,6 +545,16 @@
         }
       }
     },
+    "Allow alarms and notifications in Settings" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר התראות והתרעות בהגדרות"
+          }
+        }
+      }
+    },
     "Allow alarms in Settings for longer durations" : {
       "localizations" : {
         "he" : {
@@ -478,7 +566,14 @@
       }
     },
     "Allow in Settings for full alarm features" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשרו בהגדרות לתכונות התראה מלאות"
+          }
+        }
+      }
     },
     "Allow Notifications" : {
       "localizations" : {
@@ -563,6 +658,7 @@
       }
     },
     "Auto-stop requires the app to be running in the background. Don't force-quit before Shabbat." : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -578,6 +674,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "עצירה אוטומטית עד 30 דקות"
+          }
+        }
+      }
+    },
+    "before" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפני"
           }
         }
       }
@@ -678,7 +785,14 @@
       }
     },
     "Choose City Manually" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בחירת עיר ידנית"
+          }
+        }
+      }
     },
     "Clear" : {
       "extractionState" : "manual",
@@ -722,6 +836,7 @@
       }
     },
     "Controlled by iOS · Settings › Sounds & Haptics" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -763,8 +878,18 @@
         }
       }
     },
-    "Custom Alarm" : {
+    "CURRENT PARASHAT" : {
 
+    },
+    "Custom Alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה מותאמת"
+          }
+        }
+      }
     },
     "Custom Durations" : {
       "extractionState" : "manual",
@@ -794,6 +919,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שחר"
+          }
+        }
+      }
+    },
+    "Day" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום"
           }
         }
       }
@@ -914,7 +1049,14 @@
       }
     },
     "Early Minyan" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מניין מוקדם"
+          }
+        }
+      }
     },
     "Eastern" : {
       "extractionState" : "manual",
@@ -991,10 +1133,24 @@
       }
     },
     "Enable location in Settings" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעילו מיקום בהגדרות"
+          }
+        }
+      }
     },
     "Enable location in Settings for accurate prayer times, or choose your city manually." : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעילו מיקום בהגדרות לזמני תפילה מדויקים, או בחרו את העיר שלכם ידנית."
+          }
+        }
+      }
     },
     "Enable location to see\ntoday's zmanim" : {
       "localizations" : {
@@ -1216,7 +1372,14 @@
       }
     },
     "Help & FAQ" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עזרה ושאלות נפוצות"
+          }
+        }
+      }
     },
     "Help us keep improving Shabbat Clock" : {
       "localizations" : {
@@ -1339,7 +1502,19 @@
         }
       }
     },
+    "Keep Shabbat Clock open in the background so your alarms auto-stop. Don't force-quit the app." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השאירו את שעון שבת פתוח ברקע כדי שההתראות ייעצרו אוטומטית. אל תסגרו את האפליקציה."
+          }
+        }
+      }
+    },
     "Keep the app in the background" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1350,11 +1525,32 @@
       }
     },
     "Keep the app open in the background for auto-stop to work. Don't force-quit before Shabbat." : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "השאירו את האפליקציה פתוחה ברקע כדי שהעצירה האוטומטית תעבוד. אל תסגרו בכוח לפני שבת."
+          }
+        }
+      }
+    },
+    "Keep the app running in the background before Shabbat so alarms auto-stop." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השאירו את האפליקציה פועלת ברקע לפני שבת כדי שהתראות ייכבו אוטומטית."
+          }
+        }
+      }
+    },
+    "Keep the app running in the background for alarms to auto-stop." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השאירו את האפליקציה ברקע כדי שההתראות ייעצרו אוטומטית."
           }
         }
       }
@@ -1447,6 +1643,7 @@
     },
     "LEFT" : {
       "comment" : "Countdown ring label — time remaining until event",
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1509,7 +1706,14 @@
       }
     },
     "Location Access Disabled" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גישה למיקום מבוטלת"
+          }
+        }
+      }
     },
     "Location Enabled" : {
       "localizations" : {
@@ -1638,7 +1842,14 @@
       }
     },
     "Netz Minyan" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מניין הנץ"
+          }
+        }
+      }
     },
     "New Alarm" : {
       "localizations" : {
@@ -1660,7 +1871,11 @@
         }
       }
     },
+    "NEXT ALARM" : {
+
+    },
     "NEXT ALARM: " : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1683,6 +1898,7 @@
     },
     "NEXT EVENT" : {
       "comment" : "Label for the featured next Shabbat event card on the main screen",
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1737,6 +1953,7 @@
       }
     },
     "NO ALARMS SET" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1850,7 +2067,14 @@
       }
     },
     "Onboarding" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הכרות ראשונית"
+          }
+        }
+      }
     },
     "Once" : {
       "extractionState" : "manual",
@@ -1903,6 +2127,9 @@
           }
         }
       }
+    },
+    "Override Premium" : {
+
     },
     "Parashat" : {
       "extractionState" : "manual",
@@ -1999,6 +2226,16 @@
         }
       }
     },
+    "Pre-Shabbat Reminder" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תזכורת לפני שבת"
+          }
+        }
+      }
+    },
     "Preferable time for Mincha" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2029,6 +2266,9 @@
           }
         }
       }
+    },
+    "Premium State" : {
+
     },
     "Privacy Policy" : {
       "localizations" : {
@@ -2104,11 +2344,47 @@
         }
       }
     },
+    "Remind me" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הזכר לי"
+          }
+        }
+      }
+    },
+    "Reminds you to keep the app open before Shabbat" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מזכיר לכם להשאיר את האפליקציה פתוחה לפני שבת"
+          }
+        }
+      }
+    },
     "Remove" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הסרה"
+          }
+        }
+      }
     },
     "Remove Alarm" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הסרת התראה"
+          }
+        }
+      }
     },
     "Repeat" : {
       "localizations" : {
@@ -2170,6 +2446,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שחזור רכישות"
+          }
+        }
+      }
+    },
+    "Review alarms and keep the app running" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדקו התראות והשאירו את האפליקציה פועלת"
           }
         }
       }
@@ -2296,7 +2582,14 @@
       }
     },
     "SAVE 71%" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חסכו 71%"
+          }
+        }
+      }
     },
     "Save Alarm" : {
       "extractionState" : "stale",
@@ -2331,6 +2624,7 @@
       }
     },
     "Set Alarm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2352,7 +2646,14 @@
       }
     },
     "Set location for accurate times" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגדירו מיקום לזמנים מדויקים"
+          }
+        }
+      }
     },
     "Settings" : {
       "localizations" : {
@@ -2360,6 +2661,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "הגדרות"
+          }
+        }
+      }
+    },
+    "Settings › Sounds & Haptics › Vibration" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגדרות › צלילים והפטיקה › רטט"
           }
         }
       }
@@ -2383,6 +2695,9 @@
           }
         }
       }
+    },
+    "Shabbat begins tomorrow" : {
+
     },
     "Shabbat Clock" : {
       "localizations" : {
@@ -2425,6 +2740,9 @@
         }
       }
     },
+    "Shabbat in %lld days" : {
+
+    },
     "Shabbat Melodies" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2442,6 +2760,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "מנחה שבת"
+          }
+        }
+      }
+    },
+    "Shabbat Mode" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצב שבת"
+          }
+        }
+      }
+    },
+    "Shabbat Reminder" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תזכורת שבת"
           }
         }
       }
@@ -2467,6 +2806,7 @@
       }
     },
     "Shabbat Tip" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2485,6 +2825,12 @@
           }
         }
       }
+    },
+    "Simulate Friday" : {
+
+    },
+    "Simulation" : {
+
     },
     "Sitar" : {
       "extractionState" : "manual",
@@ -2790,7 +3136,14 @@
       }
     },
     "This will remove the alarm for this zman." : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעולה זו תסיר את ההתראה עבור זמן זה."
+          }
+        }
+      }
     },
     "Thursday" : {
       "extractionState" : "manual",
@@ -2802,6 +3155,9 @@
           }
         }
       }
+    },
+    "To disable vibration, go to Settings › Sounds & Haptics" : {
+
     },
     "Today" : {
       "extractionState" : "manual",
@@ -2933,6 +3289,7 @@
     },
     "UPCOMING" : {
       "comment" : "Small label next to parasha name in hero card — indicates it's the upcoming Shabbat's parasha",
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2994,6 +3351,7 @@
       }
     },
     "Vibration" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -3004,6 +3362,7 @@
       }
     },
     "Vibration is controlled in iOS Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -3161,7 +3520,14 @@
       }
     },
     "Zman" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמן"
+          }
+        }
+      }
     },
     "Zmanim" : {
       "localizations" : {
@@ -3189,6 +3555,9 @@
           }
         }
       }
+    },
+    "פרשת %@" : {
+
     }
   },
   "version" : "1.0"

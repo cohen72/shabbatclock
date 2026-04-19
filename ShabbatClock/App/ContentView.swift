@@ -9,6 +9,7 @@ struct ContentView: View {
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedTab: Int = 0
     @State private var showingOnboarding = false
@@ -64,12 +65,18 @@ struct ContentView: View {
         .onAppear {
             alarmService.configure(with: modelContext)
             ZmanAlarmSyncService.shared.configure(with: modelContext)
+            ShabbatReminderService.shared.reschedule()
             if !hasCompletedOnboarding {
                 var transaction = Transaction()
                 transaction.disablesAnimations = true
                 withTransaction(transaction) {
                     showingOnboarding = true
                 }
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                alarmService.refreshNotificationAuthorization()
             }
         }
         .fullScreenCover(isPresented: $showingOnboarding) {

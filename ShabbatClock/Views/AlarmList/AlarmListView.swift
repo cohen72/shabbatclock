@@ -16,6 +16,9 @@ struct AlarmListView: View {
   // Zman alarm sheet: triggered when tapping a zman alarm in the list
   @State private var zmanSheetAlarm: Alarm?
   
+  // Shabbat banner
+  @State private var shabbatBannerDismissed = false
+
   // Free tier limit
   private let freeAlarmLimit = 3
   @AppStorage("isPremium") private var isPremium = false
@@ -30,6 +33,22 @@ struct AlarmListView: View {
           emptyStateView
         } else {
           List {
+            // Permission denied banner (non-dismissible)
+            if alarmService.isBothDenied {
+              permissionDeniedBanner
+                .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+
+            // Friday reminder banner (dismissible)
+            if isErevShabbat && !shabbatBannerDismissed && !alarms.isEmpty {
+              erevShabbatCard
+                .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+
             ForEach(alarms) { alarm in
               AlarmRowView(alarm: alarm) { isEnabled in
                 handleToggle(alarm: alarm, isEnabled: isEnabled)
@@ -121,7 +140,7 @@ struct AlarmListView: View {
                     Label(String(localized: "Shabbat Mincha"), systemImage: "sun.max")
                   }
                 } header: {
-                  Label("Shabbat", systemImage: "star.of.david")
+                  Label("Shabbat", systemImage: "moon.stars")
                 }
                 
                 // Zman presets
@@ -212,8 +231,14 @@ struct AlarmListView: View {
   
   private var emptyStateView: some View {
     VStack(spacing: 0) {
+      if alarmService.isBothDenied {
+        permissionDeniedBanner
+          .padding(.horizontal, 20)
+          .padding(.top, 16)
+      }
+
       Spacer()
-      
+
       VStack(spacing: 24) {
         Image(systemName: "alarm.waves.left.and.right")
           .font(.system(size: 60))
@@ -236,6 +261,100 @@ struct AlarmListView: View {
     }
   }
   
+  // MARK: - Permission Denied Banner
+
+  private var permissionDeniedBanner: some View {
+    Button {
+      if let url = URL(string: UIApplication.openSettingsURLString) {
+        UIApplication.shared.open(url)
+      }
+    } label: {
+      HStack(spacing: 12) {
+        Image(systemName: "exclamationmark.triangle.fill")
+          .font(.system(size: 16))
+          .foregroundStyle(.red)
+
+        VStack(alignment: .leading, spacing: 2) {
+          Text("Alarms Can't Ring")
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(.textPrimary)
+          Text("Allow alarms and notifications in Settings")
+            .font(.system(size: 11))
+            .foregroundStyle(.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+
+        Spacer(minLength: 0)
+
+        Image(systemName: "arrow.up.forward")
+          .font(.system(size: 12, weight: .semibold))
+          .foregroundStyle(.red.opacity(0.6))
+      }
+      .padding(12)
+      .background(
+        RoundedRectangle(cornerRadius: 14, style: .continuous)
+          .fill(Color.red.opacity(0.08))
+          .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+              .stroke(Color.red.opacity(0.2), lineWidth: 0.5)
+          )
+      )
+    }
+  }
+
+  // MARK: - Erev Shabbat Banner
+
+  private var isErevShabbat: Bool {
+    #if DEBUG
+    if UserDefaults.standard.bool(forKey: "debugSimulateFriday") { return true }
+    #endif
+    let weekday = Calendar.current.component(.weekday, from: Date())
+    if weekday == 6 { return true }
+    if weekday == 7, let havdalah = zmanimService.havdalahTime, Date() < havdalah { return true }
+    return false
+  }
+
+  private var erevShabbatCard: some View {
+    HStack(spacing: 12) {
+      Image(systemName: "moon.stars.fill")
+        .font(.system(size: 16))
+        .foregroundStyle(.goldAccent)
+
+      VStack(alignment: .leading, spacing: 2) {
+        Text("Shabbat Shalom!")
+          .font(.system(size: 13, weight: .semibold))
+          .foregroundStyle(.textPrimary)
+        Text("Keep the app running in the background for alarms to auto-stop.")
+          .font(.system(size: 11))
+          .foregroundStyle(.textSecondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
+
+      Spacer(minLength: 0)
+
+      Button {
+        withAnimation {
+          shabbatBannerDismissed = true
+        }
+      } label: {
+        Image(systemName: "xmark")
+          .font(.system(size: 10, weight: .semibold))
+          .foregroundStyle(.textSecondary.opacity(0.5))
+          .frame(width: 24, height: 24)
+      }
+      .buttonStyle(.plain)
+    }
+    .padding(12)
+    .background(
+      RoundedRectangle(cornerRadius: 14, style: .continuous)
+        .fill(Color.goldAccent.opacity(0.08))
+        .overlay(
+          RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .stroke(Color.goldAccent.opacity(0.2), lineWidth: 0.5)
+        )
+    )
+  }
+
   // MARK: - Actions
   
   private var canAddAlarm: Bool {

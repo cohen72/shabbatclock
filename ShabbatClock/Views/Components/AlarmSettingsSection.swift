@@ -153,37 +153,60 @@ struct AlarmSettingsSection: View {
                 }
             }
 
-            // Auto-stop background requirement hint
-            if !alarmService.isFallbackMode {
-                HStack(spacing: 6) {
-                    Image(systemName: "info.circle")
-                        .font(.system(size: 11))
-                    Text("Keep the app open in the background for auto-stop to work. Don't force-quit before Shabbat.")
-                        .font(.system(size: 11))
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.85)
-                }
-                .foregroundStyle(.textSecondary.opacity(0.5))
-                .padding(.horizontal, 16)
-            }
         }
     }
 
     // MARK: - Vibration Hint
 
     private var vibrationHintRow: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             Image(systemName: "iphone.radiowaves.left.and.right")
-                .font(.system(size: 14))
-                .foregroundStyle(.textSecondary)
-            Text("Vibration is controlled in iOS Settings")
                 .font(.system(size: 12))
-                .foregroundStyle(.textSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.85)
-            Spacer(minLength: 0)
+                .foregroundStyle(.textSecondary.opacity(0.5))
+            Text("To disable vibration, go to Settings › Sounds & Haptics")
+                .font(.system(size: 11))
+                .foregroundStyle(.textSecondary.opacity(0.5))
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.vertical, 6)
+    }
+}
+
+// MARK: - Auto-Stop Background Banner
+
+/// Banner reminding users to keep the app in the background for auto-stop to work.
+/// Placed at the top of alarm edit/create screens.
+struct AutoStopBackgroundBanner: View {
+    @Environment(AlarmKitService.self) private var alarmService
+
+    var body: some View {
+        if !alarmService.isFallbackMode {
+            HStack(spacing: 12) {
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.goldAccent)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Shabbat Mode")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.textPrimary)
+                    Text("Keep the app running in the background before Shabbat so alarms auto-stop.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.goldAccent.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Color.goldAccent.opacity(0.2), lineWidth: 0.5)
+                    )
+            )
+        }
     }
 }

@@ -8,12 +8,17 @@ final class AudioManager: ObservableObject {
     static let shared = AudioManager()
 
     private var previewPlayer: AVAudioPlayer?
+    private var autoStopTask: Task<Void, Never>?
+
+    /// Called when a preview auto-stops (timer expiry or playback finished).
+    /// Views should observe this to reset their UI state.
+    var onPreviewStopped: (() -> Void)?
 
     private init() {}
 
     // MARK: - Preview Playback
 
-    /// Play a sound for preview (short duration, no loop).
+    /// Play a sound for preview. Plays for up to 15 seconds or until the track ends, whichever is shorter.
     func playPreview(sound: AlarmSound) {
         stopPreview()
 
@@ -29,9 +34,13 @@ final class AudioManager: ObservableObject {
             previewPlayer?.prepareToPlay()
             previewPlayer?.play()
 
-            // Auto-stop after 5 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+            // Auto-stop after 15 seconds or when track ends, whichever is shorter
+            let duration = min(previewPlayer?.duration ?? 15.0, 15.0)
+            autoStopTask = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(duration))
+                guard !Task.isCancelled else { return }
                 self?.stopPreview()
+                self?.onPreviewStopped?()
             }
         } catch {
             print("[AudioManager] Failed to play preview: \(error)")
@@ -40,6 +49,8 @@ final class AudioManager: ObservableObject {
 
     /// Stop the currently playing preview.
     func stopPreview() {
+        autoStopTask?.cancel()
+        autoStopTask = nil
         previewPlayer?.stop()
         previewPlayer = nil
     }

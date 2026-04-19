@@ -5,13 +5,14 @@ struct SoundPickerView: View {
   @Binding var selectedSoundName: String
   
   @State private var previewingSound: AlarmSound?
-  @AppStorage("isPremium") private var isPremium = false
-  
+  @State private var showingPremium = false
+  @ObservedObject private var storeManager = StoreManager.shared
+
   var body: some View {
     ZStack {
       LinearGradient.nightSky
         .ignoresSafeArea()
-      
+
       ScrollView {
         LazyVStack(spacing: 24) {
           ForEach(AlarmSound.Category.allCases, id: \.self) { category in
@@ -21,7 +22,8 @@ struct SoundPickerView: View {
                 sounds: sounds,
                 selectedSoundName: $selectedSoundName,
                 previewingSound: $previewingSound,
-                isPremium: isPremium
+                isPremium: storeManager.isPremium,
+                onLockedTap: { showingPremium = true }
               )
             }
           }
@@ -33,8 +35,18 @@ struct SoundPickerView: View {
     }
     .navigationTitle("Alarm Sound")
     .navigationBarTitleDisplayMode(.inline)
+    .sheet(isPresented: $showingPremium) {
+      PremiumView()
+        .applyLanguageOverride(AppLanguage.current)
+    }
+    .onAppear {
+      AudioManager.shared.onPreviewStopped = { [self] in
+        previewingSound = nil
+      }
+    }
     .onDisappear {
       AudioManager.shared.stopPreview()
+      AudioManager.shared.onPreviewStopped = nil
     }
   }
 }
@@ -47,7 +59,8 @@ struct SoundCategorySection: View {
   @Binding var selectedSoundName: String
   @Binding var previewingSound: AlarmSound?
   let isPremium: Bool
-  
+  let onLockedTap: () -> Void
+
   var body: some View {
     VStack(alignment: .leading, spacing: 12) {
       // Category header
@@ -55,20 +68,13 @@ struct SoundCategorySection: View {
         Image(systemName: category.icon)
           .font(.system(size: 14))
           .foregroundStyle(.accentPurple)
-        
+
         Text(category.displayName)
           .font(AppFont.body(15))
           .fontWeight(.semibold)
           .foregroundStyle(.textPrimary)
-        
-        Spacer()
-        
-        // Show premium badge if category has premium sounds
-        if sounds.contains(where: { $0.isPremium }) && !isPremium {
-          PremiumBadge()
-        }
       }
-      
+
       // Sounds
       VStack(spacing: 1) {
         ForEach(sounds) { sound in
@@ -87,10 +93,10 @@ struct SoundCategorySection: View {
       .clipShape(RoundedRectangle(cornerRadius: 12))
     }
   }
-  
+
   private func handleSoundTap(_ sound: AlarmSound) {
     if sound.isPremium && !isPremium {
-      // Show premium prompt
+      onLockedTap()
       return
     }
     selectedSoundName = sound.name
@@ -123,23 +129,26 @@ struct SoundRow: View {
   
   var body: some View {
     HStack(spacing: 12) {
-      // Sound name — tappable to select (disabled when locked)
-      Button(action: onTap) {
-        Text(sound.displayName)
-          .font(AppFont.body())
-          .foregroundColor(isLocked ? .textSecondary.opacity(0.5) : .textPrimary)
-      }
-      .disabled(isLocked)
-      
+      // Checkmark for selected — fixed width so layout doesn't shift
+      Image(systemName: isSelected ? "checkmark" : "")
+        .font(.system(size: 14, weight: .semibold))
+        .foregroundStyle(.accentPurple)
+        .frame(width: 16)
+
+      // Sound name
+      Text(sound.displayName)
+        .font(AppFont.body())
+        .foregroundColor(isLocked ? .textSecondary.opacity(0.5) : .textPrimary)
+
       Spacer()
-      
+
       // Lock icon for premium
       if isLocked {
         Image(systemName: "lock.fill")
           .font(.system(size: 12))
           .foregroundColor(.goldAccent.opacity(0.7))
       }
-      
+
       // Preview button — always enabled so users can hear premium sounds
       Button(action: onPreview) {
         Image(systemName: isPreviewing ? "stop.fill" : "play.fill")
@@ -151,37 +160,12 @@ struct SoundRow: View {
               .fill(Color.surfaceSubtle)
           )
       }
-      
-      // Checkmark for selected
-      if isSelected {
-        Image(systemName: "checkmark")
-          .foregroundStyle(.accentPurple)
-          .fontWeight(.semibold)
-      }
     }
     .padding(.horizontal, 16)
     .padding(.vertical, 12)
+    .contentShape(Rectangle())
+    .onTapGesture { onTap() }
     .background(isSelected ? Color.surfaceSelected : Color.surfaceSubtle)
-  }
-}
-
-// MARK: - Premium Badge
-
-struct PremiumBadge: View {
-  var body: some View {
-    HStack(spacing: 4) {
-      Image(systemName: "star.fill")
-        .font(.system(size: 8))
-      Text("Premium")
-        .font(AppFont.caption(10))
-    }
-    .foregroundStyle(.goldAccent)
-    .padding(.horizontal, 8)
-    .padding(.vertical, 4)
-    .background(
-      Capsule()
-        .fill(Color.goldAccent.opacity(0.15))
-    )
   }
 }
 

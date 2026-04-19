@@ -22,9 +22,19 @@ final class StoreManager: ObservableObject {
     @Published private(set) var subscriptionStatus: Product.SubscriptionInfo.RenewalState?
     @Published private(set) var isLoading = false
 
+    #if DEBUG
+    /// Debug override for premium state. `nil` = use real subscription state.
+    @Published var debugPremiumOverride: Bool? = nil
+    #endif
+
     /// Whether the user has an active premium subscription.
     var isPremium: Bool {
-        !purchasedProductIDs.isEmpty
+        #if DEBUG
+        if let override = debugPremiumOverride {
+            return override
+        }
+        #endif
+        return !purchasedProductIDs.isEmpty
     }
 
     /// The weekly product (if loaded).
@@ -183,7 +193,7 @@ final class StoreManager: ObservableObject {
 
     /// Keeps the legacy @AppStorage("isPremium") in sync so existing views
     /// that read it directly continue to work without refactoring every view.
-    private func syncAppStorage() {
+    func syncAppStorage() {
         UserDefaults.standard.set(isPremium, forKey: "isPremium")
     }
 

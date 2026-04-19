@@ -7,6 +7,8 @@ struct SettingsView: View {
     @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
+    @AppStorage("shabbatReminderEnabled") private var shabbatReminderEnabled = true
+    @AppStorage("shabbatReminderMinutesBefore") private var shabbatReminderMinutesBefore = 120
 
     @Environment(AlarmKitService.self) private var alarmService
     @StateObject private var locationManager = LocationManager.shared
@@ -33,13 +35,8 @@ struct SettingsView: View {
                             alarmPermissionSection
                         }
 
-                        // Vibration hint (alarm vibration is iOS-controlled)
-                        vibrationSection
-
-                        // Shabbat auto-stop tip
-                        if !alarmService.isFallbackMode {
-                            shabbatTipSection
-                        }
+                        // Pre-Shabbat reminder settings
+                        shabbatReminderSection
 
                         // Location section
                         locationSection
@@ -137,63 +134,64 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Vibration Section
+    // MARK: - Shabbat Reminder Section
 
-    private var vibrationSection: some View {
+    /// 0 = Off, positive values = minutes before candle lighting
+    private let reminderOptions: [(String, Int)] = [
+        ("Off", 0),
+        ("30 min", 30),
+        ("1 hour", 60),
+        ("2 hours", 120),
+        ("3 hours", 180),
+    ]
+
+    /// Combined value: 0 means off, >0 means enabled at that interval
+    private var reminderSelection: Int {
+        shabbatReminderEnabled ? (shabbatReminderMinutesBefore > 0 ? shabbatReminderMinutesBefore : 120) : 0
+    }
+
+    private var shabbatReminderSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Vibration", icon: "iphone.radiowaves.left.and.right")
+            SectionHeader(title: "Shabbat", icon: "flame.fill")
 
-            HStack(spacing: 12) {
-                Image(systemName: "waveform")
-                    .font(.system(size: 20))
-                    .foregroundStyle(.accentPurple)
-                    .frame(width: 32)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Alarm Vibration")
-                        .font(AppFont.body())
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Pre-Shabbat Reminder")
+                        .font(.system(size: 15))
                         .foregroundStyle(.textPrimary)
 
-                    Text("Controlled by iOS · Settings › Sounds & Haptics")
-                        .font(AppFont.caption(12))
+                    Text("Review alarms and keep the app running")
+                        .font(.system(size: 11))
                         .foregroundStyle(.textSecondary)
-                        .lineLimit(2)
                 }
 
                 Spacer()
+
+                Picker("", selection: Binding(
+                    get: { reminderSelection },
+                    set: { newValue in
+                        if newValue == 0 {
+                            shabbatReminderEnabled = false
+                        } else {
+                            shabbatReminderEnabled = true
+                            shabbatReminderMinutesBefore = newValue
+                        }
+                    }
+                )) {
+                    ForEach(reminderOptions, id: \.1) { option in
+                        Text(option.0).tag(option.1)
+                    }
+                }
+                .tint(.goldAccent)
             }
             .padding(16)
             .settingsCard()
         }
-    }
-
-    // MARK: - Shabbat Tip Section
-
-    private var shabbatTipSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: "Shabbat Tip", icon: "flame.fill")
-
-            HStack(spacing: 12) {
-                Image(systemName: "app.badge.checkmark")
-                    .font(.system(size: 20))
-                    .foregroundStyle(.goldAccent)
-                    .frame(width: 32)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Keep the app in the background")
-                        .font(AppFont.body())
-                        .foregroundStyle(.textPrimary)
-
-                    Text("Auto-stop requires the app to be running in the background. Don't force-quit before Shabbat.")
-                        .font(AppFont.caption(12))
-                        .foregroundStyle(.textSecondary)
-                        .lineLimit(3)
-                }
-
-                Spacer()
-            }
-            .padding(16)
-            .settingsCard()
+        .onChange(of: shabbatReminderEnabled) { _, _ in
+            ShabbatReminderService.shared.reschedule()
+        }
+        .onChange(of: shabbatReminderMinutesBefore) { _, _ in
+            ShabbatReminderService.shared.reschedule()
         }
     }
 

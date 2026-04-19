@@ -15,17 +15,9 @@ struct AlarmRowView: View {
     alarm.zmanTypeRawValue != nil
   }
   
-  /// Whether this alarm has Shabbat styling (Friday/Saturday repeat, or Shabbat-linked zman)
+  /// Whether this alarm has Shabbat styling (any repeat day includes Saturday)
   private var isShabbatStyled: Bool {
-    // Explicit Shabbat: repeats only on Friday (5) and/or Saturday (6)
-    if !alarm.repeatDays.isEmpty && alarm.repeatDays.allSatisfy({ $0 == 5 || $0 == 6 }) {
-      return true
-    }
-    // Single Saturday repeat
-    if alarm.isShabbatAlarm && alarm.repeatDays.count == 1 {
-      return true
-    }
-    return false
+    alarm.repeatDays.contains(6)
   }
   
   /// Descriptive label for zman alarms (e.g., "Dawn · 5 min before")
