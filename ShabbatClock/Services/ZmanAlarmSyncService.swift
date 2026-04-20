@@ -68,6 +68,13 @@ final class ZmanAlarmSyncService: ObservableObject {
         var zmanAlarms = allAlarms.filter { $0.zmanTypeRawValue != nil }
         guard !zmanAlarms.isEmpty else { return }
 
+        // Fix legacy zman alarms that were created with snoozeEnabled = true (default).
+        // Zman alarms should never have snooze — it causes AlarmKit to enter a snooze
+        // countdown instead of stopping, which breaks auto-stop.
+        for alarm in zmanAlarms where alarm.snoozeEnabled {
+            alarm.snoozeEnabled = false
+        }
+
         // Deduplicate: if multiple alarms share the same zmanTypeRawValue, keep the newest and delete the rest
         let grouped = Dictionary(grouping: zmanAlarms, by: { $0.zmanTypeRawValue! })
         for (zmanType, alarms) in grouped where alarms.count > 1 {

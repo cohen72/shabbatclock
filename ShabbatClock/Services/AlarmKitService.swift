@@ -638,10 +638,18 @@ final class AlarmKitService: NSObject {
         removeAutoStopNotifications(for: alarmKitID, repeatDays: alarm.repeatDays)
 
         if alarm.repeatDays.isEmpty {
-            // One-time alarm: explicitly cancel in AlarmKit and mirror in our model.
+            // One-time alarm: explicitly cancel in AlarmKit.
             try? AlarmManager.shared.cancel(id: alarmKitID)
-            alarm.isEnabled = false
-            alarm.alarmKitID = nil
+
+            if alarm.zmanTypeRawValue != nil {
+                // Zman alarm: delete entirely — user can recreate from ZmanimView.
+                // Keeping a disabled zman alarm creates a confusing "ghost" bell.slash icon.
+                modelContext.delete(alarm)
+            } else {
+                // Manual alarm: disable but keep (mirrors stock Clock behavior).
+                alarm.isEnabled = false
+                alarm.alarmKitID = nil
+            }
             try? modelContext.save()
             updateNextAlarmDate()
         } else {
@@ -695,10 +703,17 @@ final class AlarmKitService: NSObject {
             // the alarm may still be registered in the system)
             try? AlarmManager.shared.cancel(id: uuid)
             removeAutoStopNotifications(for: uuid, repeatDays: alarm.repeatDays)
-            alarm.isEnabled = false
-            alarm.alarmKitID = nil  // Clear so syncAllAlarms won't try to re-schedule it
+
+            if alarm.zmanTypeRawValue != nil {
+                // Zman alarm: delete entirely to avoid ghost bell.slash icon
+                context.delete(alarm)
+            } else {
+                // Manual alarm: disable but keep
+                alarm.isEnabled = false
+                alarm.alarmKitID = nil
+            }
             try? context.save()
-            print("[AlarmKitService] One-time alarm '\(alarm.label)' disabled and cancelled after firing")
+            print("[AlarmKitService] One-time alarm '\(alarm.label)' handled after firing")
         }
     }
 

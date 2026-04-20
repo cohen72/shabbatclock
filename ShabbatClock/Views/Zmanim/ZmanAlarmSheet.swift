@@ -64,9 +64,7 @@ struct ZmanAlarmSheet: View {
     }
 
     private var zmanTimeString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: zman.time)
+        zman.timeString
     }
 
     private var fireRelativeDay: String {
@@ -261,17 +259,11 @@ struct ZmanAlarmSheet: View {
 
     /// Dynamic label: "Ring at [zman] time" or "Ring before [zman]"
     private var offsetLabel: String {
-        let isHebrew = AppLanguage.current == .hebrew
+        let name = AppLanguage.current == .hebrew ? zman.hebrewName : zman.englishName
         if minutesBefore == 0 {
-            if isHebrew {
-                return "צלצל בזמן \(zman.hebrewName)"
-            }
-            return String(format: AppLanguage.localized("Ring at %@ time"), zman.englishName)
+            return String(format: AppLanguage.localized("Ring at %@ time"), name)
         } else {
-            if isHebrew {
-                return "צלצל לפני \(zman.hebrewName)"
-            }
-            return String(format: AppLanguage.localized("Ring before %@"), zman.englishName)
+            return String(format: AppLanguage.localized("Ring before %@"), name)
         }
     }
 

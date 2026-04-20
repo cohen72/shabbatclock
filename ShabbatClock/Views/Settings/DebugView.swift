@@ -6,6 +6,7 @@ import CoreLocation
 /// Provides tools for testing permission prompts, alarm states, and other internals.
 struct DebugView: View {
     @Environment(AlarmKitService.self) private var alarmService
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var locationManager = LocationManager.shared
     @ObservedObject private var storeManager = StoreManager.shared
 
@@ -13,6 +14,7 @@ struct DebugView: View {
     @State private var showingAlarmPrompt = false
     @State private var showingNotificationPrompt = false
     @State private var showingOnboarding = false
+    @State private var testAlarmStatus: String?
 
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("debugSimulateFriday") private var simulateFriday = false
@@ -269,6 +271,12 @@ struct DebugView: View {
             SectionHeader(title: "Actions", icon: "hammer.fill")
 
             VStack(spacing: 1) {
+                debugButton("Test Zman Alarm (1 min)") {
+                    createTestZmanAlarm()
+                }
+                if let status = testAlarmStatus {
+                    stateRow("Test Alarm", value: status)
+                }
                 debugButton("Re-sync All Alarms") {
                     alarmService.syncAllAlarms()
                 }
@@ -287,6 +295,34 @@ struct DebugView: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(Color.surfaceBorder, lineWidth: 0.5)
             )
+        }
+    }
+
+    /// Creates a zman alarm that fires 1 minute from now with 30s auto-stop.
+    /// Uses the same code path as ZmanAlarmSheet to test the full flow.
+    private func createTestZmanAlarm() {
+        let calendar = Calendar.current
+        let fireDate = calendar.date(byAdding: .minute, value: 1, to: Date())!
+        let hour = calendar.component(.hour, from: fireDate)
+        let minute = calendar.component(.minute, from: fireDate)
+
+        let alarm = Alarm()
+        alarm.hour = hour
+        alarm.minute = minute
+        alarm.isEnabled = true
+        alarm.label = "Test Zman"
+        alarm.soundName = "Lecha Dodi"
+        alarm.snoozeEnabled = false
+        alarm.alarmDurationSeconds = 30
+        alarm.zmanTypeRawValue = "netz"
+        alarm.zmanMinutesBefore = 0
+
+        modelContext.insert(alarm)
+
+        Task {
+            await alarmService.enable(alarm)
+            let timeStr = String(format: "%d:%02d", hour, minute)
+            testAlarmStatus = "Fires \(timeStr), 30s stop"
         }
     }
 

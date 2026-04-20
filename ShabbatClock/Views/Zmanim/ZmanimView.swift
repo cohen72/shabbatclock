@@ -131,7 +131,7 @@ struct ZmanimView: View {
                                                 }
                                             )
                                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                                if globalAlarm != nil {
+                                                if displayAlarm != nil {
                                                     Button(role: .destructive) {
                                                         deleteAlarm(for: zman)
                                                     } label: {

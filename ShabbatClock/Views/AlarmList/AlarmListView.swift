@@ -211,6 +211,21 @@ struct AlarmListView: View {
           }
         )
         .applyLanguageOverride(AppLanguage.current)
+      } else {
+        // Zmanim not loaded yet — show a brief loading state
+        VStack(spacing: 16) {
+          ProgressView()
+            .tint(.accentPurple)
+          Text("Loading zmanim…")
+            .font(.system(size: 14))
+            .foregroundStyle(.textSecondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(LinearGradient.nightSky)
+        .presentationDetents([.medium])
+        .onAppear {
+          zmanimService.calculateTodayZmanim()
+        }
       }
     }
     .alert("Upgrade to Premium", isPresented: $showingPremiumAlert) {
@@ -368,6 +383,11 @@ struct AlarmListView: View {
   private func handleToggle(alarm: Alarm, isEnabled: Bool) {
     Task {
       if isEnabled {
+        // For zman alarms, sync the time from today's zmanim before re-scheduling
+        // to avoid firing at a stale hour/minute
+        if alarm.zmanTypeRawValue != nil {
+          ZmanAlarmSyncService.shared.syncAllZmanAlarms()
+        }
         await alarmService.enable(alarm)
       } else {
         alarmService.disable(alarm)
