@@ -57,5 +57,7 @@
 	<false/>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Shabbat Clock uses alarms to wake you for Shabbat prayers and zmanim. Alarms will sound even when Do Not Disturb is enabled.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Shabbat Clock uses the microphone to record custom alarm sounds — your voice, a family member, or a melody to wake up to.</string>
 </dict>
 </plist>

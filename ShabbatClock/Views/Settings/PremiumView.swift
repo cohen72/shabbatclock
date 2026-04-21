@@ -15,6 +15,7 @@ struct PremiumView: View {
     private let features: [(icon: String, title: LocalizedStringKey, subtitle: LocalizedStringKey)] = [
         ("infinity", "Unlimited Alarms", "No limits on how many alarms you create"),
         ("music.note.list", "All Premium Sounds", "42 beautiful sounds including Shabbat melodies"),
+        ("mic.fill", "Record Your Own Sounds", "Create personalized alarm sounds with your voice or a melody"),
         ("timer", "Extended Durations", "Auto-stop up to 30 minutes"),
         ("heart.fill", "Support Development", "Help us keep improving Shabbat Clock"),
     ]

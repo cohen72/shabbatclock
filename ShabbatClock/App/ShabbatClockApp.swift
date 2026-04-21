@@ -12,7 +12,7 @@ struct ShabbatClockApp: App {
         AppLanguage.applyBundleOverride()
 
         do {
-            container = try ModelContainer(for: Alarm.self)
+            container = try ModelContainer(for: Alarm.self, CustomSound.self)
         } catch {
             fatalError("Failed to initialize ModelContainer: \(error)")
         }

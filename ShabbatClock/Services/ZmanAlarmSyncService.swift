@@ -17,6 +17,12 @@ final class ZmanAlarmSyncService: ObservableObject {
     private var lastSyncDate: Date?
     private var isConfigured = false
 
+    #if DEBUG
+    /// Alarm IDs to exclude from sync (used by debug fire-time override so the sync
+    /// doesn't immediately overwrite the override back to the real zman time).
+    var debugSyncSkipIDs: Set<UUID> = []
+    #endif
+
     private init() {}
 
     // MARK: - Setup
@@ -96,6 +102,13 @@ final class ZmanAlarmSyncService: ObservableObject {
         var alarmsToReschedule: [Alarm] = []
 
         for alarm in zmanAlarms {
+            #if DEBUG
+            if debugSyncSkipIDs.contains(alarm.id) {
+                print("[ZmanAlarmSync] Skipping debug-overridden alarm: \(alarm.label)")
+                continue
+            }
+            #endif
+
             guard let rawValue = alarm.zmanTypeRawValue,
                   let zman = zmanim.first(where: { $0.type.rawValue == rawValue }) else {
                 continue

@@ -59,6 +59,24 @@
           }
         }
       }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shabbat Clock uses the microphone to record custom alarm sounds — your voice, a family member, or a melody to wake up to."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעון שבת משתמש במיקרופון כדי להקליט צלילי התראה מותאמים אישית — הקול שלך, של בן משפחה, או מנגינה להתעורר אליה."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

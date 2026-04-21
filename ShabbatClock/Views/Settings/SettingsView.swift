@@ -377,26 +377,46 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Defaults", icon: "slider.horizontal.3")
 
-            NavigationLink {
-                SoundPickerView(selectedSoundName: $defaultSound)
-            } label: {
-                HStack {
-                    Text("Default Sound")
-                        .font(AppFont.body())
-                        .foregroundStyle(.textPrimary)
+            VStack(spacing: 8) {
+                NavigationLink {
+                    SoundPickerView(selectedSoundName: $defaultSound)
+                } label: {
+                    HStack {
+                        Text("Default Sound")
+                            .font(AppFont.body())
+                            .foregroundStyle(.textPrimary)
 
-                    Spacer()
+                        Spacer()
 
-                    Text(AlarmSound.sound(named: defaultSound)?.displayName ?? defaultSound)
-                        .font(AppFont.body(14))
-                        .foregroundStyle(.textSecondary)
+                        Text(AlarmSound.sound(named: defaultSound)?.displayName ?? defaultSound)
+                            .font(AppFont.body(14))
+                            .foregroundStyle(.textSecondary)
 
-                    Image(systemName: "chevron.forward")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.textSecondary)
+                        Image(systemName: "chevron.forward")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.textSecondary)
+                    }
+                    .padding(16)
+                    .settingsCard()
                 }
-                .padding(16)
-                .settingsCard()
+
+                NavigationLink {
+                    CustomSoundsSettingsView()
+                } label: {
+                    HStack {
+                        Text("Custom Sounds")
+                            .font(AppFont.body())
+                            .foregroundStyle(.textPrimary)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.forward")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.textSecondary)
+                    }
+                    .padding(16)
+                    .settingsCard()
+                }
             }
         }
     }

@@ -18,15 +18,28 @@ final class AudioManager: ObservableObject {
 
     // MARK: - Preview Playback
 
-    /// Play a sound for preview. Plays for up to 15 seconds or until the track ends, whichever is shorter.
+    /// Play a bundled sound for preview. Plays for up to 15 seconds or until the track ends.
     func playPreview(sound: AlarmSound) {
-        stopPreview()
-
         guard let url = sound.url else {
             print("[AudioManager] Preview sound file not found: \(sound.name)")
             return
         }
+        playPreview(url: url)
+    }
 
+    /// Play a user-recorded custom sound for preview.
+    func playPreview(customFileName: String) {
+        guard let url = CustomSoundStore.url(for: customFileName),
+              FileManager.default.fileExists(atPath: url.path) else {
+            print("[AudioManager] Custom recording file missing: \(customFileName)")
+            return
+        }
+        playPreview(url: url)
+    }
+
+    /// Shared preview implementation for a resolved file URL.
+    private func playPreview(url: URL) {
+        stopPreview()
         do {
             previewPlayer = try AVAudioPlayer(contentsOf: url)
             previewPlayer?.numberOfLoops = 0
@@ -34,7 +47,6 @@ final class AudioManager: ObservableObject {
             previewPlayer?.prepareToPlay()
             previewPlayer?.play()
 
-            // Auto-stop after 15 seconds or when track ends, whichever is shorter
             let duration = min(previewPlayer?.duration ?? 15.0, 15.0)
             autoStopTask = Task { [weak self] in
                 try? await Task.sleep(for: .seconds(duration))

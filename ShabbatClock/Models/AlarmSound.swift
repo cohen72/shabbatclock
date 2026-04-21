@@ -13,6 +13,29 @@ struct AlarmSound: Identifiable, Hashable {
         AppLanguage.localized(name)
     }
 
+    // MARK: - Custom Recording Sentinel
+
+    /// Prefix used on `Alarm.soundName` to indicate a user-recorded custom sound.
+    /// Followed by the CustomSound filename (e.g., "custom:custom_1713600000.m4a").
+    static let customSoundPrefix = "custom:"
+
+    /// True if the given alarm sound name refers to a user recording.
+    static func isCustomSoundName(_ soundName: String) -> Bool {
+        soundName.hasPrefix(customSoundPrefix)
+    }
+
+    /// Extracts the filename from a custom sound name.
+    /// Returns nil if the name is not a custom-sound reference.
+    static func customFileName(from soundName: String) -> String? {
+        guard soundName.hasPrefix(customSoundPrefix) else { return nil }
+        return String(soundName.dropFirst(customSoundPrefix.count))
+    }
+
+    /// Builds the `Alarm.soundName` value for a given custom recording filename.
+    static func customSoundName(fileName: String) -> String {
+        customSoundPrefix + fileName
+    }
+
     enum Category: String, CaseIterable {
         case shabbatMelodies = "Shabbat Melodies"
         case nature = "Nature"

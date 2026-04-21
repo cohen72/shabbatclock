@@ -13,6 +13,13 @@
 		AAA00010 /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00010 /* Alarm.swift */; };
 		AAA00011 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00011 /* AlarmSound.swift */; };
 		AAA00012 /* ShabbatAlarmMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00012 /* ShabbatAlarmMetadata.swift */; };
+		AAA00400 /* CustomSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00400 /* CustomSound.swift */; };
+		AAA00401 /* CustomSoundStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00401 /* CustomSoundStore.swift */; };
+		AAA00402 /* AudioRecordingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00402 /* AudioRecordingManager.swift */; };
+		AAA00403 /* AudioTrimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00403 /* AudioTrimmer.swift */; };
+		AAA00404 /* SoundRecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00404 /* SoundRecordingView.swift */; };
+		AAA00405 /* CustomSoundDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00405 /* CustomSoundDeletion.swift */; };
+		AAA00406 /* CustomSoundsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00406 /* CustomSoundsSettingsView.swift */; };
 		AAA00021 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00021 /* AudioManager.swift */; };
 		AAA00023 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00023 /* LocationManager.swift */; };
 		AAA00024 /* ZmanimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00024 /* ZmanimService.swift */; };
@@ -83,6 +90,13 @@
 		BBB00010 /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
 		BBB00011 /* AlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
 		BBB00012 /* ShabbatAlarmMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShabbatAlarmMetadata.swift; sourceTree = "<group>"; };
+		BBB00400 /* CustomSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSound.swift; sourceTree = "<group>"; };
+		BBB00401 /* CustomSoundStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundStore.swift; sourceTree = "<group>"; };
+		BBB00402 /* AudioRecordingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingManager.swift; sourceTree = "<group>"; };
+		BBB00403 /* AudioTrimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTrimmer.swift; sourceTree = "<group>"; };
+		BBB00404 /* SoundRecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundRecordingView.swift; sourceTree = "<group>"; };
+		BBB00405 /* CustomSoundDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundDeletion.swift; sourceTree = "<group>"; };
+		BBB00406 /* CustomSoundsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundsSettingsView.swift; sourceTree = "<group>"; };
 		BBB00021 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
 		BBB00023 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		BBB00024 /* ZmanimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZmanimService.swift; sourceTree = "<group>"; };
@@ -218,6 +232,7 @@
 				BBB00010 /* Alarm.swift */,
 				BBB00011 /* AlarmSound.swift */,
 				BBB00012 /* ShabbatAlarmMetadata.swift */,
+				BBB00400 /* CustomSound.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -227,6 +242,9 @@
 			children = (
 				BBB00021 /* AudioManager.swift */,
 				BBB00025 /* AlarmKitService.swift */,
+				BBB00401 /* CustomSoundStore.swift */,
+				BBB00402 /* AudioRecordingManager.swift */,
+				BBB00405 /* CustomSoundDeletion.swift */,
 				BBB00026 /* StopAlarmIntent.swift */,
 				BBB00027 /* StoreManager.swift */,
 				BBB00023 /* LocationManager.swift */,
@@ -307,6 +325,8 @@
 				BBB00070 /* AlarmEditView.swift */,
 				BBB00071 /* RepeatDaysPicker.swift */,
 				BBB00072 /* SoundPickerView.swift */,
+				BBB00403 /* AudioTrimmer.swift */,
+				BBB00404 /* SoundRecordingView.swift */,
 			);
 			path = AlarmEdit;
 			sourceTree = "<group>";
@@ -325,6 +345,7 @@
 			children = (
 				BBB00100 /* SettingsView.swift */,
 				BBB00102 /* DebugView.swift */,
+				BBB00406 /* CustomSoundsSettingsView.swift */,
 				BBB00101 /* PremiumView.swift */,
 			);
 			path = Settings;
@@ -471,6 +492,13 @@
 				AAA00010 /* Alarm.swift in Sources */,
 				AAA00011 /* AlarmSound.swift in Sources */,
 				AAA00012 /* ShabbatAlarmMetadata.swift in Sources */,
+				AAA00400 /* CustomSound.swift in Sources */,
+				AAA00401 /* CustomSoundStore.swift in Sources */,
+				AAA00402 /* AudioRecordingManager.swift in Sources */,
+				AAA00403 /* AudioTrimmer.swift in Sources */,
+				AAA00404 /* SoundRecordingView.swift in Sources */,
+				AAA00405 /* CustomSoundDeletion.swift in Sources */,
+				AAA00406 /* CustomSoundsSettingsView.swift in Sources */,
 				AAA00021 /* AudioManager.swift in Sources */,
 				AAA00025 /* AlarmKitService.swift in Sources */,
 				AAA00026 /* StopAlarmIntent.swift in Sources */,

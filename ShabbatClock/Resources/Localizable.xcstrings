@@ -4,8 +4,23 @@
     "" : {
 
     },
+    " " : {
+
+    },
     "--:--" : {
 
+    },
+    "\"%@\" stopped automatically" : {
+      "comment" : "Body of the auto-stop notification. %@ is the alarm label.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"%@\" נעצרה אוטומטית"
+          }
+        }
+      }
     },
     "/week" : {
       "localizations" : {
@@ -70,6 +85,38 @@
         }
       }
     },
+    "%lld alarms" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld alarms"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld התראות"
+          }
+        }
+      }
+    },
+    "%lld alarms use this sound and will switch to \"Lecha Dodi\"." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld alarms use this sound and will switch to \"Lecha Dodi\"."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld התראות משתמשות בצליל הזה ויעברו ל\"לכה דודי\"."
+          }
+        }
+      }
+    },
     "%lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -79,6 +126,9 @@
           }
         }
       }
+    },
+    "•" : {
+
     },
     "© %@ Shabbat Clock" : {
       "localizations" : {
@@ -106,6 +156,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "$14.99/שנה"
+          }
+        }
+      }
+    },
+    "1 alarm" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 alarm"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה אחת"
+          }
+        }
+      }
+    },
+    "1 alarm uses this sound and will switch to \"Lecha Dodi\"." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 alarm uses this sound and will switch to \"Lecha Dodi\"."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראה אחת משתמשת בצליל הזה ותעבור ל\"לכה דודי\"."
           }
         }
       }
@@ -434,6 +516,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "צליל התראה"
+          }
+        }
+      }
+    },
+    "Alarm Stopped" : {
+      "comment" : "Title of the auto-stop notification shown when an alarm stops automatically.",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה נעצרה"
           }
         }
       }
@@ -868,6 +961,22 @@
         }
       }
     },
+    "Create personalized alarm sounds with your voice or a melody" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create personalized alarm sounds with your voice or a melody"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צרו צלילי התראה אישיים עם הקול שלכם או מנגינה"
+          }
+        }
+      }
+    },
     "Current City" : {
       "localizations" : {
         "he" : {
@@ -898,6 +1007,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "משכי זמן מותאמים"
+          }
+        }
+      }
+    },
+    "Custom Sounds" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Sounds"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צלילים מותאמים"
           }
         }
       }
@@ -943,6 +1068,9 @@
         }
       }
     },
+    "DEBUG" : {
+
+    },
     "Default Sound" : {
       "localizations" : {
         "he" : {
@@ -973,12 +1101,44 @@
         }
       }
     },
+    "Delete \"%@\"?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete \"%@\"?"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "למחוק את \"%@\"?"
+          }
+        }
+      }
+    },
     "Delete Alarm" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "מחיקת התראה"
+          }
+        }
+      }
+    },
+    "Delete Recording?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Recording?"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "למחוק את ההקלטה?"
           }
         }
       }
@@ -1158,6 +1318,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "אפשרו מיקום כדי לראות\nאת זמני היום"
+          }
+        }
+      }
+    },
+    "Enable microphone access in Settings to record a custom alarm sound." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable microphone access in Settings to record a custom alarm sound."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר גישה למיקרופון בהגדרות כדי להקליט צליל התראה מותאם."
           }
         }
       }
@@ -1749,6 +1925,22 @@
         }
       }
     },
+    "Make alarms personal" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make alarms personal"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התאימו אישית את ההתראות"
+          }
+        }
+      }
+    },
     "Manage Subscription" : {
       "localizations" : {
         "he" : {
@@ -1776,6 +1968,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "התמוטטות"
+          }
+        }
+      }
+    },
+    "Microphone Access" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone Access"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גישה למיקרופון"
           }
         }
       }
@@ -1833,6 +2041,70 @@
         }
       }
     },
+    "My Melody" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My Melody"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המנגינה שלי"
+          }
+        }
+      }
+    },
+    "My Recordings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My Recordings"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההקלטות שלי"
+          }
+        }
+      }
+    },
+    "NAME" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NAME"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שם"
+          }
+        }
+      }
+    },
+    "Name Your Sound" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name Your Sound"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תן שם לצליל"
+          }
+        }
+      }
+    },
     "Nature" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1860,6 +2132,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "התראה חדשה"
+          }
+        }
+      }
+    },
+    "New Custom Sound" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Custom Sound"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צליל חדש"
           }
         }
       }
@@ -2006,6 +2294,22 @@
         }
       }
     },
+    "No Recordings Yet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Recordings Yet"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין הקלטות עדיין"
+          }
+        }
+      }
+    },
     "Not Now" : {
       "localizations" : {
         "he" : {
@@ -2047,6 +2351,9 @@
           }
         }
       }
+    },
+    "Off" : {
+
     },
     "Ohm" : {
       "extractionState" : "manual",
@@ -2130,6 +2437,9 @@
           }
         }
       }
+    },
+    "Override fire time" : {
+
     },
     "Override Premium" : {
 
@@ -2273,6 +2583,22 @@
     "Premium State" : {
 
     },
+    "Preview" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השמעה"
+          }
+        }
+      }
+    },
     "Privacy Policy" : {
       "localizations" : {
         "he" : {
@@ -2322,6 +2648,86 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "דרגו את האפליקציה"
+          }
+        }
+      }
+    },
+    "Record New Sound" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record New Sound"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקלט צליל חדש"
+          }
+        }
+      }
+    },
+    "Record up to 30 seconds" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record up to 30 seconds"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ניתן להקליט עד 30 שניות"
+          }
+        }
+      }
+    },
+    "Record Your Own Sounds" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record Your Own Sounds"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקלט את הצלילים שלך"
+          }
+        }
+      }
+    },
+    "Record your own voice, a family member, or a favorite melody to wake up to." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record your own voice, a family member, or a favorite melody to wake up to."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקליטו את הקול שלכם, של בן משפחה, או מנגינה אהובה להתעורר אליה."
+          }
+        }
+      }
+    },
+    "Recording…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recording…"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מקליט…"
           }
         }
       }
@@ -2449,6 +2855,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שחזור רכישות"
+          }
+        }
+      }
+    },
+    "Retake" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retake"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקלט שוב"
           }
         }
       }
@@ -3055,6 +3477,22 @@
         }
       }
     },
+    "Tap + to record a custom alarm sound" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + to record a custom alarm sound"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקישו + כדי להקליט צליל התראה מותאם"
+          }
+        }
+      }
+    },
     "Terms of Use" : {
       "localizations" : {
         "he" : {
@@ -3123,6 +3561,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "זה מאפשר להתראה לצלצל בזמן שנקבע."
+          }
+        }
+      }
+    },
+    "This recording will be permanently deleted." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This recording will be permanently deleted."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההקלטה תימחק לצמיתות."
           }
         }
       }
@@ -3290,6 +3744,22 @@
         }
       }
     },
+    "Unlock with Premium" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock with Premium"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פתחו עם פרימיום"
+          }
+        }
+      }
+    },
     "UPCOMING" : {
       "comment" : "Small label next to parasha name in hero card — indicates it's the upcoming Shabbat's parasha",
       "extractionState" : "stale",
@@ -3329,6 +3799,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שדרגו לפרימיום"
+          }
+        }
+      }
+    },
+    "Upgrade to Premium to record custom alarm sounds" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade to Premium to record custom alarm sounds"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שדרגו לפרימיום כדי להקליט צלילי התראה מותאמים"
           }
         }
       }

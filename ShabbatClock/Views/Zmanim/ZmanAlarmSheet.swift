@@ -29,6 +29,11 @@ struct ZmanAlarmSheet: View {
     @State private var showingAlarmPermission = false
     @State private var showingNotificationPermission = false
 
+    #if DEBUG
+    /// When set, overrides computedFireTime with this date (debug builds only).
+    @State private var debugFireTimeOverride: Date? = nil
+    #endif
+
     @AppStorage("isPremium") private var isPremium = false
 
     init(
@@ -50,7 +55,10 @@ struct ZmanAlarmSheet: View {
 
     /// The computed ring time based on current offset selection.
     private var computedFireTime: Date {
-        zman.time.addingTimeInterval(-Double(minutesBefore * 60))
+        #if DEBUG
+        if let override = debugFireTimeOverride { return override }
+        #endif
+        return zman.time.addingTimeInterval(-Double(minutesBefore * 60))
     }
 
     private var fireTimeString: String {
@@ -99,6 +107,10 @@ struct ZmanAlarmSheet: View {
                             alarmDuration: $draftAlarmDuration,
                             label: $draftLabel
                         )
+
+                        #if DEBUG
+                        debugOverrideCard
+                        #endif
 
                         // Remove button (existing alarms only)
                         if existingAlarm != nil {
@@ -267,6 +279,75 @@ struct ZmanAlarmSheet: View {
         }
     }
 
+    // MARK: - Debug Override (DEBUG only)
+
+    #if DEBUG
+    private var debugOverrideCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("DEBUG")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(.orange)
+                .padding(.leading, 4)
+
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Override fire time")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.textPrimary)
+                    Spacer()
+                    if let override = debugFireTimeOverride {
+                        let f = DateFormatter()
+                        let _ = (f.dateFormat = "h:mm:ss a")
+                        Text(f.string(from: override))
+                            .font(.system(size: 12, design: .monospaced))
+                            .foregroundStyle(.orange)
+                    } else {
+                        Text("Off")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.textSecondary)
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    debugTimeButton("+30s", seconds: 30)
+                    debugTimeButton("+1m", seconds: 60)
+                    debugTimeButton("+2m", seconds: 120)
+                    debugTimeButton("+5m", seconds: 300)
+                    Button("Clear") {
+                        debugFireTimeOverride = nil
+                        hasChanges = true
+                    }
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.textSecondary)
+                }
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.orange.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.orange.opacity(0.3), lineWidth: 0.5)
+                    )
+            )
+        }
+    }
+
+    private func debugTimeButton(_ title: String, seconds: Int) -> some View {
+        Button(title) {
+            debugFireTimeOverride = Date().addingTimeInterval(TimeInterval(seconds))
+            hasChanges = true
+        }
+        .font(.system(size: 12, weight: .medium))
+        .foregroundStyle(.orange)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(
+            Capsule().fill(Color.orange.opacity(0.15))
+        )
+    }
+    #endif
+
     // MARK: - Remove Button
 
     private var removeButton: some View {
@@ -330,6 +411,12 @@ struct ZmanAlarmSheet: View {
         alarm.snoozeEnabled = false
         alarm.zmanTypeRawValue = zman.type.rawValue
         alarm.zmanMinutesBefore = minutesBefore
+
+        #if DEBUG
+        if debugFireTimeOverride != nil {
+            ZmanAlarmSyncService.shared.debugSyncSkipIDs.insert(alarm.id)
+        }
+        #endif
 
         if alarmService.isFallbackMode {
             alarm.alarmDurationSeconds = AlarmKitService.fallbackMaxDuration

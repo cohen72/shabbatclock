@@ -13,6 +13,12 @@ final class Alarm {
     var createdAt: Date
     var lastFiredAt: Date?
     var alarmKitID: UUID?
+    /// AlarmKit ID of the "silencer" alarm scheduled at fireTime + duration.
+    /// The silencer is a silent AlarmKit alarm that fires shortly after the main alarm;
+    /// iOS treats it as a new alarm and (as a side effect) silences the original ringing.
+    /// This is the auto-stop mechanism for AlarmKit alarms, since we can't run code
+    /// while the app is suspended to call AlarmManager.stop().
+    var silencerAlarmKitID: UUID?
     var snoozeDurationSecondsValue: Int?
     var snoozeEnabledValue: Bool?
     var alarmDurationSecondsValue: Int?
