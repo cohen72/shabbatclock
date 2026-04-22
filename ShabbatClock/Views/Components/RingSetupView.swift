@@ -73,9 +73,10 @@ struct RingSetupView: View {
                 .foregroundStyle(.goldAccent)
                 .padding(.top, 8)
 
-            Text("Silent Auto-Stop")
+            Text("Vibration-Free Auto-Stop")
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(.textPrimary)
+                .multilineTextAlignment(.center)
 
             Text("Your alarm rings, then stops on its own — no vibration, no fuss. One quick setup makes it perfect for Shabbat.")
                 .font(.system(size: 14))
@@ -103,7 +104,7 @@ struct RingSetupView: View {
                     .foregroundStyle(.textPrimary)
             }
 
-            Text("Shabbat Clock uses iOS's built-in alarm. To stop it on time, the app schedules a second silent alarm that takes over and ends the ring. The result is a clean shut-off — but iOS will still try to vibrate unless you turn vibration off.")
+            Text("Your alarm rings, then ends automatically after the duration you pick. To make it truly silent, turn off Haptics in iOS Settings — otherwise iOS will keep vibrating for up to 15 minutes.")
                 .font(.system(size: 13))
                 .foregroundStyle(.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -139,11 +140,11 @@ struct RingSetupView: View {
             }
             .padding(.top, 4)
 
-            // Screenshots showing the 3 settings steps
+            // Screenshots showing the 3 settings steps. Hebrew variants used when app is in Hebrew.
             HStack(spacing: 8) {
-                screenshotTile(image: "haptics1", label: "Step 1")
-                screenshotTile(image: "haptics2", label: "Step 2")
-                screenshotTile(image: "haptics3", label: "Step 3")
+                screenshotTile(image: localizedHapticsImage(1), label: "Step 1")
+                screenshotTile(image: localizedHapticsImage(2), label: "Step 2")
+                screenshotTile(image: localizedHapticsImage(3), label: "Step 3")
             }
 
             Divider().overlay(Color.surfaceBorder)
@@ -187,6 +188,13 @@ struct RingSetupView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .themeCard(cornerRadius: 14)
+    }
+
+    /// Returns the asset name for the Nth haptics-settings screenshot, picking the
+    /// Hebrew variant when the app is in Hebrew so the iOS UI shown matches the
+    /// user's device language.
+    private func localizedHapticsImage(_ step: Int) -> String {
+        AppLanguage.current == .hebrew ? "hapticsHebrew\(step)" : "haptics\(step)"
     }
 
     private func screenshotTile(image: String, label: LocalizedStringKey) -> some View {
@@ -282,8 +290,17 @@ struct RingSetupView: View {
 
 /// Plays the bundled `haptics` video on loop, muted, with a subtle fade at the
 /// top edge to mask the iOS status bar visible in the source recording.
+/// Uses the Hebrew variant when the app is in Hebrew so the iOS UI in the video
+/// matches the user's device language.
 struct HapticsVideoPlayer: View {
     @State private var player: AVPlayer?
+
+    /// Asset name of the data asset to play. Picked at view creation time based on language.
+    private let assetName: String
+
+    init() {
+        self.assetName = AppLanguage.current == .hebrew ? "hapticsHebrew" : "haptics"
+    }
 
     var body: some View {
         ZStack {
@@ -320,9 +337,9 @@ struct HapticsVideoPlayer: View {
         }
     }
 
-    /// Loads the `haptics` data asset and prepares an AVPlayer that loops it.
+    /// Loads the appropriate haptics data asset and prepares an AVPlayer that loops it.
     private func loadVideo() async {
-        guard let dataAsset = NSDataAsset(name: "haptics") else { return }
+        guard let dataAsset = NSDataAsset(name: assetName) else { return }
 
         // AVPlayer can't read directly from an in-memory Data; write to a temp file.
         let tempURL = FileManager.default.temporaryDirectory

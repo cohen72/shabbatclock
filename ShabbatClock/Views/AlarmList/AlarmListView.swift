@@ -15,9 +15,16 @@ struct AlarmListView: View {
   
   // Zman alarm sheet: triggered when tapping a zman alarm in the list
   @State private var zmanSheetAlarm: Alarm?
+
+  // New zman alarm draft: triggered from zman presets in the + menu
+  @State private var newZmanDraft: ZmanDraft?
   
   // Shabbat banner
   @State private var shabbatBannerDismissed = false
+
+  // Gate empty/list transition until after first render to avoid animating
+  // the navigation title on initial appearance.
+  @State private var hasAppeared = false
 
   // Free tier limit
   private let freeAlarmLimit = 3
@@ -28,27 +35,32 @@ struct AlarmListView: View {
       ZStack {
         LinearGradient.nightSky
           .ignoresSafeArea()
-        
-        if alarms.isEmpty {
-          emptyStateView
-        } else {
-          List {
-            // Permission denied banner (non-dismissible)
-            if alarmService.isBothDenied {
-              permissionDeniedBanner
-                .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
 
-            // Friday reminder banner (dismissible)
-            if isErevShabbat && !shabbatBannerDismissed && !alarms.isEmpty {
-              erevShabbatCard
-                .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
+        List {
+          // Permission denied banner (non-dismissible)
+          if alarmService.isBothDenied {
+            permissionDeniedBanner
+              .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
+              .listRowBackground(Color.clear)
+              .listRowSeparator(.hidden)
+          }
 
+          // Friday reminder banner (dismissible)
+          if isErevShabbat && !shabbatBannerDismissed && !alarms.isEmpty {
+            erevShabbatCard
+              .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
+              .listRowBackground(Color.clear)
+              .listRowSeparator(.hidden)
+          }
+
+          if alarms.isEmpty {
+            emptyStateView
+              .frame(maxWidth: .infinity, minHeight: 420)
+              .listRowInsets(EdgeInsets())
+              .listRowBackground(Color.clear)
+              .listRowSeparator(.hidden)
+              .transition(.opacity.combined(with: .scale(scale: 0.96)))
+          } else {
             ForEach(alarms) { alarm in
               AlarmRowView(alarm: alarm) { isEnabled in
                 handleToggle(alarm: alarm, isEnabled: isEnabled)
@@ -74,12 +86,14 @@ struct AlarmListView: View {
                 }
                 .tint(.red)
               }
+              .transition(.opacity)
             }
           }
-          .listStyle(.plain)
-          .scrollContentBackground(.hidden)
-          .contentMargins(.bottom, 120, for: .scrollContent)
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .contentMargins(.bottom, 120, for: .scrollContent)
+        .animation(hasAppeared ? .easeInOut(duration: 0.35) : nil, value: alarms.isEmpty)
       }
       .navigationTitle("Alarms")
       .navigationBarTitleDisplayMode(.large)
@@ -152,9 +166,9 @@ struct AlarmListView: View {
                       label: String(localized: "Netz Minyan")
                     )
                   } label: {
-                    Label(String(localized: "Netz Minyan"), systemImage: "sunrise.fill")
+                    Label(String(localized: "Netz Minyan"), systemImage: zmanPresetIcon(for: .netz))
                   }
-                  
+
                   Button {
                     createZmanPresetAlarm(
                       zmanType: .alotHashachar,
@@ -162,7 +176,7 @@ struct AlarmListView: View {
                       label: String(localized: "Early Minyan")
                     )
                   } label: {
-                    Label(String(localized: "Early Minyan"), systemImage: "moon.stars")
+                    Label(String(localized: "Early Minyan"), systemImage: zmanPresetIcon(for: .alotHashachar))
                   }
                 } header: {
                   Label("Zmanim", systemImage: "sun.min")
@@ -198,6 +212,11 @@ struct AlarmListView: View {
       if zmanimService.todayZmanim.isEmpty {
         zmanimService.calculateTodayZmanim()
       }
+      // Enable empty/list crossfade only after the first appearance so the
+      // initial @Query load doesn't animate the nav title.
+      DispatchQueue.main.async {
+        hasAppeared = true
+      }
     }
     .sheet(item: $zmanSheetAlarm) { alarm in
       // Find the matching zman for this alarm
@@ -213,6 +232,32 @@ struct AlarmListView: View {
         .applyLanguageOverride(AppLanguage.current)
       } else {
         // Zmanim not loaded yet — show a brief loading state
+        VStack(spacing: 16) {
+          ProgressView()
+            .tint(.accentPurple)
+          Text("Loading zmanim…")
+            .font(.system(size: 14))
+            .foregroundStyle(.textSecondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(LinearGradient.nightSky)
+        .presentationDetents([.medium])
+        .onAppear {
+          zmanimService.calculateTodayZmanim()
+        }
+      }
+    }
+    .sheet(item: $newZmanDraft) { draft in
+      if let zman = zmanimService.todayZmanim.first(where: { $0.type == draft.zmanType }) {
+        ZmanAlarmSheet(
+          zman: zman,
+          existingAlarm: nil,
+          onDelete: nil,
+          initialMinutesBefore: draft.minutesBefore,
+          initialLabel: draft.label
+        )
+        .applyLanguageOverride(AppLanguage.current)
+      } else {
         VStack(spacing: 16) {
           ProgressView()
             .tint(.accentPurple)
@@ -396,7 +441,16 @@ struct AlarmListView: View {
   }
   
   // MARK: - Presets
-  
+
+  /// Bell icon mirroring ZmanimView semantics:
+  /// no alarm → "bell", enabled → "bell.fill", disabled → "bell.slash".
+  private func zmanPresetIcon(for zmanType: ZmanimService.ZmanType) -> String {
+    guard let alarm = alarms.first(where: { $0.zmanTypeRawValue == zmanType.rawValue }) else {
+      return "bell"
+    }
+    return alarm.isEnabled ? "bell.fill" : "bell.slash"
+  }
+
   /// Create a Shabbat preset alarm and open it in the editor for customization.
   private func createPresetAlarm(label: String, hour: Int, minute: Int, repeatDays: [Int]) {
     let alarm = Alarm(
@@ -417,31 +471,17 @@ struct AlarmListView: View {
       return
     }
 
-    guard let zman = zmanimService.todayZmanim.first(where: { $0.type == zmanType }) else {
-      // Zmanim not loaded — create with default time, sync will fix it
-      let alarm = Alarm(label: label)
-      alarm.zmanTypeRawValue = zmanType.rawValue
-      alarm.zmanMinutesBefore = minutesBefore
-      newAlarm = alarm
-      return
-    }
-
-    let fireTime = zman.time.addingTimeInterval(-Double(minutesBefore * 60))
-    let calendar = Calendar.current
-    let alarm = Alarm(
-      hour: calendar.component(.hour, from: fireTime),
-      minute: calendar.component(.minute, from: fireTime),
-      isEnabled: true,
-      label: label
-    )
-    alarm.zmanTypeRawValue = zmanType.rawValue
-    alarm.zmanMinutesBefore = minutesBefore
-    
-    modelContext.insert(alarm)
-    Task {
-      await alarmService.enable(alarm)
-    }
+    // Open ZmanAlarmSheet as a draft — user must hit Save to persist
+    newZmanDraft = ZmanDraft(zmanType: zmanType, minutesBefore: minutesBefore, label: label)
   }
+}
+
+/// Draft state for creating a new zman-linked alarm via ZmanAlarmSheet.
+struct ZmanDraft: Identifiable {
+  let id = UUID()
+  let zmanType: ZmanimService.ZmanType
+  let minutesBefore: Int
+  let label: String
 }
 
 // MARK: - Preview

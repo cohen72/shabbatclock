@@ -39,18 +39,21 @@ struct ZmanAlarmSheet: View {
     init(
         zman: ZmanimService.Zman,
         existingAlarm: Alarm?,
-        onDelete: (() -> Void)? = nil
+        onDelete: (() -> Void)? = nil,
+        initialMinutesBefore: Int? = nil,
+        initialLabel: String? = nil
     ) {
         self.zman = zman
         self.existingAlarm = existingAlarm
         self.onDelete = onDelete
 
         let alarm = existingAlarm
-        _minutesBefore = State(initialValue: alarm?.zmanMinutesBefore ?? 0)
+        _minutesBefore = State(initialValue: alarm?.zmanMinutesBefore ?? initialMinutesBefore ?? 0)
         let fallbackSound = UserDefaults.standard.string(forKey: "defaultSound") ?? "Lecha Dodi"
         _draftSoundName = State(initialValue: alarm?.soundName ?? fallbackSound)
-        _draftAlarmDuration = State(initialValue: alarm?.alarmDurationSeconds ?? 30)
-        _draftLabel = State(initialValue: alarm?.label ?? zman.englishName)
+        let defaultDuration = UserDefaults.standard.object(forKey: "defaultAlarmDuration") as? Int ?? 15
+        _draftAlarmDuration = State(initialValue: alarm?.alarmDurationSeconds ?? defaultDuration)
+        _draftLabel = State(initialValue: alarm?.label ?? initialLabel ?? zman.englishName)
     }
 
     /// The computed ring time based on current offset selection.
@@ -63,6 +66,7 @@ struct ZmanAlarmSheet: View {
 
     private var fireTimeString: String {
         let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.effectiveLocale
         formatter.dateFormat = "h:mm"
         return formatter.string(from: computedFireTime)
     }
@@ -72,7 +76,10 @@ struct ZmanAlarmSheet: View {
     }
 
     private var zmanTimeString: String {
-        zman.timeString
+        let formatter = DateFormatter()
+        formatter.locale = AppLanguage.current.effectiveLocale
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: zman.time)
     }
 
     private var fireRelativeDay: String {
@@ -92,8 +99,8 @@ struct ZmanAlarmSheet: View {
                 ScrollView {
                     VStack(spacing: 16) {
 
-                        // Hero card: zman identity
-                        heroHeader
+                        // Arc showing where this zman falls in the day
+                        ZmanArcCard(zman: zman, zmanTimeString: zmanTimeString)
 
                         // Offset picker + fire time
                         offsetCard
@@ -120,6 +127,7 @@ struct ZmanAlarmSheet: View {
                 }
             }
             .scrollDismissesKeyboard(.immediately)
+            .navigationTitle("Zman Alarm")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -143,12 +151,12 @@ struct ZmanAlarmSheet: View {
         .onChange(of: draftSoundName) { _, _ in hasChanges = true }
         .onChange(of: draftAlarmDuration) { _, _ in hasChanges = true }
         .onChange(of: draftLabel) { _, _ in hasChanges = true }
-        .confirmationDialog("Remove Alarm", isPresented: $showingDeleteConfirmation) {
+        .alert("Remove Alarm", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {}
             Button("Remove", role: .destructive) {
                 dismiss()
                 onDelete?()
             }
-            Button("Cancel", role: .cancel) {}
         } message: {
             Text("This will remove the alarm for this zman.")
         }
@@ -188,27 +196,6 @@ struct ZmanAlarmSheet: View {
         }
     }
 
-    // MARK: - Hero Header
-
-    private var heroHeader: some View {
-        VStack(spacing: 4) {
-            Text(zman.hebrewName)
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(.goldAccent)
-
-            Text(zman.englishName)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(.textPrimary)
-
-            Text(zmanTimeString)
-                .font(.system(size: 13))
-                .foregroundStyle(.textSecondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .themeCard(cornerRadius: 14)
-    }
-
     // MARK: - Offset Card
 
     /// Combined offset picker + computed fire time in one card.
@@ -229,41 +216,43 @@ struct ZmanAlarmSheet: View {
                     Text("30 min").tag(30)
                 }
                 .pickerStyle(.segmented)
-                .colorScheme(.dark)
             }
             .padding(16)
 
-            Divider().overlay(Color.surfaceBorder)
+            // Fire time row only appears when offset > 0 (otherwise it duplicates the zman time shown above)
+            if minutesBefore > 0 {
+                Divider().overlay(Color.surfaceBorder)
 
-            // Fire time result
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Alarm will ring at")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(.textSecondary)
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Alarm will ring at")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.textSecondary)
 
-                    Text(fireRelativeDay)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.textSecondary.opacity(0.7))
+                        Text(fireRelativeDay)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.textSecondary.opacity(0.7))
+                    }
+
+                    Spacer()
+
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text(fireTimeString)
+                            .font(.system(size: 26, weight: .thin, design: .default))
+                            .monospacedDigit()
+                            .foregroundStyle(.textPrimary)
+
+                        Text(firePeriodString)
+                            .font(.system(size: 13, weight: .thin, design: .default))
+                            .foregroundStyle(.textSecondary.opacity(0.8))
+                    }
                 }
-
-                Spacer()
-
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text(fireTimeString)
-                        .font(.system(size: 42, weight: .thin, design: .default))
-                        .monospacedDigit()
-                        .foregroundStyle(.textPrimary)
-
-                    Text(firePeriodString)
-                        .font(.system(size: 18, weight: .thin, design: .default))
-                        .foregroundStyle(.textSecondary.opacity(0.8))
-                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
         }
         .themeCard(cornerRadius: 14)
+        .animation(.easeInOut(duration: 0.2), value: minutesBefore)
     }
 
     /// Dynamic label: "Ring at [zman] time" or "Ring before [zman]"
@@ -417,6 +406,9 @@ struct ZmanAlarmSheet: View {
 
         if alarmService.isFallbackMode {
             alarm.alarmDurationSeconds = AlarmKitService.fallbackMaxDuration
+        } else if !StoreManager.shared.isPremium && draftAlarmDuration > 15 {
+            // Free tier caps auto-stop at 15s; longer durations are premium-only.
+            alarm.alarmDurationSeconds = 15
         } else {
             alarm.alarmDurationSeconds = draftAlarmDuration
         }

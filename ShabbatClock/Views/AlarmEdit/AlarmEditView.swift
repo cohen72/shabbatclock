@@ -27,6 +27,7 @@ struct AlarmEditView: View {
   
   @AppStorage("isPremium") private var isPremium = false
   @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
+  @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 15
   
   private let snoozeDurationOptions: [(String, Int)] = [
     ("1 min", 60),
@@ -98,14 +99,16 @@ struct AlarmEditView: View {
       draftRepeatDays = alarm.repeatDays
       draftSnoozeEnabled = alarm.snoozeEnabled
       draftSnoozeDuration = alarm.snoozeDurationSeconds
-      draftAlarmDuration = alarm.alarmDurationSeconds
+      // For new alarms, seed from the user's default (from Settings);
+      // for existing, use whatever is persisted on the alarm.
+      draftAlarmDuration = isNew ? defaultAlarmDuration : alarm.alarmDurationSeconds
     }
     .scrollDismissesKeyboard(.immediately)
-    .confirmationDialog("Delete Alarm", isPresented: $showingDeleteConfirmation) {
+    .alert("Delete Alarm", isPresented: $showingDeleteConfirmation) {
+      Button("Cancel", role: .cancel) {}
       Button("Delete", role: .destructive) {
         deleteAlarm()
       }
-      Button("Cancel", role: .cancel) {}
     } message: {
       Text("Are you sure you want to delete this alarm?")
     }
@@ -339,6 +342,9 @@ struct AlarmEditView: View {
     if alarmService.isFallbackMode {
       // Fallback: force 30s duration and schedule via notifications
       alarm.alarmDurationSeconds = AlarmKitService.fallbackMaxDuration
+    } else if !StoreManager.shared.isPremium && draftAlarmDuration > 15 {
+      // Free tier caps auto-stop at 15s; longer durations are premium-only.
+      alarm.alarmDurationSeconds = 15
     } else {
       alarm.alarmDurationSeconds = draftAlarmDuration
     }

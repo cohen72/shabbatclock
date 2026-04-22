@@ -219,6 +219,17 @@
         }
       }
     },
+    "1 min" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דקה"
+          }
+        }
+      }
+    },
     "1.0.0" : {
 
     },
@@ -244,6 +255,17 @@
         }
       }
     },
+    "2 min" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2 דק׳"
+          }
+        }
+      }
+    },
     "3 hours" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -251,6 +273,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "3 שעות"
+          }
+        }
+      }
+    },
+    "3 min" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 דק׳"
           }
         }
       }
@@ -329,6 +362,17 @@
         }
       }
     },
+    "15 sec" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "15 שנ׳"
+          }
+        }
+      }
+    },
     "30 min" : {
       "localizations" : {
         "he" : {
@@ -356,16 +400,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "30 שנ׳"
-          }
-        }
-      }
-    },
-    "42 beautiful sounds including Shabbat melodies" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "42 צלילים יפים כולל מנגינות שבת"
           }
         }
       }
@@ -414,6 +448,7 @@
     },
     "About auto-stop" : {
       "comment" : "Title of the small education card in the alarm edit screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -810,12 +845,12 @@
         }
       }
     },
-    "Auto-stop up to 30 minutes" : {
+    "Auto-stop up to 5 minutes" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "עצירה אוטומטית עד 30 דקות"
+            "value" : "עצירה אוטומטית עד 5 דקות"
           }
         }
       }
@@ -1042,18 +1077,18 @@
         }
       }
     },
-    "Create personalized alarm sounds with your voice or a melody" : {
+    "Create personalized alarm sounds" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Create personalized alarm sounds with your voice or a melody"
+            "value" : "Create personalized alarm sounds"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "צרו צלילי התראה אישיים עם הקול שלכם או מנגינה"
+            "value" : "צרו צלילי התראה אישיים"
           }
         }
       }
@@ -1158,6 +1193,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "צליל ברירת מחדל"
+          }
+        }
+      }
+    },
+    "Default Auto-Stop" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עצירה אוטומטית כברירת מחדל"
           }
         }
       }
@@ -1326,6 +1371,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "עריכת התראה"
+          }
+        }
+      }
+    },
+    "Zman Alarm" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראת זמן"
           }
         }
       }
@@ -1533,11 +1588,35 @@
       }
     },
     "For a clean silent shut-off, turn off vibration in iOS Settings." : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "לכיבוי שקט ונקי, כבה את הרטט בהגדרות iOS."
+          }
+        }
+      }
+    },
+    "For vibration-free auto-stop, turn off Haptics in iOS Settings." : {
+      "comment" : "Subtitle of the warning card in the alarm edit screen.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לכיבוי אוטומטי ללא רטט, כבה את משוב המגע בהגדרות iOS."
+          }
+        }
+      }
+    },
+    "For vibration-free auto-stop, turn off Haptics in Settings." : {
+      "comment" : "Subtitle of the warning card in the alarm edit screen.",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לכיבוי אוטומטי ללא רטט, כבה את משוב המגע בהגדרות."
           }
         }
       }
@@ -1737,6 +1816,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "אני חי"
+          }
+        }
+      }
+    },
+    "Important" : {
+      "comment" : "Title of the warning card in the alarm edit screen.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חשוב"
+          }
+        }
+      }
+    },
+    "Important: Stop the vibration" : {
+      "comment" : "Title of the warning card in the alarm edit screen.",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חשוב: עצור את הרטט"
           }
         }
       }
@@ -2537,7 +2639,14 @@
       }
     },
     "Off" : {
-
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כבוי"
+          }
+        }
+      }
     },
     "Ohm" : {
       "extractionState" : "manual",
@@ -3458,6 +3567,7 @@
       }
     },
     "Shabbat Clock uses iOS's built-in alarm. To stop it on time, the app schedules a second silent alarm that takes over and ends the ring. The result is a clean shut-off — but iOS will still try to vibrate unless you turn vibration off." : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -3553,6 +3663,36 @@
         }
       }
     },
+    "CURRENT PARASHAT" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פרשת השבוע"
+          }
+        }
+      }
+    },
+    "Shabbat begins tomorrow" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבת מתחילה מחר"
+          }
+        }
+      }
+    },
+    "Shabbat in %lld days" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבת בעוד %lld ימים"
+          }
+        }
+      }
+    },
     "Shabbat Tip" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3566,6 +3706,7 @@
     },
     "Silent Auto-Stop" : {
       "comment" : "Title for the Ring Setup education screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -4171,6 +4312,16 @@
         }
       }
     },
+    "Unlock the full sound library" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פתיחת ספריית הצלילים המלאה"
+          }
+        }
+      }
+    },
     "Unlock with Premium" : {
       "localizations" : {
         "en" : {
@@ -4305,6 +4456,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "הרטט כבוי"
+          }
+        }
+      }
+    },
+    "Vibration-Free Auto-Stop" : {
+      "comment" : "Title for the Ring Setup education screen and onboarding ring-setup page.",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כיבוי אוטומטי ללא רטט"
           }
         }
       }
@@ -4472,6 +4634,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "הכל מוכן!"
+          }
+        }
+      }
+    },
+    "Your alarm rings, then ends automatically after the duration you pick. To make it truly silent, turn off Haptics in iOS Settings — otherwise iOS will keep vibrating for up to 15 minutes." : {
+      "comment" : "How auto-stop works card description in Ring Setup screen.",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה מצלצלת ואז מסתיימת אוטומטית לאחר משך הזמן שבחרת. כדי שזה יהיה שקט באמת, כבה את משוב המגע בהגדרות iOS — אחרת ה-iOS ימשיך לרטוט עד 15 דקות."
           }
         }
       }

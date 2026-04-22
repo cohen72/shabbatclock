@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Environment(\.requestReview) private var requestReview
     @AppStorage("isPremium") private var isPremium = false
     @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
+    @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 15
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
     @AppStorage("shabbatReminderEnabled") private var shabbatReminderEnabled = true
@@ -182,7 +183,7 @@ struct SettingsView: View {
                         }
                     )) {
                         ForEach(reminderOptions, id: \.1) { option in
-                            Text(option.0).tag(option.1)
+                            Text(LocalizedStringKey(option.0)).tag(option.1)
                         }
                     }
                     .tint(.goldAccent)
@@ -411,46 +412,104 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Defaults", icon: "slider.horizontal.3")
 
-            VStack(spacing: 8) {
-                NavigationLink {
-                    SoundPickerView(selectedSoundName: $defaultSound)
-                } label: {
-                    HStack {
-                        Text("Default Sound")
-                            .font(AppFont.body())
-                            .foregroundStyle(.textPrimary)
-
-                        Spacer()
-
-                        Text(AlarmSound.displayName(for: defaultSound, in: modelContext))
-                            .font(AppFont.body(14))
-                            .foregroundStyle(.textSecondary)
-
-                        Image(systemName: "chevron.forward")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.textSecondary)
+            VStack(spacing: 1) {
+                settingsRow {
+                    NavigationLink {
+                        SoundPickerView(selectedSoundName: $defaultSound)
+                    } label: {
+                        HStack {
+                            Text("Default Sound")
+                            Spacer()
+                            Text(AlarmSound.displayName(for: defaultSound, in: modelContext))
+                                .font(AppFont.body(14))
+                                .foregroundStyle(.textSecondary)
+                            Image(systemName: "chevron.forward")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.textSecondary)
+                        }
                     }
-                    .padding(16)
-                    .settingsCard()
                 }
 
-                NavigationLink {
-                    CustomSoundsSettingsView()
-                } label: {
-                    HStack {
-                        Text("Custom Sounds")
-                            .font(AppFont.body())
-                            .foregroundStyle(.textPrimary)
-
-                        Spacer()
-
-                        Image(systemName: "chevron.forward")
-                            .font(.system(size: 14))
-                            .foregroundStyle(.textSecondary)
-                    }
-                    .padding(16)
-                    .settingsCard()
+                settingsRow {
+                    defaultDurationRowContent
                 }
+
+                settingsRow {
+                    NavigationLink {
+                        CustomSoundsSettingsView()
+                    } label: {
+                        HStack {
+                            Text("Custom Sounds")
+                            Spacer()
+                            Image(systemName: "chevron.forward")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.textSecondary)
+                        }
+                    }
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
+        }
+    }
+
+    private static let defaultDurationOptions: [(String, Int)] = [
+        ("15 sec", 15),
+        ("30 sec", 30),
+        ("1 min", 60),
+        ("2 min", 120),
+        ("3 min", 180),
+        ("5 min", 300),
+    ]
+
+    private func isDurationLocked(_ seconds: Int) -> Bool {
+        !StoreManager.shared.isPremium && seconds > 15
+    }
+
+    private var defaultDurationLabel: String {
+        Self.defaultDurationOptions.first(where: { $0.1 == defaultAlarmDuration })?.0 ?? "15 sec"
+    }
+
+    private var defaultDurationRowContent: some View {
+        HStack {
+            Text("Default Auto-Stop")
+            Spacer()
+            Menu {
+                ForEach(Self.defaultDurationOptions, id: \.1) { option in
+                    Button {
+                        if isDurationLocked(option.1) {
+                            showingPremium = true
+                        } else {
+                            defaultAlarmDuration = option.1
+                        }
+                    } label: {
+                        if isDurationLocked(option.1) {
+                            Label(LocalizedStringKey(option.0), systemImage: "lock.fill")
+                        } else if option.1 == defaultAlarmDuration {
+                            Label(LocalizedStringKey(option.0), systemImage: "checkmark")
+                        } else {
+                            Text(LocalizedStringKey(option.0))
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text(LocalizedStringKey(defaultDurationLabel))
+                        .font(AppFont.body(14))
+                        .foregroundStyle(.goldAccent)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.goldAccent)
+                }
+            }
+        }
+        .onAppear {
+            // Clamp if user was premium and is no longer.
+            if isDurationLocked(defaultAlarmDuration) {
+                defaultAlarmDuration = 15
             }
         }
     }

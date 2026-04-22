@@ -142,6 +142,7 @@ struct MainClockView: View {
                             .font(.system(size: 18, weight: .thin))
                             .foregroundStyle(.textSecondary.opacity(0.8))
                     }
+                    .environment(\.layoutDirection, .leftToRight)
 
                     // Hebrew date (both scripts)
                     if !zmanimService.hebrewDateString.isEmpty {

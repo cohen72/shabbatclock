@@ -103,8 +103,8 @@ struct OnboardingView: View {
                 .padding(.bottom, 12)
 
             // Headline
-            Text("Silent Auto-Stop")
-                .font(.system(size: 26, weight: .bold))
+            Text("Vibration-Free Auto-Stop")
+                .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 4)
@@ -117,10 +117,11 @@ struct OnboardingView: View {
                 .padding(.bottom, 16)
 
             // Screenshots showing the 3 steps in iOS Settings
+            // Use Hebrew screenshots when the app is in Hebrew so the iOS UI shown matches the user's device language.
             HStack(spacing: 8) {
-                onboardingScreenshot(image: "haptics1", caption: "Sounds & Haptics")
-                onboardingScreenshot(image: "haptics2", caption: "Tap Haptics")
-                onboardingScreenshot(image: "haptics3", caption: "Don't Play in Silent")
+                onboardingScreenshot(image: localizedHapticsImage(1), caption: "Sounds & Haptics")
+                onboardingScreenshot(image: localizedHapticsImage(2), caption: "Tap Haptics")
+                onboardingScreenshot(image: localizedHapticsImage(3), caption: "Don't Play in Silent")
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 14)
@@ -195,6 +196,13 @@ struct OnboardingView: View {
 
             Spacer().frame(height: 50)
         }
+    }
+
+    /// Returns the asset name for the Nth haptics-settings screenshot, picking the
+    /// Hebrew variant when the app is set to Hebrew so the iOS UI shown matches the
+    /// user's device language.
+    private func localizedHapticsImage(_ step: Int) -> String {
+        AppLanguage.current == .hebrew ? "hapticsHebrew\(step)" : "haptics\(step)"
     }
 
     /// One screenshot tile in the onboarding ring-setup page. Tap to zoom.
