@@ -49,6 +49,12 @@ final class AlarmKitService: NSObject {
     /// from creating duplicate AlarmKit alarms for the same logical alarm.
     private var alarmsBeingScheduled: Set<UUID> = []
 
+    /// Map from silencer alarm ID → its scheduled fire date. Used to measure iOS
+    /// wake latency: when the silencer enters .alerting and alarmUpdates emits to us,
+    /// we compute (handlerEnteredAt - scheduledFireDate) to see how long iOS took
+    /// to wake our suspended process and deliver the state change.
+    private var silencerFireTimes: [UUID: Date] = [:]
+
     /// Shared UserDefaults for widget communication.
     private let sharedDefaults = UserDefaults(suiteName: appGroupID)
 
@@ -89,7 +95,11 @@ final class AlarmKitService: NSObject {
         if isAuthorized {
             reconcileOrphanedAlarms()
             syncAllAlarms()
-            scheduleAutoStopNotifications()
+            // EXPERIMENT: Layer 1 disabled for silencer-alarm isolation test
+            // scheduleAutoStopNotifications()
+            // Flush any leftover auto-stop notifications from prior runs so they
+            // don't fire and mask the silencer experiment.
+            flushAllAutoStopNotifications()
         } else {
             // Fallback: schedule via critical alert notifications
             syncAllFallbackAlarms()
@@ -121,7 +131,8 @@ final class AlarmKitService: NSObject {
             isAuthorized = state == .authorized
             if isAuthorized {
                 syncAllAlarms()
-                scheduleAutoStopNotifications()
+                // EXPERIMENT: Layer 1 disabled
+                // scheduleAutoStopNotifications()
             }
         } catch {
             print("[AlarmKitService] Authorization error: \(error)")
@@ -189,30 +200,113 @@ final class AlarmKitService: NSObject {
         }
     }
 
-    /// Start a delayed stop wrapped in a UIApplication background task. The background
-    /// task extends our runtime past the brief alarm-wake window, ensuring the delayed
-    /// stop actually fires even when the phone is locked and the app was suspended.
     /// Handles an alarm transitioning to `.alerting` state.
-    /// Only detects silencer alarms firing and cleans them up; no Layer 2 Task.sleep.
+    /// When the silencer fires, we cancel it AS FAST AS POSSIBLE to minimize the
+    /// window during which the haptic motor could vibrate. Order matters:
+    /// 1. Cancel the silencer FIRST (stops its haptic ASAP)
+    /// 2. Cancel the main alarm SECOND (it should already be silenced by the system
+    ///    transitioning to the silencer, but we clean up to be safe)
+    /// 3. SwiftData state cleanup happens last
+    ///
+    /// Wrapped in `beginBackgroundTask` as insurance: if iOS tries to re-suspend
+    /// our process mid-cancellation (we were only woken briefly by alarmUpdates),
+    /// the background task keeps us alive for the ~30s grace window, guaranteeing
+    /// the cancels complete.
     private func handleNewlyAlertingAlarm(id alarmKitID: UUID) {
-        guard let modelContext else { return }
-        let descriptor = FetchDescriptor<Alarm>()
-        guard let alarms = try? modelContext.fetch(descriptor) else { return }
+        // ⏱️ TIMING POINT T0: handler entered (our code first sees the silencer firing).
+        // The gap between silencer's scheduled fire time and this T0 is the iOS wake
+        // latency we're trying to measure — the window where haptic may vibrate.
+        let t0 = CFAbsoluteTimeGetCurrent()
 
-        // If this is a silencer alarm firing, try to cancel the main alarm
-        // and clean up the silencer itself. Note: this only runs if our process
-        // is alive when the silencer fires. The core experiment is whether the
-        // silencer alarm SILENCES the main alarm at the system level regardless.
-        if let mainAlarm = alarms.first(where: { $0.silencerAlarmKitID == alarmKitID }) {
-            print("[AlarmKitService] 🤫 Silencer fired — cancelling main alarm '\(mainAlarm.label)'")
-            if let mainID = mainAlarm.alarmKitID {
-                try? AlarmManager.shared.stop(id: mainID)
-                try? AlarmManager.shared.cancel(id: mainID)
+        guard let modelContext else {
+            print("[AlarmKitService] ⚠️ handleNewlyAlertingAlarm: no modelContext")
+            return
+        }
+        let descriptor = FetchDescriptor<Alarm>()
+        guard let alarms = try? modelContext.fetch(descriptor) else {
+            print("[AlarmKitService] ⚠️ handleNewlyAlertingAlarm: fetch failed")
+            return
+        }
+
+        guard let mainAlarm = alarms.first(where: { $0.silencerAlarmKitID == alarmKitID }) else {
+            // Not a silencer — just a main alarm firing. Log for visibility.
+            if let mainAlarm = alarms.first(where: { $0.alarmKitID == alarmKitID }) {
+                print("[AlarmKitService] 🔔 Main alarm '\(mainAlarm.label)' entered .alerting (id: \(alarmKitID))")
             }
-            try? AlarmManager.shared.stop(id: alarmKitID)
-            try? AlarmManager.shared.cancel(id: alarmKitID)
-            mainAlarm.silencerAlarmKitID = nil
-            try? modelContext.save()
+            return
+        }
+
+        // Snapshot IDs before starting the task (mainAlarm is SwiftData-managed and
+        // will be invalidated on save).
+        let silencerID = alarmKitID
+        let mainID = mainAlarm.alarmKitID
+        let label = mainAlarm.label
+
+        // 📊 Wake latency: time from scheduled silencer fire → handler entry.
+        // This is the window where haptic may have vibrated before we could cancel.
+        if let scheduledFireDate = silencerFireTimes[silencerID] {
+            let wakeLatencyMs = Date().timeIntervalSince(scheduledFireDate) * 1000
+            let verdict = wakeLatencyMs < 100 ? "✅ imperceptible" :
+                         wakeLatencyMs < 300 ? "⚠️ possibly brief haptic" :
+                         "❌ vibration likely"
+            print(String(format: "[AlarmKitService] 📊 Wake latency: %.1fms (%@)", wakeLatencyMs, verdict))
+            silencerFireTimes.removeValue(forKey: silencerID)
+        } else {
+            print("[AlarmKitService] 📊 Wake latency: unknown (no recorded fire time — app may have relaunched)")
+        }
+
+        // Background task state
+        var bgTaskID: UIBackgroundTaskIdentifier = .invalid
+
+        // ⏱️ T1: about to request background task
+        let t1 = CFAbsoluteTimeGetCurrent()
+        bgTaskID = UIApplication.shared.beginBackgroundTask(withName: "silencer-cancel-\(silencerID)") {
+            print("[AlarmKitService] ⏱️ beginBackgroundTask EXPIRATION handler fired — iOS reclaiming runtime")
+            if bgTaskID != .invalid {
+                UIApplication.shared.endBackgroundTask(bgTaskID)
+                bgTaskID = .invalid
+            }
+        }
+        let t2 = CFAbsoluteTimeGetCurrent()
+        let remaining = UIApplication.shared.backgroundTimeRemaining
+        let remainingStr = remaining.isInfinite ? "∞" : String(format: "%.1fs", remaining)
+        print(String(format: "[AlarmKitService] ⏱️ bgTask granted id=%d (grant took %.3fms, runtime available: %@)",
+                     bgTaskID.rawValue, (t2 - t1) * 1000, remainingStr))
+
+        // 1. CANCEL SILENCER FIRST — this is what stops the haptic vibration.
+        let t3 = CFAbsoluteTimeGetCurrent()
+        do {
+            try AlarmManager.shared.cancel(id: silencerID)
+            let t4 = CFAbsoluteTimeGetCurrent()
+            print(String(format: "[AlarmKitService] ⏱️ cancel(silencer) took %.3fms — haptic should stop now", (t4 - t3) * 1000))
+        } catch {
+            print("[AlarmKitService] ❌ cancel(silencer) failed: \(error)")
+        }
+
+        // 2. Clean up the main alarm.
+        if let mainID {
+            let t5 = CFAbsoluteTimeGetCurrent()
+            do {
+                try AlarmManager.shared.cancel(id: mainID)
+                let t6 = CFAbsoluteTimeGetCurrent()
+                print(String(format: "[AlarmKitService] ⏱️ cancel(main) took %.3fms", (t6 - t5) * 1000))
+            } catch {
+                print("[AlarmKitService] ❌ cancel(main) failed: \(error)")
+            }
+        }
+
+        let totalMs = (CFAbsoluteTimeGetCurrent() - t0) * 1000
+        print(String(format: "[AlarmKitService] 🤫 Silencer fired — cancelled main alarm '%@' (total handler: %.3fms)", label, totalMs))
+
+        // 3. SwiftData cleanup (not time-critical)
+        mainAlarm.silencerAlarmKitID = nil
+        try? modelContext.save()
+
+        // End background task now that work is done
+        if bgTaskID != .invalid {
+            UIApplication.shared.endBackgroundTask(bgTaskID)
+            bgTaskID = .invalid
+            print("[AlarmKitService] ⏱️ bgTask ended cleanly")
         }
     }
 
@@ -556,8 +650,9 @@ final class AlarmKitService: NSObject {
 
         do {
             _ = try await AlarmManager.shared.schedule(id: silencerID, configuration: config)
+            silencerFireTimes[silencerID] = silencerFireDate
             let f = DateFormatter()
-            f.dateFormat = "h:mm:ss a"
+            f.dateFormat = "h:mm:ss.SSS a"
             print("[AlarmKitService] 🤫 Scheduled silencer at \(f.string(from: silencerFireDate)) (id: \(silencerID))")
             return silencerID
         } catch {
@@ -771,6 +866,22 @@ final class AlarmKitService: NSObject {
         }
     }
 
+    /// Flush ALL auto-stop notifications (any alarm, any variant).
+    /// Used for the silencer isolation experiment — clears leftovers from previous runs
+    /// that could otherwise mask whether the silencer alarm is doing the stopping.
+    private func flushAllAutoStopNotifications() {
+        let center = UNUserNotificationCenter.current()
+        center.getPendingNotificationRequests { requests in
+            let autoStopIDs = requests
+                .map(\.identifier)
+                .filter { $0.hasPrefix(Self.autoStopNotificationPrefix) }
+            if !autoStopIDs.isEmpty {
+                center.removePendingNotificationRequests(withIdentifiers: autoStopIDs)
+                print("[AlarmKitService] 🧹 Flushed \(autoStopIDs.count) leftover auto-stop notification(s)")
+            }
+        }
+    }
+
     /// Schedule auto-stop notifications for all enabled alarms.
     private func scheduleAutoStopNotifications() {
         guard let modelContext else { return }
@@ -836,7 +947,9 @@ final class AlarmKitService: NSObject {
             updateNextAlarmDate()
         } else {
             // Repeating: re-arm pre-scheduled auto-stop for the next fire date.
-            scheduleAutoStopNotification(alarmKitID: alarmKitID, alarm: alarm)
+            // EXPERIMENT: Layer 1 disabled
+            // scheduleAutoStopNotification(alarmKitID: alarmKitID, alarm: alarm)
+            _ = alarmKitID; _ = alarm
         }
     }
 
@@ -1018,7 +1131,8 @@ final class AlarmKitService: NSObject {
                 }
             }
             try? modelContext.save()
-            scheduleAutoStopNotifications()
+            // EXPERIMENT: Layer 1 disabled
+            // scheduleAutoStopNotifications()
             print("[AlarmKitService] Migrated \(alarms.count) alarms from fallback to AlarmKit")
         }
     }
