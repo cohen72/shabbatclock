@@ -1,8 +1,11 @@
 import UIKit
 import UserNotifications
 
-/// Schedules a local notification before Shabbat reminding the user
-/// to keep the app running in the background for auto-stop to work.
+/// Schedules a local notification before Shabbat reminding the user to review
+/// their alarms and confirm phone setup (silent mode + vibration off).
+///
+/// Tapping the notification opens the app to a Shabbat Checklist sheet
+/// (see ContentView routing).
 ///
 /// Configurable via Settings:
 /// - On/Off toggle (`shabbatReminderEnabled`)
@@ -43,9 +46,11 @@ final class ShabbatReminderService {
 
         let content = UNMutableNotificationContent()
         content.title = AppLanguage.localized("Shabbat Shalom!")
-        content.body = AppLanguage.localized("Keep Shabbat Clock open in the background so your alarms auto-stop. Don't force-quit the app.")
+        content.body = AppLanguage.localized("Tap to review your alarms and confirm your phone is ready for Shabbat.")
         content.sound = .default
         content.interruptionLevel = .timeSensitive
+        // Mark this notification so the tap handler can open the Shabbat checklist
+        content.userInfo = ["action": "openShabbatChecklist"]
 
         let triggerComponents = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],

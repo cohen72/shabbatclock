@@ -28,4 +28,12 @@ final class CustomSound {
         self.duration = duration
         self.createdAt = createdAt
     }
+
+    /// Look up the custom sound matching a given filename in the given SwiftData context.
+    static func find(fileName: String, in context: ModelContext) -> CustomSound? {
+        let descriptor = FetchDescriptor<CustomSound>(
+            predicate: #Predicate { $0.fileName == fileName }
+        )
+        return try? context.fetch(descriptor).first
+    }
 }

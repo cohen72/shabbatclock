@@ -13,6 +13,7 @@ struct ContentView: View {
 
     @State private var selectedTab: Int = 0
     @State private var showingOnboarding = false
+    @State private var showingShabbatChecklist = false
 
     private var resolvedColorScheme: ColorScheme? {
         AppearanceMode(rawValue: appearanceMode)?.colorScheme
@@ -86,6 +87,13 @@ struct ContentView: View {
             }
             .environment(alarmService)
             .applyLanguageOverride(resolvedLanguage)
+        }
+        .sheet(isPresented: $showingShabbatChecklist) {
+            ShabbatChecklistView()
+                .applyLanguageOverride(resolvedLanguage)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openShabbatChecklist)) { _ in
+            showingShabbatChecklist = true
         }
     }
 }

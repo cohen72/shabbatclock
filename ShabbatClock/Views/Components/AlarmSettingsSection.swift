@@ -1,31 +1,25 @@
 import SwiftUI
 
 /// Shared alarm settings used by both AlarmEditView and ZmanAlarmSheet.
-/// Contains: sound picker, auto-stop duration, label, vibration hint.
+/// Contains: sound picker, auto-stop duration, label, ring setup education.
 struct AlarmSettingsSection: View {
     @Binding var soundName: String
     @Binding var alarmDuration: Int
     @Binding var label: String
 
     @Environment(AlarmKitService.self) private var alarmService
-    @AppStorage("isPremium") private var isPremium = false
+    @Environment(\.modelContext) private var modelContext
+    @State private var showingRingSetup = false
 
     private var alarmDurationOptions: [(String, Int)] {
-        var options: [(String, Int)] = [
+        [
             ("15 sec", 15),
             ("30 sec", 30),
             ("1 min", 60),
             ("2 min", 120),
+            ("3 min", 180),
             ("5 min", 300),
-            ("10 min", 600),
         ]
-        if isPremium {
-            options.append(contentsOf: [
-                ("15 min", 900),
-                ("30 min", 1800),
-            ])
-        }
-        return options
     }
 
     var body: some View {
@@ -39,8 +33,30 @@ struct AlarmSettingsSection: View {
             // Auto-stop duration
             alarmDurationRow
 
-            // Vibration hint
-            vibrationHintRow
+            // Ring setup education
+            ringSetupCard
+        }
+        .onAppear {
+            // Migrate legacy duration values that no longer exist in the picker
+            // (10/15/30 min options were removed). Snap to the largest available value.
+            let validValues = alarmDurationOptions.map(\.1)
+            if !validValues.contains(alarmDuration) {
+                alarmDuration = validValues.last ?? 30
+            }
+        }
+        .sheet(isPresented: $showingRingSetup) {
+            NavigationStack {
+                RingSetupView(mode: .standalone)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") {
+                                showingRingSetup = false
+                            }
+                            .foregroundStyle(.accentPurple)
+                        }
+                    }
+            }
+            .applyLanguageOverride(AppLanguage.current)
         }
     }
 
@@ -80,7 +96,7 @@ struct AlarmSettingsSection: View {
                             .font(.system(size: 14))
                             .foregroundStyle(.accentPurple)
 
-                        Text(soundName)
+                        Text(AlarmSound.displayName(for: soundName, in: modelContext))
                             .font(AppFont.body())
                             .foregroundStyle(.textPrimary)
                     }
@@ -156,57 +172,48 @@ struct AlarmSettingsSection: View {
         }
     }
 
-    // MARK: - Vibration Hint
+    // MARK: - Ring Setup Education
 
-    private var vibrationHintRow: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "iphone.radiowaves.left.and.right")
-                .font(.system(size: 12))
-                .foregroundStyle(.textSecondary.opacity(0.5))
-            Text("To disable vibration, go to Settings › Sounds & Haptics")
-                .font(.system(size: 11))
-                .foregroundStyle(.textSecondary.opacity(0.5))
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 6)
-    }
-}
-
-// MARK: - Auto-Stop Background Banner
-
-/// Banner reminding users to keep the app in the background for auto-stop to work.
-/// Placed at the top of alarm edit/create screens.
-struct AutoStopBackgroundBanner: View {
-    @Environment(AlarmKitService.self) private var alarmService
-
-    var body: some View {
-        if !alarmService.isFallbackMode {
-            HStack(spacing: 12) {
-                Image(systemName: "moon.stars.fill")
-                    .font(.system(size: 16))
+    /// Compact teaser explaining the silencer mechanism + vibration caveat,
+    /// with a tap target opening the full RingSetupView walkthrough.
+    private var ringSetupCard: some View {
+        Button {
+            showingRingSetup = true
+        } label: {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "moon.zzz.fill")
+                    .font(.system(size: 18))
                     .foregroundStyle(.goldAccent)
+                    .frame(width: 24)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Shabbat Mode")
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("About auto-stop")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.textPrimary)
-                    Text("Keep the app running in the background before Shabbat so alarms auto-stop.")
+                    Text("For a clean silent shut-off, turn off vibration in iOS Settings.")
                         .font(.system(size: 11))
                         .foregroundStyle(.textSecondary)
+                        .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
+                    Text("Learn how →")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.accentPurple)
+                        .padding(.top, 2)
                 }
 
                 Spacer(minLength: 0)
             }
-            .padding(12)
+            .padding(14)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color.goldAccent.opacity(0.08))
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.goldAccent.opacity(0.06))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .stroke(Color.goldAccent.opacity(0.2), lineWidth: 0.5)
                     )
             )
         }
+        .buttonStyle(.plain)
     }
 }
+

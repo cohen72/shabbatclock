@@ -91,9 +91,6 @@ struct ZmanAlarmSheet: View {
 
                 ScrollView {
                     VStack(spacing: 16) {
-                        // Auto-stop background reminder
-                        AutoStopBackgroundBanner()
-                            .padding(.top, 12)
 
                         // Hero card: zman identity
                         heroHeader

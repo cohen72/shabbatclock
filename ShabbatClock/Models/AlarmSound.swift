@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 struct AlarmSound: Identifiable, Hashable {
     let id: String
@@ -34,6 +35,20 @@ struct AlarmSound: Identifiable, Hashable {
     /// Builds the `Alarm.soundName` value for a given custom recording filename.
     static func customSoundName(fileName: String) -> String {
         customSoundPrefix + fileName
+    }
+
+    /// Resolves any alarm sound name (bundled or custom) into a user-facing display string.
+    /// For custom recordings, looks up the CustomSound in the provided SwiftData context.
+    /// If the custom recording has been deleted, falls back to the default sound's display name.
+    static func displayName(for soundName: String, in context: ModelContext?) -> String {
+        if let customFileName = customFileName(from: soundName) {
+            if let context, let custom = CustomSound.find(fileName: customFileName, in: context) {
+                return custom.name
+            }
+            // File/record missing — show default instead of the raw sentinel+filename
+            return defaultSound.displayName
+        }
+        return sound(named: soundName)?.displayName ?? soundName
     }
 
     enum Category: String, CaseIterable {

@@ -238,47 +238,32 @@ struct MainClockView: View {
 
     private var shabbatTimesCard: some View {
         VStack(spacing: 0) {
-            if hasValidLocation {
-                HStack(spacing: 0) {
-                    // Candle Lighting
-                    shabbatTimeColumn(
-                        icon: "flame.fill",
-                        iconColor: .goldAccent,
-                        label: "Candle Lighting",
-                        time: zmanimService.candleLightingTime,
-                        dayLabel: candleLightingDayLabel
-                    )
+            HStack(spacing: 0) {
+                // Candle Lighting
+                shabbatTimeColumn(
+                    icon: "flame.fill",
+                    iconColor: .goldAccent,
+                    label: "Candle Lighting",
+                    time: hasValidLocation ? zmanimService.candleLightingTime : nil,
+                    dayLabel: candleLightingDayLabel
+                )
 
-                    // Vertical divider
-                    Rectangle()
-                        .fill(Color.surfaceBorder)
-                        .frame(width: 0.5)
-                        .padding(.vertical, 12)
+                // Vertical divider
+                Rectangle()
+                    .fill(Color.surfaceBorder)
+                    .frame(width: 0.5)
+                    .padding(.vertical, 12)
 
-                    // Havdalah
-                    shabbatTimeColumn(
-                        icon: "moon.stars.fill",
-                        iconColor: Color(hex: "8B9DC3"),
-                        label: "Havdalah",
-                        time: zmanimService.havdalahTime,
-                        dayLabel: havdalahDayLabel
-                    )
-                }
-                .padding(.vertical, 4)
-            } else {
-                // No location — prompt
-                HStack(spacing: 8) {
-                    Image(systemName: "location.circle")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.goldAccent)
-
-                    Text("Set location for accurate times")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.textSecondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
+                // Havdalah
+                shabbatTimeColumn(
+                    icon: "moon.stars.fill",
+                    iconColor: Color(hex: "8B9DC3"),
+                    label: "Havdalah",
+                    time: hasValidLocation ? zmanimService.havdalahTime : nil,
+                    dayLabel: havdalahDayLabel
+                )
             }
+            .padding(.vertical, 4)
         }
         .themeCard(cornerRadius: 14)
     }

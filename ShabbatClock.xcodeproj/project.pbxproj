@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		27A8F7D5C4375871A26FD7D4 /* AlarmSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */; };
+		27A8F7D6C4375871A26FD7D5 /* RingSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680694A0330FB9B8F8E8E /* RingSetupView.swift */; };
+		27A8F7D7C4375871A26FD7D6 /* ShabbatChecklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */; };
 		AAA00001 /* ShabbatClockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00001 /* ShabbatClockApp.swift */; };
 		AAA00002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00002 /* ContentView.swift */; };
 		AAA00010 /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00010 /* Alarm.swift */; };
@@ -128,6 +130,8 @@
 		CCC00001 /* ShabbatClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShabbatClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCE4824B /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
 		D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlarmSettingsSection.swift; sourceTree = "<group>"; };
+		D53680694A0330FB9B8F8E8E /* RingSetupView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RingSetupView.swift; sourceTree = "<group>"; };
+		D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatChecklistView.swift; sourceTree = "<group>"; };
 		DD112233 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		DD112235 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = widgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -297,6 +301,8 @@
 				CC27FEBB /* PermissionPromptView.swift */,
 				CC27FEBC /* SwipeToDelete.swift */,
 				D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */,
+				D53680694A0330FB9B8F8E8E /* RingSetupView.swift */,
+				D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -526,6 +532,8 @@
 				AAA00101 /* PremiumView.swift in Sources */,
 				BF7213DF338B8C9C1EB62A43 /* ZmanAlarmSyncService.swift in Sources */,
 				27A8F7D5C4375871A26FD7D4 /* AlarmSettingsSection.swift in Sources */,
+				27A8F7D6C4375871A26FD7D5 /* RingSetupView.swift in Sources */,
+				27A8F7D7C4375871A26FD7D6 /* ShabbatChecklistView.swift in Sources */,
 				D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */,
 				FC9AFE400A4C3BA8F9DC6356 /* ShabbatReminderService.swift in Sources */,
 			);

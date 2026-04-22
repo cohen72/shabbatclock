@@ -11,6 +11,7 @@ struct SettingsView: View {
     @AppStorage("shabbatReminderMinutesBefore") private var shabbatReminderMinutesBefore = 120
 
     @Environment(AlarmKitService.self) private var alarmService
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var locationManager = LocationManager.shared
     @State private var showingPremium = false
     @State private var showingAbout = false
@@ -154,38 +155,71 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Shabbat", icon: "flame.fill")
 
-            HStack {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Pre-Shabbat Reminder")
-                        .font(.system(size: 15))
-                        .foregroundStyle(.textPrimary)
+            VStack(spacing: 1) {
+                // Pre-Shabbat reminder
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Pre-Shabbat Reminder")
+                            .font(.system(size: 15))
+                            .foregroundStyle(.textPrimary)
 
-                    Text("Review alarms and keep the app running")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.textSecondary)
-                }
+                        Text("Review alarms before Shabbat starts")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.textSecondary)
+                    }
 
-                Spacer()
+                    Spacer()
 
-                Picker("", selection: Binding(
-                    get: { reminderSelection },
-                    set: { newValue in
-                        if newValue == 0 {
-                            shabbatReminderEnabled = false
-                        } else {
-                            shabbatReminderEnabled = true
-                            shabbatReminderMinutesBefore = newValue
+                    Picker("", selection: Binding(
+                        get: { reminderSelection },
+                        set: { newValue in
+                            if newValue == 0 {
+                                shabbatReminderEnabled = false
+                            } else {
+                                shabbatReminderEnabled = true
+                                shabbatReminderMinutesBefore = newValue
+                            }
+                        }
+                    )) {
+                        ForEach(reminderOptions, id: \.1) { option in
+                            Text(option.0).tag(option.1)
                         }
                     }
-                )) {
-                    ForEach(reminderOptions, id: \.1) { option in
-                        Text(option.0).tag(option.1)
-                    }
+                    .tint(.goldAccent)
                 }
-                .tint(.goldAccent)
+                .padding(16)
+                .background(Color.surfaceCard)
+
+                // Ring Setup
+                NavigationLink {
+                    RingSetupView(mode: .standalone)
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Ring Setup")
+                                .font(.system(size: 15))
+                                .foregroundStyle(.textPrimary)
+
+                            Text("How auto-stop works · turn off vibration")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.textSecondary)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.forward")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.textSecondary)
+                    }
+                    .padding(16)
+                    .background(Color.surfaceCard)
+                }
             }
-            .padding(16)
-            .settingsCard()
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
         }
         .onChange(of: shabbatReminderEnabled) { _, _ in
             ShabbatReminderService.shared.reschedule()
@@ -388,7 +422,7 @@ struct SettingsView: View {
 
                         Spacer()
 
-                        Text(AlarmSound.sound(named: defaultSound)?.displayName ?? defaultSound)
+                        Text(AlarmSound.displayName(for: defaultSound, in: modelContext))
                             .font(AppFont.body(14))
                             .foregroundStyle(.textSecondary)
 
