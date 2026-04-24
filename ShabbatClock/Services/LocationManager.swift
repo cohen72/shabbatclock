@@ -43,6 +43,7 @@ final class LocationManager: NSObject, ObservableObject {
         locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
         authorizationStatus = locationManager.authorizationStatus
         loadManualLocation()
+        loadLastKnownLocation()
     }
 
     // MARK: - Public Methods
@@ -129,6 +130,24 @@ final class LocationManager: NSObject, ObservableObject {
         reverseGeocode(loc)
     }
 
+    /// Restore the last successfully resolved device location from UserDefaults so the UI shows
+    /// a known place (e.g. "Haifa") even when GPS is currently unavailable. Overwritten the
+    /// moment a fresh fix comes in. Skipped when a manual location is active.
+    private func loadLastKnownLocation() {
+        guard !isUsingManualLocation else { return }
+        let lat = UserDefaults.standard.double(forKey: "lastLatitude")
+        let lon = UserDefaults.standard.double(forKey: "lastLongitude")
+        guard lat != 0 || lon != 0 else { return }
+        location = CLLocation(latitude: lat, longitude: lon)
+        if let savedName = UserDefaults.standard.string(forKey: "lastLocationName"), !savedName.isEmpty {
+            locationName = savedName
+        }
+        if let tzID = UserDefaults.standard.string(forKey: "lastLocationTimeZone"),
+           let tz = TimeZone(identifier: tzID) {
+            locationTimeZone = tz
+        }
+    }
+
     private func reverseGeocode(_ location: CLLocation) {
         Task {
             do {
@@ -140,23 +159,35 @@ final class LocationManager: NSObject, ObservableObject {
                 if let placemark = placemarks.first {
                     let city = placemark.locality
                     let country = placemark.country
+                    let resolvedName: String
                     if let city, let country {
-                        self.locationName = "\(city), \(country)"
+                        resolvedName = "\(city), \(country)"
                     } else if let city {
-                        self.locationName = city
+                        resolvedName = city
                     } else if let name = placemark.name {
-                        self.locationName = name
+                        resolvedName = name
                     } else {
-                        self.locationName = "__unknown__"
+                        resolvedName = "__unknown__"
                     }
-                    // Use the placemark's timezone
+                    self.locationName = resolvedName
                     if let tz = placemark.timeZone {
                         self.locationTimeZone = tz
+                    }
+                    // Persist last-known resolved location so we keep showing it when GPS
+                    // later fails (e.g. user moves into an area without signal).
+                    if resolvedName != "__unknown__" {
+                        UserDefaults.standard.set(resolvedName, forKey: "lastLocationName")
+                        UserDefaults.standard.set(self.locationTimeZone.identifier, forKey: "lastLocationTimeZone")
                     }
                 }
             } catch {
                 print("[LocationManager] Geocoding error: \(error)")
-                self.locationName = "__unknown__"
+                // Keep the previously-known location name rather than blanking to "__unknown__".
+                // Only fall back to unknown if we truly have nothing stored.
+                if self.locationName.isEmpty,
+                   (UserDefaults.standard.string(forKey: "lastLocationName") ?? "").isEmpty {
+                    self.locationName = "__unknown__"
+                }
             }
         }
     }

@@ -27,11 +27,6 @@ struct MainClockView: View {
                         heroTimeSection
                             .padding(.top, 4)
 
-                        // MARK: Friday reminder banner
-                        if isErevShabbat {
-                            erevShabbatBanner
-                        }
-
                         // MARK: Parasha Card
                         if !zmanimService.parashaHebrew.isEmpty {
                             parashaCard
@@ -396,48 +391,6 @@ struct MainClockView: View {
             .themeCard(cornerRadius: 14)
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: - Erev Shabbat Banner
-
-    /// True on Friday (or Saturday before havdalah), or when debug simulation is active.
-    private var isErevShabbat: Bool {
-        #if DEBUG
-        if UserDefaults.standard.bool(forKey: "debugSimulateFriday") { return true }
-        #endif
-        let weekday = Calendar.current.component(.weekday, from: currentTime)
-        if weekday == 6 { return true }
-        if weekday == 7, let havdalah = zmanimService.havdalahTime, currentTime < havdalah { return true }
-        return false
-    }
-
-    private var erevShabbatBanner: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "moon.stars.fill")
-                .font(.system(size: 16))
-                .foregroundStyle(.goldAccent)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Shabbat Shalom!")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.textPrimary)
-                Text("Keep the app running in the background for alarms to auto-stop.")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            Spacer(minLength: 0)
-        }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.goldAccent.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(Color.goldAccent.opacity(0.2), lineWidth: 0.5)
-                )
-        )
     }
 
     private var hasValidLocation: Bool {

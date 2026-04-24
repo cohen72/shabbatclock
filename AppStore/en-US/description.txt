@@ -1,0 +1,49 @@
+The Shabbat alarm clock you've been waiting for.
+
+Shabbat Clock is a beautifully crafted alarm clock built for observant Jewish life — with full zmanim, a Shabbat dashboard, and a clock face that looks good enough to leave on your nightstand.
+
+Unlike other "Shabbos clocks" that rely on notifications (and give up after 30 seconds), Shabbat Clock uses Apple's system-level alarms. That means it wakes you up — every time, even on silent, even when the phone is locked, even when Do Not Disturb is on. The way an alarm is supposed to work.
+
+ZMANIM, DONE RIGHT.
+Precise halachic times for your exact location, calculated with the same engine trusted by the most popular Jewish apps. Eleven zmanim covered:
+
+• Alot HaShachar (Dawn)
+• Misheyakir (Earliest Tallit)
+• Netz (Sunrise)
+• Sof Zman Shma & Tefila
+• Chatzot
+• Mincha Gedola & Ketana
+• Plag HaMincha
+• Shkia (Sunset)
+• Tzeis HaKochavim
+
+Tap any zman to set an alarm before it — 10 minutes before Shkia, 30 minutes before Plag, however you daven.
+
+A SHABBAT DASHBOARD ON YOUR HOME SCREEN.
+See what you need at a glance: today's Hebrew date, this week's parasha, the countdown to Shabbat, candle lighting time, and havdalah. Whether Shabbat is tomorrow or six days away, you'll always know where you stand.
+
+BUILT FOR THE WAY YOU ACTUALLY LIVE.
+• Elegant analog clock that adapts to light and dark mode
+• Warm, traditional alarm sounds — Lecha Dodi, Ana Bekoach, El Adon, and more
+• Set it once, repeats every week (or just Friday nights, or only weekdays)
+• Auto-stops after a reasonable time — no 10-minute sirens on Shabbos morning
+• Works in English or Hebrew, with full right-to-left support
+• Location-aware: precise zmanim wherever you are, from Jerusalem to Teaneck
+
+FREE TO USE. PREMIUM WHEN YOU WANT MORE.
+The free version includes three alarms and the full Shabbat dashboard — enough for most people. Shabbat Clock Premium unlocks unlimited alarms, premium alarm sounds, and custom alarm durations. Available as a weekly or yearly subscription.
+
+A NOTE ON SHABBAT OBSERVANCE.
+This app runs in the background and is designed to respect Shabbat. Set your alarms before candle lighting and put the phone down — everything keeps working without you touching it. No interaction required on Shabbat itself.
+
+iOS 26 REQUIRED.
+Shabbat Clock is built for the latest iOS and takes full advantage of AlarmKit, the new system-level alarm framework. If you're on iOS 26, you're in for a treat.
+
+Shabbat Shalom.
+
+—
+
+Subscription terms: Payment is charged to your Apple ID at confirmation. Subscriptions auto-renew unless canceled at least 24 hours before the end of the current period. Manage subscriptions in your Apple ID settings.
+
+Privacy Policy: https://shabbatclock.app/privacy
+Terms of Use: https://shabbatclock.app/terms

@@ -113,7 +113,7 @@ struct ZmanAlarmSheet: View {
                         )
 
                         #if DEBUG
-                        debugOverrideCard
+//                        debugOverrideCard
                         #endif
 
                         // Remove button (existing alarms only)

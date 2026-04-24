@@ -95,7 +95,7 @@ ShabbatClock/
 - **Past-zman dimming**: Rows where time passed get `.opacity(0.45)`
 - **ZmanAlarmSheet**: Manage existing zman alarm (toggle, change offset, delete)
 - **CreateAlarmFromZmanSheet**: Create alarm with offset picker (0/5/10/15/30 min before)
-- **Premium**: Zman alarms count toward 3-alarm free limit; premium upsell when exceeded
+- **Premium**: Zman alarms count toward 2-alarm free limit; premium upsell when exceeded
 - Pull-to-refresh support
 
 ### 3. Shabbat Dashboard (Main Clock Screen)
@@ -163,7 +163,7 @@ ShabbatClock/
 - **StoreManager**: `StoreManager.shared` - Centralized StoreKit 2 subscription manager
 - **Plans**: Weekly ($0.99/week) and Yearly ($14.99/year, ~71% savings)
 - **Product IDs**: `works.delicious.shabbatclock.premium.weekly`, `works.delicious.shabbatclock.premium.yearly`
-- **Free tier**: Limited to 3 alarms; can preview but not select premium sounds
+- **Free tier**: Limited to 2 alarms; can preview but not select premium sounds
 - **Premium state**: `StoreManager.shared.isPremium` is source of truth
 - **UI**: Toolbar capsule badge "1/3" with lock icon; + button shows lock when limit reached
 

@@ -25,7 +25,7 @@ struct ZmanimView: View {
     }
 
     // Premium
-    private let freeAlarmLimit = 3
+    private let freeAlarmLimit = 2
     @AppStorage("isPremium") private var isPremium = false
 
     /// All zman-linked alarms by type (unfiltered). Used for tap handling

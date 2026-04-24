@@ -176,31 +176,38 @@ struct CitySearchView: View {
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
-        // Re-geocode with the app's locale so the saved name matches the app language,
-        // not the device's system locale.
-        Task {
-            let geocoder = CLGeocoder()
-            let locale = AppLanguage.current.effectiveLocale
-            let name: String
-            if let placemarks = try? await geocoder.reverseGeocodeLocation(location, preferredLocale: locale),
-               let placemark = placemarks.first {
-                let city = placemark.locality
-                let country = placemark.country
-                if let city, let country {
-                    name = "\(city), \(country)"
-                } else if let city {
-                    name = city
-                } else {
-                    name = placemark.name ?? item.name ?? "Selected Location"
-                }
-            } else if let address = item.address {
-                name = address.shortAddress ?? address.fullAddress
-            } else {
-                name = item.name ?? "Selected Location"
+
+        // Seed with the name we already have from the MapKit result so the UI updates
+        // instantly. We then refine with locale-aware reverse geocoding in the background.
+        let initialName: String = {
+            if let address = item.address {
+                return address.shortAddress ?? address.fullAddress
             }
-            locationManager.setManualLocation(location, name: name)
-            ZmanimService.shared.calculateTodayZmanim()
-            dismiss()
+            return item.name ?? "Selected Location"
+        }()
+
+        locationManager.setManualLocation(location, name: initialName)
+        ZmanimService.shared.calculateTodayZmanim()
+        dismiss()
+
+        Task.detached {
+            let geocoder = CLGeocoder()
+            let locale = await AppLanguage.current.effectiveLocale
+            guard let placemarks = try? await geocoder.reverseGeocodeLocation(location, preferredLocale: locale),
+                  let placemark = placemarks.first else { return }
+            let refinedName: String?
+            if let city = placemark.locality, let country = placemark.country {
+                refinedName = "\(city), \(country)"
+            } else if let city = placemark.locality {
+                refinedName = city
+            } else {
+                refinedName = placemark.name
+            }
+            guard let refinedName, refinedName != initialName else { return }
+            await MainActor.run {
+                LocationManager.shared.setManualLocation(location, name: refinedName)
+                ZmanimService.shared.calculateTodayZmanim()
+            }
         }
     }
 }

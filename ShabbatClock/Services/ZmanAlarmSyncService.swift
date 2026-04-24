@@ -1,6 +1,7 @@
 import UIKit
 import SwiftData
 import Combine
+import AlarmKit
 
 /// Keeps zman-linked alarm times in sync with daily zmanim calculations.
 ///
@@ -98,6 +99,23 @@ final class ZmanAlarmSyncService: ObservableObject {
         let zmanim = ZmanimService.shared.todayZmanim
         guard !zmanim.isEmpty else { return }
 
+        // Snapshot AlarmKit's current live registry once. Used below to detect
+        // one-time zman alarms that already fired-and-completed while our process
+        // was suspended (in which case our handleAlarmFinishedAlerting callback
+        // never ran, so `isEnabled` stayed true and we'd otherwise re-schedule
+        // them for tomorrow unexpectedly).
+        //
+        // If we can't read the registry we set `liveAlarmIDs` to nil and skip the
+        // orphan check entirely — a stale list is far worse than skipping (it would
+        // falsely "clean up" every live zman alarm).
+        let liveAlarmIDs: Set<UUID>?
+        do {
+            liveAlarmIDs = Set(try AlarmManager.shared.alarms.map(\.id))
+        } catch {
+            print("[ZmanAlarmSync] Could not read AlarmKit registry: \(error). Skipping orphan check.")
+            liveAlarmIDs = nil
+        }
+
         // Collect alarms that need time updates
         var alarmsToReschedule: [Alarm] = []
 
@@ -111,6 +129,22 @@ final class ZmanAlarmSyncService: ObservableObject {
 
             guard let rawValue = alarm.zmanTypeRawValue,
                   let zman = zmanim.first(where: { $0.type.rawValue == rawValue }) else {
+                continue
+            }
+
+            // Detect one-time zman alarms that already fired while the app was suspended.
+            // Symptoms we recover from: app was killed/suspended through the fire window,
+            // so AlarmKit emitted the alerting → idle transition without us observing it.
+            // Result: the alarm's AlarmKit entry is gone, but our SwiftData row still says
+            // isEnabled=true. Without this guard, the next sync would re-arm it for
+            // "tomorrow" (surprise repeat).
+            if let liveAlarmIDs,
+               alarm.repeatDays.isEmpty,
+               alarm.isEnabled,
+               let kitID = alarm.alarmKitID,
+               !liveAlarmIDs.contains(kitID) {
+                print("[ZmanAlarmSync] One-time alarm \(alarm.label) already fired — cleaning up instead of rescheduling")
+                AlarmKitService.shared.delete(alarm)
                 continue
             }
 

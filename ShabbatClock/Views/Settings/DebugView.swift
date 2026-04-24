@@ -1,5 +1,7 @@
+#if DEBUG
 import SwiftUI
 import AlarmKit
+import ActivityKit
 import CoreLocation
 
 /// Debug-only settings screen. Only visible in DEBUG builds.
@@ -14,7 +16,10 @@ struct DebugView: View {
     @State private var showingAlarmPrompt = false
     @State private var showingNotificationPrompt = false
     @State private var showingOnboarding = false
+    @State private var showingShabbatChecklist = false
     @State private var testAlarmStatus: String?
+
+    @Environment(\.dismiss) private var dismiss
 
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("debugSimulateFriday") private var simulateFriday = false
@@ -53,6 +58,13 @@ struct DebugView: View {
         }
         .navigationTitle("Debug")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button(role: .close) {
+                    dismiss()
+                }
+            }
+        }
         .fullScreenCover(isPresented: $showingLocationPrompt) {
             PermissionPromptView.location(
                 onContinue: { showingLocationPrompt = false },
@@ -79,6 +91,10 @@ struct DebugView: View {
                 showingOnboarding = false
             }
             .applyLanguageOverride(AppLanguage.current)
+        }
+        .sheet(isPresented: $showingShabbatChecklist) {
+            ShabbatChecklistView()
+                .applyLanguageOverride(AppLanguage.current)
         }
     }
 
@@ -185,6 +201,9 @@ struct DebugView: View {
                 debugButton("Reset Onboarding") {
                     hasCompletedOnboarding = false
                 }
+                debugButton("Preview Shabbat Checklist") {
+                    showingShabbatChecklist = true
+                }
                 stateRow("Completed", value: hasCompletedOnboarding ? "Yes" : "No")
             }
             .clipShape(RoundedRectangle(cornerRadius: 14))
@@ -274,6 +293,9 @@ struct DebugView: View {
                 debugButton("Test Zman Alarm (1 min)") {
                     createTestZmanAlarm()
                 }
+                debugButton("Test 60s Sound (rings in 20s)") {
+                    scheduleLongSoundTest()
+                }
                 if let status = testAlarmStatus {
                     stateRow("Test Alarm", value: status)
                 }
@@ -295,6 +317,54 @@ struct DebugView: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(Color.surfaceBorder, lineWidth: 0.5)
             )
+        }
+    }
+
+    /// Schedules a raw AlarmKit alarm 20 seconds from now using TestTone60.m4a (a 60-second
+    /// pulsing tone). Lets us verify on-device whether iOS actually plays a full-minute custom
+    /// sound or enforces the documented 30-second notification-sound cap.
+    ///
+    /// Intentionally does NOT create a SwiftData Alarm row or a silencer — this is the minimal
+    /// diagnostic: one fixed-schedule AlarmKit alarm, see what happens when it fires.
+    private func scheduleLongSoundTest() {
+        let fireDate = Date().addingTimeInterval(20)
+        let schedule = AlarmKit.Alarm.Schedule.fixed(fireDate)
+
+        let stopButton = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.fill")
+        let alert = AlarmPresentation.Alert(
+            title: "Sound Duration Test",
+            stopButton: stopButton
+        )
+        let presentation = AlarmPresentation(alert: alert)
+
+        let metadata = ShabbatAlarmMetadata(
+            label: "Sound Duration Test",
+            isShabbatAlarm: false,
+            soundCategory: "Test"
+        )
+
+        let alertSound: ActivityKit.AlertConfiguration.AlertSound = .named("Sounds/TestTone60.m4a")
+
+        let id = UUID()
+        let config = AlarmManager.AlarmConfiguration(
+            countdownDuration: nil,
+            schedule: schedule,
+            attributes: AlarmAttributes<ShabbatAlarmMetadata>(
+                presentation: presentation,
+                metadata: metadata,
+                tintColor: .accentPurple
+            ),
+            stopIntent: StopAlarmIntent(alarmID: id),
+            sound: alertSound
+        )
+
+        Task {
+            do {
+                _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
+                testAlarmStatus = "Rings in 20s · TestTone60 (60s pulsing tone)"
+            } catch {
+                testAlarmStatus = "Failed: \(error.localizedDescription)"
+            }
         }
     }
 
@@ -387,3 +457,4 @@ extension CLAuthorizationStatus {
         }
     }
 }
+#endif

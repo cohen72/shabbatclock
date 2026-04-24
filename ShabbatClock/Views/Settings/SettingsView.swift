@@ -544,11 +544,35 @@ struct SettingsView: View {
                 }
 
                 settingsRow {
-                    Link(destination: AppURLs.supportMailto) {
+                    Link(destination: AppURLs.contactMailto) {
                         HStack {
                             Text("Contact Support")
                             Spacer()
                             Image(systemName: "envelope")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.textSecondary)
+                        }
+                    }
+                }
+
+                settingsRow {
+                    Link(destination: AppURLs.featureRequestMailto) {
+                        HStack {
+                            Text("Request a Feature")
+                            Spacer()
+                            Image(systemName: "lightbulb")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.textSecondary)
+                        }
+                    }
+                }
+
+                settingsRow {
+                    Link(destination: AppURLs.bugReportMailto) {
+                        HStack {
+                            Text("Report a Bug")
+                            Spacer()
+                            Image(systemName: "ant")
                                 .font(.system(size: 14))
                                 .foregroundStyle(.textSecondary)
                         }

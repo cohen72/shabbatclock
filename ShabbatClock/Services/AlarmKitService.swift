@@ -18,6 +18,9 @@ final class AlarmKitService: NSObject {
     /// Legacy prefix retained ONLY so we can flush leftover scheduled notifications
     /// from older app versions. The current silencer-alarm approach doesn't schedule these.
     static let autoStopNotificationPrefix = "autostop-"
+    /// Legacy prefix retained ONLY so we can flush any fallback notifications scheduled by
+    /// older app versions. We no longer schedule fallback notifications — if AlarmKit isn't
+    /// authorized the app shows an in-app banner asking the user to enable it in Settings.
     static let fallbackNotificationPrefix = "fallback-"
 
     private(set) var isAuthorized: Bool = false
@@ -25,22 +28,11 @@ final class AlarmKitService: NSObject {
     private(set) var activeAlarms: [AlarmKit.Alarm] = []
     private(set) var nextAlarmDate: Date?
 
-    /// True when AlarmKit was explicitly denied and alarms use local notifications as fallback.
-    /// False when authorization is undetermined (user hasn't been asked yet).
-    var isFallbackMode: Bool { !isAuthorized && hasBeenAskedForAuthorization }
-
-    /// True when BOTH AlarmKit AND notifications are denied — alarms cannot work at all.
-    /// Distinct from isFallbackMode (AlarmKit denied but notifications available).
-    var isBothDenied: Bool { !isAuthorized && !isNotificationAuthorized && hasBeenAskedForAuthorization }
-
     /// Whether the user has been prompted for AlarmKit authorization at least once.
     var hasBeenAskedForAuthorization: Bool {
         // If state is not .notDetermined, user has been asked
         AlarmManager.shared.authorizationState != .notDetermined
     }
-
-    /// Maximum alarm duration in fallback mode (UNNotification sound limit).
-    static let fallbackMaxDuration: Int = 30
 
     private var modelContext: ModelContext?
     private var modelContainer: ModelContainer?
@@ -86,17 +78,16 @@ final class AlarmKitService: NSObject {
         observeAuthorizationChanges()
         observeAlarmUpdates()
 
-        // Sync alarms using the appropriate mechanism
         if isAuthorized {
             reconcileOrphanedAlarms()
             syncAllAlarms()
             // One-time cleanup: remove any auto-stop notifications scheduled by older
             // app versions that used the UNNotification-based auto-stop mechanism.
             flushAllAutoStopNotifications()
-        } else {
-            // Fallback: schedule via critical alert notifications
-            syncAllFallbackAlarms()
         }
+        // One-time cleanup: flush any fallback notifications left by older versions
+        // that used the UN-critical-alert fallback path (no longer supported).
+        flushAllFallbackNotifications()
 
         updateNextAlarmDate()
     }
@@ -149,9 +140,11 @@ final class AlarmKitService: NSObject {
                 let wasAuthorized = isAuthorized
                 isAuthorized = authState == .authorized
 
-                // Auto-migrate: user just granted AlarmKit in Settings
+                // When user grants AlarmKit in Settings after previously denying,
+                // re-schedule any enabled alarms that lost their AlarmKit registration.
                 if !wasAuthorized && isAuthorized {
-                    migrateFromFallbackToAlarmKit()
+                    reconcileOrphanedAlarms()
+                    syncAllAlarms()
                 }
             }
         }
@@ -274,8 +267,10 @@ final class AlarmKitService: NSObject {
                 alarm.alarmKitID = newID
             }
         } else {
+            // AlarmKit not authorized — alarm row is saved but not scheduled.
+            // The in-app banner prompts the user to enable AlarmKit in Settings.
+            // Once they do, observeAuthorizationChanges triggers syncAllAlarms.
             alarm.alarmKitID = nil
-            scheduleFallbackAlarm(for: alarm)
         }
 
         try? alarm.modelContext?.save()
@@ -291,7 +286,6 @@ final class AlarmKitService: NSObject {
             alarm.alarmKitID = nil
         }
         cancelSilencerIfAny(for: alarm)
-        cancelFallbackAlarm(for: alarm)
 
         alarm.isEnabled = false
         try? alarm.modelContext?.save()
@@ -318,10 +312,10 @@ final class AlarmKitService: NSObject {
             try? AlarmManager.shared.cancel(id: id)
         }
 
-        // Cancel fallback notification (inline — avoid touching the model)
-        let fallbackID = Self.fallbackNotificationPrefix + alarmID.uuidString
+        // One-time cleanup: remove any legacy fallback notification left by older builds.
+        let legacyFallbackID = Self.fallbackNotificationPrefix + alarmID.uuidString
         UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: [fallbackID]
+            withIdentifiers: [legacyFallbackID]
         )
 
         context?.delete(alarm)

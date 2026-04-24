@@ -16,13 +16,6 @@
 		AAA00010 /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00010 /* Alarm.swift */; };
 		AAA00011 /* AlarmSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00011 /* AlarmSound.swift */; };
 		AAA00012 /* ShabbatAlarmMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00012 /* ShabbatAlarmMetadata.swift */; };
-		AAA00400 /* CustomSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00400 /* CustomSound.swift */; };
-		AAA00401 /* CustomSoundStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00401 /* CustomSoundStore.swift */; };
-		AAA00402 /* AudioRecordingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00402 /* AudioRecordingManager.swift */; };
-		AAA00403 /* AudioTrimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00403 /* AudioTrimmer.swift */; };
-		AAA00404 /* SoundRecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00404 /* SoundRecordingView.swift */; };
-		AAA00405 /* CustomSoundDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00405 /* CustomSoundDeletion.swift */; };
-		AAA00406 /* CustomSoundsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00406 /* CustomSoundsSettingsView.swift */; };
 		AAA00021 /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00021 /* AudioManager.swift */; };
 		AAA00023 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00023 /* LocationManager.swift */; };
 		AAA00024 /* ZmanimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00024 /* ZmanimService.swift */; };
@@ -45,6 +38,13 @@
 		AAA00102 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00102 /* DebugView.swift */; };
 		AAA00103 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00103 /* OnboardingView.swift */; };
 		AAA00200 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = BBB00200 /* Sounds */; };
+		AAA00400 /* CustomSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00400 /* CustomSound.swift */; };
+		AAA00401 /* CustomSoundStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00401 /* CustomSoundStore.swift */; };
+		AAA00402 /* AudioRecordingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00402 /* AudioRecordingManager.swift */; };
+		AAA00403 /* AudioTrimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00403 /* AudioTrimmer.swift */; };
+		AAA00404 /* SoundRecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00404 /* SoundRecordingView.swift */; };
+		AAA00405 /* CustomSoundDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00405 /* CustomSoundDeletion.swift */; };
+		AAA00406 /* CustomSoundsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00406 /* CustomSoundsSettingsView.swift */; };
 		BF7213DF338B8C9C1EB62A43 /* ZmanAlarmSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */; };
 		D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A4226EB6DEE08BEB8E2C17 /* ZmanAlarmSheet.swift */; };
 		DD112234 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112233 /* Localizable.xcstrings */; };
@@ -53,6 +53,7 @@
 		DD8859E4 /* PermissionPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBB /* PermissionPromptView.swift */; };
 		DD8859E5 /* SwipeToDelete.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBC /* SwipeToDelete.swift */; };
 		DDAB2E76 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4824B /* CitySearchView.swift */; };
+		ED823EEC2F9B8C9C0084B452 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = ED823EEB2F9B8C9C0084B452 /* Mixpanel */; };
 		EDE72F3C2F8BFB3100E40DFF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDE72F3B2F8BFB3100E40DFF /* WidgetKit.framework */; };
 		EDE72F3E2F8BFB3100E40DFF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDE72F3D2F8BFB3100E40DFF /* SwiftUI.framework */; };
 		EDE72F4B2F8BFB3200E40DFF /* widgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -93,13 +94,6 @@
 		BBB00010 /* Alarm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alarm.swift; sourceTree = "<group>"; };
 		BBB00011 /* AlarmSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSound.swift; sourceTree = "<group>"; };
 		BBB00012 /* ShabbatAlarmMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShabbatAlarmMetadata.swift; sourceTree = "<group>"; };
-		BBB00400 /* CustomSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSound.swift; sourceTree = "<group>"; };
-		BBB00401 /* CustomSoundStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundStore.swift; sourceTree = "<group>"; };
-		BBB00402 /* AudioRecordingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingManager.swift; sourceTree = "<group>"; };
-		BBB00403 /* AudioTrimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTrimmer.swift; sourceTree = "<group>"; };
-		BBB00404 /* SoundRecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundRecordingView.swift; sourceTree = "<group>"; };
-		BBB00405 /* CustomSoundDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundDeletion.swift; sourceTree = "<group>"; };
-		BBB00406 /* CustomSoundsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundsSettingsView.swift; sourceTree = "<group>"; };
 		BBB00021 /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioManager.swift; sourceTree = "<group>"; };
 		BBB00023 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		BBB00024 /* ZmanimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZmanimService.swift; sourceTree = "<group>"; };
@@ -124,6 +118,13 @@
 		BBB00103 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BBB00200 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		BBB00201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BBB00400 /* CustomSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSound.swift; sourceTree = "<group>"; };
+		BBB00401 /* CustomSoundStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundStore.swift; sourceTree = "<group>"; };
+		BBB00402 /* AudioRecordingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingManager.swift; sourceTree = "<group>"; };
+		BBB00403 /* AudioTrimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTrimmer.swift; sourceTree = "<group>"; };
+		BBB00404 /* SoundRecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundRecordingView.swift; sourceTree = "<group>"; };
+		BBB00405 /* CustomSoundDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundDeletion.swift; sourceTree = "<group>"; };
+		BBB00406 /* CustomSoundsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundsSettingsView.swift; sourceTree = "<group>"; };
 		C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatReminderService.swift; sourceTree = "<group>"; };
 		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
 		CC27FEBB /* PermissionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPromptView.swift; sourceTree = "<group>"; };
@@ -132,8 +133,8 @@
 		CCE4824B /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
 		D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlarmSettingsSection.swift; sourceTree = "<group>"; };
 		D53680694A0330FB9B8F8E8E /* RingSetupView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RingSetupView.swift; sourceTree = "<group>"; };
-		D53680704A0330FB9B8F8E90 /* ZmanArcCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZmanArcCard.swift; sourceTree = "<group>"; };
 		D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatChecklistView.swift; sourceTree = "<group>"; };
+		D53680704A0330FB9B8F8E90 /* ZmanArcCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZmanArcCard.swift; sourceTree = "<group>"; };
 		DD112233 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		DD112235 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = widgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -143,7 +144,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		EDE72F4C2F8BFB3200E40DFF /* Exceptions for "widgets" folder in "widgetsExtension" target */ = {
+		EDE72F4C2F8BFB3200E40DFF /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -153,18 +154,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		EDE72F3F2F8BFB3100E40DFF /* widgets */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				EDE72F4C2F8BFB3200E40DFF /* Exceptions for "widgets" folder in "widgetsExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = widgets;
-			sourceTree = "<group>";
-		};
+		EDE72F3F2F8BFB3100E40DFF /* widgets */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (EDE72F4C2F8BFB3200E40DFF /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = widgets; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,6 +162,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED823EEC2F9B8C9C0084B452 /* Mixpanel in Frameworks */,
 				EDF6A1E02F23A6860052797F /* KosherSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -417,6 +408,7 @@
 			name = ShabbatClock;
 			packageProductDependencies = (
 				EDF6A1DF2F23A6860052797F /* KosherSwift */,
+				ED823EEB2F9B8C9C0084B452 /* Mixpanel */,
 			);
 			productName = ShabbatClock;
 			productReference = CCC00001 /* ShabbatClock.app */;
@@ -452,6 +444,7 @@
 			mainGroup = EEE00000;
 			packageReferences = (
 				EDF6A1DE2F23A6860052797F /* XCRemoteSwiftPackageReference "KosherSwift" */,
+				ED823EEA2F9B8C9C0084B452 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 			);
 			productRefGroup = EEE00999 /* Products */;
 			projectDirPath = "";
@@ -581,7 +574,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -612,7 +605,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -766,9 +759,11 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -799,9 +794,11 @@
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -838,6 +835,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		ED823EEA2F9B8C9C0084B452 /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mixpanel/mixpanel-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.3.0;
+			};
+		};
 		EDF6A1DE2F23A6860052797F /* XCRemoteSwiftPackageReference "KosherSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Elyahu41/KosherSwift.git";
@@ -849,6 +854,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		ED823EEB2F9B8C9C0084B452 /* Mixpanel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ED823EEA2F9B8C9C0084B452 /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
+			productName = Mixpanel;
+		};
 		EDF6A1DF2F23A6860052797F /* KosherSwift */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EDF6A1DE2F23A6860052797F /* XCRemoteSwiftPackageReference "KosherSwift" */;
