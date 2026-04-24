@@ -15,16 +15,14 @@ final class AlarmKitService: NSObject {
     static let shared = AlarmKitService()
 
     static let appGroupID = "group.works.delicious.shabbatclock"
-    /// Legacy prefix retained ONLY so we can flush leftover scheduled notifications
-    /// from older app versions. The current silencer-alarm approach doesn't schedule these.
-    static let autoStopNotificationPrefix = "autostop-"
-    /// Legacy prefix retained ONLY so we can flush any fallback notifications scheduled by
-    /// older app versions. We no longer schedule fallback notifications — if AlarmKit isn't
-    /// authorized the app shows an in-app banner asking the user to enable it in Settings.
-    static let fallbackNotificationPrefix = "fallback-"
 
     private(set) var isAuthorized: Bool = false
     private(set) var isNotificationAuthorized: Bool = false
+    /// True if the user explicitly denied AlarmKit. Drives post-denial UI
+    /// (Open Settings link) in onboarding and in-app prompts.
+    private(set) var isAlarmDenied: Bool = false
+    /// True if the user explicitly denied notifications.
+    private(set) var isNotificationDenied: Bool = false
     private(set) var activeAlarms: [AlarmKit.Alarm] = []
     private(set) var nextAlarmDate: Date?
 
@@ -67,11 +65,15 @@ final class AlarmKitService: NSObject {
         isConfigured = true
 
         // Check current authorization state without prompting
-        isAuthorized = AlarmManager.shared.authorizationState == .authorized
+        let alarmState = AlarmManager.shared.authorizationState
+        isAuthorized = alarmState == .authorized
+        isAlarmDenied = alarmState == .denied
         isNotificationAuthorized = false
+        isNotificationDenied = false
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             Task { @MainActor in
                 self.isNotificationAuthorized = settings.authorizationStatus == .authorized
+                self.isNotificationDenied = settings.authorizationStatus == .denied
             }
         }
 
@@ -81,13 +83,7 @@ final class AlarmKitService: NSObject {
         if isAuthorized {
             reconcileOrphanedAlarms()
             syncAllAlarms()
-            // One-time cleanup: remove any auto-stop notifications scheduled by older
-            // app versions that used the UNNotification-based auto-stop mechanism.
-            flushAllAutoStopNotifications()
         }
-        // One-time cleanup: flush any fallback notifications left by older versions
-        // that used the UN-critical-alert fallback path (no longer supported).
-        flushAllFallbackNotifications()
 
         updateNextAlarmDate()
     }
@@ -104,6 +100,7 @@ final class AlarmKitService: NSObject {
         do {
             let state = try await AlarmManager.shared.requestAuthorization()
             isAuthorized = state == .authorized
+            isAlarmDenied = state == .denied
             if isAuthorized {
                 syncAllAlarms()
             }
@@ -119,6 +116,7 @@ final class AlarmKitService: NSObject {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             Task { @MainActor in
                 self.isNotificationAuthorized = settings.authorizationStatus == .authorized
+                self.isNotificationDenied = settings.authorizationStatus == .denied
             }
         }
     }
@@ -129,6 +127,7 @@ final class AlarmKitService: NSObject {
         do {
             let granted = try await center.requestAuthorization(options: [.alert, .sound, .timeSensitive])
             isNotificationAuthorized = granted
+            isNotificationDenied = !granted
         } catch {
             print("[AlarmKitService] Notification authorization error: \(error)")
         }
@@ -139,6 +138,7 @@ final class AlarmKitService: NSObject {
             for await authState in AlarmManager.shared.authorizationUpdates {
                 let wasAuthorized = isAuthorized
                 isAuthorized = authState == .authorized
+                isAlarmDenied = authState == .denied
 
                 // When user grants AlarmKit in Settings after previously denying,
                 // re-schedule any enabled alarms that lost their AlarmKit registration.
@@ -196,7 +196,16 @@ final class AlarmKitService: NSObject {
             return
         }
 
-        // Snapshot before SwiftData mutations invalidate references
+        // Recurring alarms: the silencer is also recurring. Do NOT cancel — iOS
+        // transitions the main alarm out of `.alerting` as a side effect of the
+        // silencer firing, which is all we need. Both main and silencer stay
+        // scheduled for next week.
+        guard mainAlarm.repeatDays.isEmpty else {
+            print("[AlarmKitService] 🤫 Silencer fired for recurring alarm '\(mainAlarm.label)' — leaving both scheduled")
+            return
+        }
+
+        // Snapshot before SwiftData mutations invalidate references.
         let silencerID = alarmKitID
         let mainID = mainAlarm.alarmKitID
         let label = mainAlarm.label
@@ -212,15 +221,13 @@ final class AlarmKitService: NSObject {
             }
         }
 
-        // Cancel silencer FIRST — this stops the haptic vibration ASAP
+        // One-time alarm: cancel silencer FIRST (stops haptic ASAP), then main.
         try? AlarmManager.shared.cancel(id: silencerID)
-
-        // Then clean up the main alarm registration
         if let mainID {
             try? AlarmManager.shared.cancel(id: mainID)
         }
 
-        print("[AlarmKitService] 🤫 Silencer fired — cancelled main alarm '\(label)'")
+        print("[AlarmKitService] 🤫 Silencer fired — cancelled one-time alarm '\(label)'")
 
         mainAlarm.silencerAlarmKitID = nil
         try? modelContext.save()
@@ -252,13 +259,11 @@ final class AlarmKitService: NSObject {
         alarmsBeingScheduled.insert(alarm.id)
         defer { alarmsBeingScheduled.remove(alarm.id) }
 
-        // Clear any prior state — prior AlarmKit alarm, auto-stop alarm, notifications, fallback.
+        // Clear any prior state — prior AlarmKit alarm and silencer alarm.
         if let priorID = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: priorID)
-            removeAutoStopNotifications(for: priorID, repeatDays: alarm.repeatDays)
         }
         cancelSilencerIfAny(for: alarm)
-        cancelFallbackAlarm(for: alarm)
 
         alarm.isEnabled = true
 
@@ -282,7 +287,6 @@ final class AlarmKitService: NSObject {
     func disable(_ alarm: Alarm) {
         if let id = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: id)
-            removeAutoStopNotifications(for: id, repeatDays: alarm.repeatDays)
             alarm.alarmKitID = nil
         }
         cancelSilencerIfAny(for: alarm)
@@ -301,22 +305,13 @@ final class AlarmKitService: NSObject {
         let alarmKitID = alarm.alarmKitID
         let silencerID = alarm.silencerAlarmKitID
         let repeatDays = alarm.repeatDays
-        let alarmID = alarm.id
 
-        // Cancel AlarmKit alarm + auto-stop notifications
         if let id = alarmKitID {
             try? AlarmManager.shared.cancel(id: id)
-            removeAutoStopNotifications(for: id, repeatDays: repeatDays)
         }
         if let id = silencerID {
             try? AlarmManager.shared.cancel(id: id)
         }
-
-        // One-time cleanup: remove any legacy fallback notification left by older builds.
-        let legacyFallbackID = Self.fallbackNotificationPrefix + alarmID.uuidString
-        UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: [legacyFallbackID]
-        )
 
         context?.delete(alarm)
         try? context?.save()
@@ -338,7 +333,6 @@ final class AlarmKitService: NSObject {
         // Cancel existing AlarmKit alarm if re-scheduling
         if let existingID = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: existingID)
-            removeAutoStopNotifications(for: existingID, repeatDays: alarm.repeatDays)
         }
         cancelSilencerIfAny(for: alarm)
 
@@ -425,28 +419,49 @@ final class AlarmKitService: NSObject {
         }
     }
 
-    /// Schedule a silent AlarmKit alarm at (mainAlarmFireDate + alarmDurationSeconds).
-    /// When this fires, iOS transitions the system out of the main alarm's alerting
-    /// state, effectively silencing the original alarm without needing our process
-    /// to run code. Returns the silencer's AlarmKit ID so it can be cancelled.
+    /// Schedule a silent AlarmKit alarm that fires `alarmDurationSeconds` after the main
+    /// alarm's scheduled time. When this fires, iOS transitions the system out of the
+    /// main alarm's alerting state, silencing the original alarm without needing our
+    /// process to run code.
     ///
-    /// Uses `Schedule.fixed(Date)` for second-level precision. Non-repeating (.fixed
-    /// is inherently one-time); for repeating alarms, the silencer is re-scheduled
-    /// each time the main alarm fires via `handleNewlyAlertingAlarm`.
+    /// Uses `Schedule.relative` with the same weekday recurrence as the main alarm (or
+    /// `.never` for one-time alarms), shifted forward by `duration/60` minutes. Duration
+    /// is required to be a whole number of minutes (enforced upstream — the UI offers
+    /// only 60-second multiples). If adding minutes crosses midnight, the weekdays are
+    /// rolled forward by one day so the silencer fires on the correct next day.
+    ///
+    /// Returns the silencer's AlarmKit ID so the caller can store it for cancellation.
     private func scheduleSilencerAlarm(
         for alarm: Alarm,
         mainAlarmHour: Int,
         mainAlarmMinute: Int
     ) async -> UUID? {
-        // Compute the main alarm's next fire date, then add the stop duration.
-        guard let mainFireDate = alarm.nextFireDate() else {
-            print("[AlarmKitService] ⚠️ Silencer: could not compute main fire date")
-            return nil
+        // Compute silencer hour/minute with midnight rollover tracking.
+        let durationMinutes = max(1, alarm.alarmDurationSeconds / 60)
+        let totalMinutes = mainAlarmHour * 60 + mainAlarmMinute + durationMinutes
+        let silencerHour = (totalMinutes / 60) % 24
+        let silencerMinute = totalMinutes % 60
+        let crossesMidnight = (totalMinutes / 60) >= 24
+
+        let silencerRecurrence: AlarmKit.Alarm.Schedule.Relative.Recurrence
+        if alarm.repeatDays.isEmpty {
+            silencerRecurrence = .never
+        } else {
+            let shiftedDays = crossesMidnight
+                ? alarm.repeatDays.map { ($0 + 1) % 7 }
+                : alarm.repeatDays
+            silencerRecurrence = .weekly(shiftedDays.compactMap { weekday(from: $0) })
         }
-        let silencerFireDate = mainFireDate.addingTimeInterval(TimeInterval(alarm.alarmDurationSeconds))
+
+        let silencerTime = AlarmKit.Alarm.Schedule.Relative.Time(
+            hour: silencerHour,
+            minute: silencerMinute
+        )
+        let schedule = AlarmKit.Alarm.Schedule.relative(
+            .init(time: silencerTime, repeats: silencerRecurrence)
+        )
 
         let silencerID = UUID()
-        let schedule = AlarmKit.Alarm.Schedule.fixed(silencerFireDate)
 
         // Minimal presentation — the silencer should be invisible to the user.
         let stopButton = AlarmButton(text: " ", textColor: .clear, systemImageName: "stop.fill")
@@ -490,7 +505,6 @@ final class AlarmKitService: NSObject {
         guard let alarmKitID = alarm.alarmKitID else { return }
         do {
             try AlarmManager.shared.cancel(id: alarmKitID)
-            removeAutoStopNotifications(for: alarmKitID, repeatDays: alarm.repeatDays)
             print("[AlarmKitService] Cancelled alarm: \(alarm.label)")
         } catch {
             print("[AlarmKitService] Failed to cancel alarm: \(error)")
@@ -527,20 +541,6 @@ final class AlarmKitService: NSObject {
         for alarm in orphaned {
             try? AlarmManager.shared.cancel(id: alarm.id)
         }
-
-        // Clear any lingering auto-stop notifications for the orphaned IDs.
-        // We don't know each alarm's original repeatDays, so remove every possible key:
-        // the one-time variant, all seven weekday variants, and the legacy bare-UUID form.
-        let orphanIDStrings = orphaned.map { $0.id.uuidString }
-        var notificationIDs: [String] = []
-        for idString in orphanIDStrings {
-            notificationIDs.append("\(Self.autoStopNotificationPrefix)\(idString)-once")
-            for day in 0...6 {
-                notificationIDs.append("\(Self.autoStopNotificationPrefix)\(idString)-\(day)")
-            }
-            notificationIDs.append(Self.autoStopNotificationPrefix + idString)
-        }
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: notificationIDs)
 
         print("[AlarmKitService] Reconcile: cancelled \(orphaned.count) orphaned alarm(s)")
     }
@@ -609,44 +609,6 @@ final class AlarmKitService: NSObject {
         }
     }
 
-    // MARK: - Legacy Auto-Stop Notification Cleanup
-    //
-    // Older app versions scheduled UNNotifications at (alarm fire time + duration)
-    // to call AlarmManager.stop() when delivered. The silencer-alarm approach has
-    // replaced this entirely. These helpers remain ONLY to clean up leftover
-    // notifications from older installs.
-
-    /// One-time cleanup: flush any auto-stop notifications scheduled by older versions.
-    /// The silencer-alarm approach replaced these; without flushing, leftover notifications
-    /// from previous installs would still fire after their scheduled time.
-    private func flushAllAutoStopNotifications() {
-        let center = UNUserNotificationCenter.current()
-        center.getPendingNotificationRequests { requests in
-            let autoStopIDs = requests
-                .map(\.identifier)
-                .filter { $0.hasPrefix(Self.autoStopNotificationPrefix) }
-            if !autoStopIDs.isEmpty {
-                center.removePendingNotificationRequests(withIdentifiers: autoStopIDs)
-                print("[AlarmKitService] 🧹 Flushed \(autoStopIDs.count) legacy auto-stop notification(s)")
-            }
-        }
-    }
-
-    /// Remove any legacy auto-stop notifications for a specific alarm (cleanup helper
-    /// for old installs; the silencer-alarm approach doesn't schedule these anymore).
-    private func removeAutoStopNotifications(for alarmKitID: UUID, repeatDays: [Int]) {
-        var ids: [String] = []
-        if repeatDays.isEmpty {
-            ids.append("\(Self.autoStopNotificationPrefix)\(alarmKitID.uuidString)-once")
-        } else {
-            for day in repeatDays {
-                ids.append("\(Self.autoStopNotificationPrefix)\(alarmKitID.uuidString)-\(day)")
-            }
-        }
-        ids.append(Self.autoStopNotificationPrefix + alarmKitID.uuidString)
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
-    }
-
     /// Called when an alarm transitions from `.alerting` back to idle (user tapped Stop,
     /// we auto-stopped it, or snooze countdown started). Handles:
     ///   - one-time alarms: flip isEnabled = false (mirrors stock Clock behavior)
@@ -656,9 +618,6 @@ final class AlarmKitService: NSObject {
         let descriptor = FetchDescriptor<Alarm>()
         guard let alarms = try? modelContext.fetch(descriptor),
               let alarm = alarms.first(where: { $0.alarmKitID == alarmKitID }) else { return }
-
-        // Clear any pending auto-stop notifications (all day variants).
-        removeAutoStopNotifications(for: alarmKitID, repeatDays: alarm.repeatDays)
 
         // User stopped the alarm (or we did) — silencer is no longer needed.
         cancelSilencerIfAny(for: alarm)
@@ -683,121 +642,12 @@ final class AlarmKitService: NSObject {
         // when the alarm is re-enabled or edited; nothing to do here.
     }
 
-    // MARK: - Fallback Mode (Critical Alert Notifications)
-
-    /// Schedule a fallback alarm using UNUserNotificationCenter with critical alert sound.
-    /// Used when AlarmKit authorization is denied. Limited to 30s sound duration.
-    func scheduleFallbackAlarm(for alarm: Alarm) {
-        guard let fireDate = alarm.nextFireDate() else { return }
-
-        let notificationID = Self.fallbackNotificationPrefix + alarm.id.uuidString
-
-        // Remove any existing fallback notification for this alarm
-        UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: [notificationID]
-        )
-
-        let content = UNMutableNotificationContent()
-        content.title = alarm.label
-        content.body = String(localized: "Alarm")
-
-        // Time-sensitive fallback (AlarmKit is the primary path).
-        // Custom recordings live in the App Group and are referenced by bare filename;
-        // bundled sounds use the "Sounds/" subdirectory.
-        if let customFileName = AlarmSound.customFileName(from: alarm.soundName),
-           CustomSoundStore.fileExists(fileName: customFileName) {
-            content.sound = UNNotificationSound(
-                named: UNNotificationSoundName(CustomSoundStore.alertSoundName(for: customFileName))
-            )
-        } else if let sound = AlarmSound.sound(named: alarm.soundName) {
-            content.sound = UNNotificationSound(
-                named: UNNotificationSoundName("Sounds/\(sound.fileName).\(sound.fileExtension)")
-            )
-        } else {
-            content.sound = .default
-        }
-        content.interruptionLevel = .timeSensitive
-
-        let triggerComponents = Calendar.current.dateComponents(
-            [.year, .month, .day, .hour, .minute],
-            from: fireDate
-        )
-        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
-
-        let request = UNNotificationRequest(
-            identifier: notificationID,
-            content: content,
-            trigger: trigger
-        )
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error {
-                print("[AlarmKitService] Failed to schedule fallback alarm: \(error)")
-            } else {
-                print("[AlarmKitService] Fallback alarm scheduled for \(fireDate)")
-            }
-        }
-    }
-
     /// Cancel the silent "silencer" alarm previously scheduled alongside this alarm.
     /// Safe to call even if no silencer was scheduled.
     private func cancelSilencerIfAny(for alarm: Alarm) {
         if let silencerID = alarm.silencerAlarmKitID {
             try? AlarmManager.shared.cancel(id: silencerID)
             alarm.silencerAlarmKitID = nil
-        }
-    }
-
-    /// Cancel a fallback notification for the given alarm.
-    func cancelFallbackAlarm(for alarm: Alarm) {
-        let notificationID = Self.fallbackNotificationPrefix + alarm.id.uuidString
-        UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: [notificationID]
-        )
-    }
-
-    /// Schedule all enabled alarms as fallback notifications.
-    private func syncAllFallbackAlarms() {
-        guard let modelContext else { return }
-
-        let descriptor = FetchDescriptor<Alarm>(
-            predicate: #Predicate { $0.isEnabled }
-        )
-
-        guard let alarms = try? modelContext.fetch(descriptor) else { return }
-        for alarm in alarms {
-            scheduleFallbackAlarm(for: alarm)
-        }
-        print("[AlarmKitService] Synced \(alarms.count) alarms as fallback notifications")
-    }
-
-    // MARK: - Auto-Migration (Fallback → AlarmKit)
-
-    /// Migrate all fallback alarms to AlarmKit after user grants permission.
-    private func migrateFromFallbackToAlarmKit() {
-        guard let modelContext else { return }
-
-        let descriptor = FetchDescriptor<Alarm>(
-            predicate: #Predicate { $0.isEnabled }
-        )
-
-        guard let alarms = try? modelContext.fetch(descriptor) else { return }
-
-        // Remove all fallback notifications
-        let fallbackIDs = alarms.map { Self.fallbackNotificationPrefix + $0.id.uuidString }
-        UNUserNotificationCenter.current().removePendingNotificationRequests(
-            withIdentifiers: fallbackIDs
-        )
-
-        // Schedule via AlarmKit
-        Task {
-            for alarm in alarms {
-                if let newID = await scheduleAlarm(for: alarm) {
-                    alarm.alarmKitID = newID
-                }
-            }
-            try? modelContext.save()
-            print("[AlarmKitService] Migrated \(alarms.count) alarms from fallback to AlarmKit")
         }
     }
 

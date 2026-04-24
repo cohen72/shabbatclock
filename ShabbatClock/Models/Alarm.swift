@@ -41,9 +41,9 @@ final class Alarm {
         set { snoozeEnabledValue = newValue }
     }
 
-    /// How long the alarm should ring before auto-stopping (defaults to 30s for migrated alarms).
+    /// How long the alarm should ring before auto-stopping (defaults to 60s).
     var alarmDurationSeconds: Int {
-        get { alarmDurationSecondsValue ?? 30 }
+        get { alarmDurationSecondsValue ?? 60 }
         set { alarmDurationSecondsValue = newValue }
     }
 
@@ -60,7 +60,7 @@ final class Alarm {
         alarmKitID: UUID? = nil,
         snoozeDurationSeconds: Int = 5 * 60,
         snoozeEnabled: Bool = true,
-        alarmDurationSeconds: Int = 30
+        alarmDurationSeconds: Int = 60
     ) {
         self.id = id
         self.hour = hour

@@ -2,7 +2,7 @@ The Shabbat alarm clock you've been waiting for.
 
 Shabbat Clock is a beautifully crafted alarm clock built for observant Jewish life — with full zmanim, a Shabbat dashboard, and a clock face that looks good enough to leave on your nightstand.
 
-Unlike other "Shabbos clocks" that rely on notifications (and give up after 30 seconds), Shabbat Clock uses Apple's system-level alarms. That means it wakes you up — every time, even on silent, even when the phone is locked, even when Do Not Disturb is on. The way an alarm is supposed to work.
+Shabbat Clock uses Apple's system-level alarms — not notifications that can give up on you. That means it wakes you up — every time, even on silent, even when the phone is locked, even when Do Not Disturb is on. The way an alarm is supposed to work.
 
 ZMANIM, DONE RIGHT.
 Precise halachic times for your exact location, calculated with the same engine trusted by the most popular Jewish apps. Eleven zmanim covered:
@@ -26,7 +26,7 @@ BUILT FOR THE WAY YOU ACTUALLY LIVE.
 • Elegant analog clock that adapts to light and dark mode
 • Warm, traditional alarm sounds — Lecha Dodi, Ana Bekoach, El Adon, and more
 • Set it once, repeats every week (or just Friday nights, or only weekdays)
-• Auto-stops after a reasonable time — no 10-minute sirens on Shabbos morning
+• Auto-stops after 1 to 5 minutes — you choose, so no 10-minute sirens on Shabbos morning
 • Works in English or Hebrew, with full right-to-left support
 • Location-aware: precise zmanim wherever you are, from Jerusalem to Teaneck
 

@@ -5,7 +5,7 @@ struct SettingsView: View {
     @Environment(\.requestReview) private var requestReview
     @AppStorage("isPremium") private var isPremium = false
     @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
-    @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 15
+    @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 60
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
     @AppStorage("shabbatReminderEnabled") private var shabbatReminderEnabled = true
@@ -32,8 +32,8 @@ struct SettingsView: View {
                         // Premium section (top for visibility)
                         premiumSection
 
-                        // Alarm permission warning (only in fallback mode)
-                        if alarmService.isFallbackMode && alarmService.hasBeenAskedForAuthorization {
+                        // Alarm permission warning (AlarmKit denied)
+                        if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
                             alarmPermissionSection
                         }
 
@@ -114,11 +114,11 @@ struct SettingsView: View {
                         .frame(width: 32)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Limited Alarm Mode")
+                        Text("Alarms Disabled")
                             .font(AppFont.body())
                             .foregroundStyle(.textPrimary)
 
-                        Text("Allow in Settings for full alarm features")
+                        Text("Enable alarms in Settings to ring on schedule")
                             .font(AppFont.caption(12))
                             .foregroundStyle(.textSecondary)
                             .lineLimit(1)
@@ -457,20 +457,19 @@ struct SettingsView: View {
     }
 
     private static let defaultDurationOptions: [(String, Int)] = [
-        ("15 sec", 15),
-        ("30 sec", 30),
-        ("1 min", 60),
+        ("60 sec", 60),
         ("2 min", 120),
         ("3 min", 180),
+        ("4 min", 240),
         ("5 min", 300),
     ]
 
     private func isDurationLocked(_ seconds: Int) -> Bool {
-        !StoreManager.shared.isPremium && seconds > 15
+        !StoreManager.shared.isPremium && seconds > 60
     }
 
     private var defaultDurationLabel: String {
-        Self.defaultDurationOptions.first(where: { $0.1 == defaultAlarmDuration })?.0 ?? "15 sec"
+        Self.defaultDurationOptions.first(where: { $0.1 == defaultAlarmDuration })?.0 ?? "60 sec"
     }
 
     private var defaultDurationRowContent: some View {
@@ -509,7 +508,7 @@ struct SettingsView: View {
         .onAppear {
             // Clamp if user was premium and is no longer.
             if isDurationLocked(defaultAlarmDuration) {
-                defaultAlarmDuration = 15
+                defaultAlarmDuration = 60
             }
         }
     }

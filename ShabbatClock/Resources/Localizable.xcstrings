@@ -198,7 +198,6 @@
       }
     },
     "1 min" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -234,12 +233,31 @@
       }
     },
     "2 min" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "2 דק׳"
+          }
+        }
+      }
+    },
+    "4 min" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 דק׳"
+          }
+        }
+      }
+    },
+    "60 sec" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "60 שנ׳"
           }
         }
       }
@@ -256,7 +274,6 @@
       }
     },
     "3 min" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -296,33 +313,12 @@
         }
       }
     },
-    "15 sec" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "15 שנ׳"
-          }
-        }
-      }
-    },
     "30 min" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "30 דק׳"
-          }
-        }
-      }
-    },
-    "30 sec" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "30 שנ׳"
           }
         }
       }
@@ -472,16 +468,6 @@
         }
       }
     },
-    "Alarm Saved in Basic Mode" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ההתראה נשמרה במצב בסיסי"
-          }
-        }
-      }
-    },
     "Alarm Sound" : {
       "localizations" : {
         "he" : {
@@ -536,6 +522,66 @@
         }
       }
     },
+    "Alarms Disabled" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראות מושבתות"
+          }
+        }
+      }
+    },
+    "Alarms Need Permission" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראות זקוקות לאישור"
+          }
+        }
+      }
+    },
+    "Enable alarms in Settings to ring on schedule" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשרו התראות בהגדרות כדי שהן יצלצלו בזמן"
+          }
+        }
+      }
+    },
+    "Enable alarms in Settings to let Shabbat Clock wake you" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשרו התראות בהגדרות כדי ששעון שבת יעיר אתכם"
+          }
+        }
+      }
+    },
+    "Enable alarms in Settings to let Shabbat Clock ring on schedule." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשרו התראות בהגדרות כדי ששעון שבת יצלצל בזמן."
+          }
+        }
+      }
+    },
+    "Auto-stop up to 5 minutes (Free: 60 sec)" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עצירה אוטומטית עד 5 דקות (חינם: 60 שנ׳)"
+          }
+        }
+      }
+    },
     "Alarms Enabled" : {
       "localizations" : {
         "he" : {
@@ -583,26 +629,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "אפשר התראות והתרעות בהגדרות"
-          }
-        }
-      }
-    },
-    "Allow alarms in Settings for longer durations" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשר התראות בהגדרות למשך זמן ארוך יותר"
-          }
-        }
-      }
-    },
-    "Allow in Settings for full alarm features" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשרו בהגדרות לתכונות התראה מלאות"
           }
         }
       }
@@ -1801,16 +1827,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "הדלקת נרות"
-          }
-        }
-      }
-    },
-    "Limited Alarm Mode" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מצב התראה מוגבל"
           }
         }
       }
@@ -4072,16 +4088,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ההתראה מצלצלת, ואז נעצרת לבד — בלי רטט, בלי בלגן. הגדרה אחת קצרה והכל מוכן לשבת."
-          }
-        }
-      }
-    },
-    "Your alarm will use a 30-second notification sound. To enable full alarm features — longer durations, Do Not Disturb override, and Shabbat mode — allow alarms in Settings." : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ההתראה תשתמש בצליל של 30 שניות. כדי לאפשר תכונות מלאות — משך ארוך יותר, עקיפת מצב לא להפריע ומצב שבת — אפשר התראות בהגדרות."
           }
         }
       }

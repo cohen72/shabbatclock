@@ -58,9 +58,6 @@ struct LocationRow: View {
                 onContinue: {
                     showingLocationPrompt = false
                     locationManager.requestPermission()
-                },
-                onSkip: {
-                    showingLocationPrompt = false
                 }
             )
         }

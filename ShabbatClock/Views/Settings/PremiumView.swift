@@ -16,7 +16,7 @@ struct PremiumView: View {
         ("infinity", "Unlimited Alarms", "No limits on how many alarms you create"),
         ("music.note.list", "All Premium Sounds", "Unlock the full sound library"),
         ("mic.fill", "Record Your Own Sounds", "Create personalized alarm sounds"),
-        ("timer", "Extended Durations", "Auto-stop up to 5 minutes"),
+        ("timer", "Extended Durations", "Auto-stop up to 5 minutes (Free: 60 sec)"),
         ("heart.fill", "Support Development", "Help us keep improving Shabbat Clock"),
     ]
 

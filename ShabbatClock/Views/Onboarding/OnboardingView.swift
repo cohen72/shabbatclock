@@ -73,20 +73,23 @@ struct OnboardingView: View {
             headline: "Reliable Alarms",
             subtitle: "Silent mode? Do Not Disturb?\nWe ring anyway.",
             details: "One quick permission and your Shabbat alarm works like the built-in Clock app — loud, on time, every time.",
-            buttonTitle: alarmService.isAuthorized ? "Alarms Enabled" : "Enable Alarms",
-            buttonIcon: alarmService.isAuthorized ? "checkmark.circle.fill" : nil,
-            isAlreadyGranted: alarmService.isAuthorized,
+            deniedDetails: "Alarms are turned off. You can enable them anytime in Settings → Shabbat Clock → Alarms.",
+            isAuthorized: alarmService.isAuthorized,
+            isDenied: alarmService.isAlarmDenied,
             action: {
                 if alarmService.isAuthorized {
                     advanceTo(2)
                 } else {
                     Task {
                         await alarmService.requestAuthorization()
-                        advanceTo(2)
+                        if alarmService.isAuthorized {
+                            advanceTo(2)
+                        }
+                        // Denied: stay on page so user sees Open Settings + Continue
                     }
                 }
             },
-            skipAction: { advanceTo(2) }
+            continueAction: { advanceTo(2) }
         )
     }
 
@@ -389,11 +392,17 @@ private struct OnboardingPage: View {
     let headline: LocalizedStringResource
     let subtitle: LocalizedStringResource
     let details: LocalizedStringResource
-    let buttonTitle: LocalizedStringResource
+    /// Alternate detail copy shown when the permission has been denied.
+    var deniedDetails: LocalizedStringResource? = nil
+    var isAuthorized: Bool = false
+    var isDenied: Bool = false
+    var buttonTitle: LocalizedStringResource = "Continue"
     var buttonIcon: String? = nil
     var isAlreadyGranted: Bool = false
     let action: () -> Void
     var skipAction: (() -> Void)? = nil
+    /// Called when the user taps "Continue" on the denied state (to skip past this page).
+    var continueAction: (() -> Void)? = nil
     var isFinal: Bool = false
 
     var body: some View {

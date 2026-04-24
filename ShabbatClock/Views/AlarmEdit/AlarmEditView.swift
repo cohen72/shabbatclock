@@ -18,16 +18,15 @@ struct AlarmEditView: View {
   @State private var draftRepeatDays: [Int] = []
   @State private var draftSnoozeEnabled: Bool = false
   @State private var draftSnoozeDuration: Int = 5 * 60
-  @State private var draftAlarmDuration: Int = 30
-  
+  @State private var draftAlarmDuration: Int = 60
+
   @State private var showingDeleteConfirmation = false
   @State private var showingAlarmPermission = false
   @State private var showingNotificationPermission = false
-  @State private var showingFallbackAlert = false
-  
+
   @AppStorage("isPremium") private var isPremium = false
   @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
-  @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 15
+  @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 60
   
   private let snoozeDurationOptions: [(String, Int)] = [
     ("1 min", 60),
@@ -118,25 +117,15 @@ struct AlarmEditView: View {
           showingAlarmPermission = false
           Task {
             await alarmService.requestAuthorization()
-            if alarmService.isAuthorized {
-              // Full AlarmKit mode — check notification permission next
-              if !alarmService.isNotificationAuthorized {
-                showingNotificationPermission = true
-              } else {
-                commitSave()
-              }
+            // Save the row regardless — if AlarmKit was denied, the row persists
+            // and the in-app banner will prompt the user to enable it in Settings.
+            // Once enabled, observeAuthorizationChanges re-schedules automatically.
+            if alarmService.isAuthorized && !alarmService.isNotificationAuthorized {
+              showingNotificationPermission = true
             } else {
-              // User denied — save with fallback and show info alert
               commitSave()
-              showingFallbackAlert = true
             }
           }
-        },
-        onSkip: {
-          showingAlarmPermission = false
-          // Save with fallback and show info alert
-          commitSave()
-          showingFallbackAlert = true
         }
       )
     }
@@ -148,20 +137,8 @@ struct AlarmEditView: View {
             await alarmService.requestNotificationAuthorization()
             commitSave()
           }
-        },
-        onSkip: {
-          showingNotificationPermission = false
-          commitSave()
         }
       )
-    }
-    .alert("Alarm Saved in Basic Mode", isPresented: $showingFallbackAlert) {
-      Button("Open Settings") {
-        openAppSettings()
-      }
-      Button("OK", role: .cancel) {}
-    } message: {
-      Text("Your alarm will use a 30-second notification sound. To enable full alarm features — longer durations, Do Not Disturb override, and Shabbat mode — allow alarms in Settings.")
     }
   }
   
@@ -328,7 +305,8 @@ struct AlarmEditView: View {
     commitSave()
   }
   
-  /// Actually save the alarm — uses AlarmKit if authorized, fallback notifications otherwise.
+  /// Actually save the alarm. If AlarmKit is denied, the row persists but doesn't schedule;
+  /// the in-app banner prompts the user to enable it, and syncAllAlarms runs when they do.
   private func commitSave() {
     alarm.hour = draftHour
     alarm.minute = draftMinute
@@ -338,13 +316,10 @@ struct AlarmEditView: View {
     alarm.snoozeEnabled = draftSnoozeEnabled
     alarm.snoozeDurationSeconds = draftSnoozeEnabled ? draftSnoozeDuration : 0
     alarm.isEnabled = true
-    
-    if alarmService.isFallbackMode {
-      // Fallback: force 30s duration and schedule via notifications
-      alarm.alarmDurationSeconds = AlarmKitService.fallbackMaxDuration
-    } else if !StoreManager.shared.isPremium && draftAlarmDuration > 15 {
-      // Free tier caps auto-stop at 15s; longer durations are premium-only.
-      alarm.alarmDurationSeconds = 15
+
+    // Free tier is capped at 60s auto-stop; longer durations are premium-only.
+    if !StoreManager.shared.isPremium && draftAlarmDuration > 60 {
+      alarm.alarmDurationSeconds = 60
     } else {
       alarm.alarmDurationSeconds = draftAlarmDuration
     }

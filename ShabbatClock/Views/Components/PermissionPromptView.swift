@@ -1,7 +1,13 @@
 import SwiftUI
 
 /// A pre-permission education screen shown before the system permission dialog.
-/// Explains to the user why we need the permission, in context, before triggering the system alert.
+///
+/// Apple Guideline 5.1.1(iv) compliance: the only action on this screen advances to the
+/// system permission dialog. There is no "Not Now" / "Maybe Later" escape — if the user
+/// wants to decline, they do so in Apple's system dialog.
+///
+/// The user can always back out by dismissing the presentation (swipe / nav-bar close),
+/// which is the standard iOS affordance and does not bypass the permission flow.
 struct PermissionPromptView: View {
     let icon: String
     let iconColor: Color
@@ -9,7 +15,6 @@ struct PermissionPromptView: View {
     let message: LocalizedStringResource
     let continueTitle: LocalizedStringResource
     let onContinue: () -> Void
-    let onSkip: (() -> Void)?
 
     init(
         icon: String,
@@ -17,8 +22,7 @@ struct PermissionPromptView: View {
         title: LocalizedStringResource,
         message: LocalizedStringResource,
         continueTitle: LocalizedStringResource = "Continue",
-        onContinue: @escaping () -> Void,
-        onSkip: (() -> Void)? = nil
+        onContinue: @escaping () -> Void
     ) {
         self.icon = icon
         self.iconColor = iconColor
@@ -26,7 +30,6 @@ struct PermissionPromptView: View {
         self.message = message
         self.continueTitle = continueTitle
         self.onContinue = onContinue
-        self.onSkip = onSkip
     }
 
     var body: some View {
@@ -56,7 +59,7 @@ struct PermissionPromptView: View {
 
             Spacer()
 
-            // Continue button
+            // Continue button — the only action. Advances to the system permission dialog.
             Button {
                 onContinue()
             } label: {
@@ -73,18 +76,6 @@ struct PermissionPromptView: View {
             }
             .padding(.horizontal, 32)
 
-            // Skip button
-            if let onSkip {
-                Button {
-                    onSkip()
-                } label: {
-                    Text("Not Now")
-                        .font(AppFont.body(14))
-                        .foregroundStyle(.textSecondary)
-                }
-                .padding(.top, 16)
-            }
-
             Spacer()
                 .frame(height: 40)
         }
@@ -98,41 +89,38 @@ struct PermissionPromptView: View {
 extension PermissionPromptView {
 
     /// Location permission — shown before the system "Allow Location" dialog.
-    static func location(onContinue: @escaping () -> Void, onSkip: (() -> Void)? = nil) -> PermissionPromptView {
+    static func location(onContinue: @escaping () -> Void) -> PermissionPromptView {
         PermissionPromptView(
             icon: "location.fill",
             iconColor: .accentPurple,
             title: "Accurate Prayer Times",
             message: "Shabbat Clock uses your location to calculate precise zmanim (halachic times) for your area — including candle lighting and havdalah times.",
             continueTitle: "Enable Location",
-            onContinue: onContinue,
-            onSkip: onSkip
+            onContinue: onContinue
         )
     }
 
     /// AlarmKit permission — shown before the system "Allow Alarms" dialog.
-    static func alarms(onContinue: @escaping () -> Void, onSkip: (() -> Void)? = nil) -> PermissionPromptView {
+    static func alarms(onContinue: @escaping () -> Void) -> PermissionPromptView {
         PermissionPromptView(
             icon: "alarm.fill",
             iconColor: .goldAccent,
             title: "Shabbat Alarms",
             message: "Shabbat Clock needs alarm access to wake you for tefilah. Alarms will sound even when your phone is on Do Not Disturb — so you can put your phone down for all of Shabbat.",
             continueTitle: "Enable Alarms",
-            onContinue: onContinue,
-            onSkip: onSkip
+            onContinue: onContinue
         )
     }
 
     /// Notification permission — shown before the system "Allow Notifications" dialog.
-    static func notifications(onContinue: @escaping () -> Void, onSkip: (() -> Void)? = nil) -> PermissionPromptView {
+    static func notifications(onContinue: @escaping () -> Void) -> PermissionPromptView {
         PermissionPromptView(
             icon: "bell.fill",
             iconColor: .goldAccent,
             title: "Alarm Notifications",
             message: "Notifications allow Shabbat Clock to automatically stop your alarm after the duration you set — so you don't need to touch your phone on Shabbat.",
             continueTitle: "Enable Notifications",
-            onContinue: onContinue,
-            onSkip: onSkip
+            onContinue: onContinue
         )
     }
 }

@@ -27,6 +27,11 @@ struct MainClockView: View {
                         heroTimeSection
                             .padding(.top, 4)
 
+                        // MARK: Alarm permission banner (AlarmKit denied)
+                        if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
+                            AlarmPermissionBanner()
+                        }
+
                         // MARK: Parasha Card
                         if !zmanimService.parashaHebrew.isEmpty {
                             parashaCard
@@ -71,9 +76,6 @@ struct MainClockView: View {
                 onContinue: {
                     showingLocationPrompt = false
                     locationManager.requestPermission()
-                },
-                onSkip: {
-                    showingLocationPrompt = false
                 }
             )
         }

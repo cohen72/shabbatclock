@@ -5,12 +5,14 @@ import SwiftData
 struct ZmanimView: View {
     @StateObject private var zmanimService = ZmanimService.shared
     @StateObject private var locationManager = LocationManager.shared
+    @Environment(AlarmKitService.self) private var alarmService
     @Query(sort: \Alarm.hour) private var allAlarms: [Alarm]
 
     @State private var showingCitySearch = false
     @State private var showingLocationPrompt = false
     @State private var showingPremiumAlert = false
     @State private var showingPremium = false
+    @State private var showingPermissionAlert = false
     @State private var sheetZman: ZmanimService.Zman?
     @State private var selectedDay: ZmanimDay = .today
     @State private var tomorrowZmanim: [ZmanimService.Zman] = []
@@ -103,6 +105,13 @@ struct ZmanimView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 0) {
+                            // Alarm permission banner (AlarmKit denied)
+                            if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
+                                AlarmPermissionBanner()
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, 12)
+                            }
+
                             // Today / Tomorrow toggle
                             dayPicker
                                 .padding(.top, 8)
@@ -218,6 +227,16 @@ struct ZmanimView: View {
         } message: {
             Text("Free users can create up to \(freeAlarmLimit) alarms. Upgrade to Premium for unlimited alarms and more sounds!")
         }
+        .alert("Alarms Need Permission", isPresented: $showingPermissionAlert) {
+            Button("Cancel", role: .cancel) {}
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+        } message: {
+            Text("Enable alarms in Settings to let Shabbat Clock ring on schedule.")
+        }
         .sheet(isPresented: $showingPremium) {
             PremiumView()
                 .applyLanguageOverride(AppLanguage.current)
@@ -227,9 +246,6 @@ struct ZmanimView: View {
                 onContinue: {
                     showingLocationPrompt = false
                     locationManager.requestPermission()
-                },
-                onSkip: {
-                    showingLocationPrompt = false
                 }
             )
         }
@@ -238,11 +254,18 @@ struct ZmanimView: View {
     // MARK: - Bell Tap Handler
 
     private func handleBellTap(for zman: ZmanimService.Zman, existingAlarm: Alarm?) {
+        // Block new-alarm creation when AlarmKit is denied — scheduling would silently no-op.
+        // Existing alarms remain tappable so the user can still manage/remove them.
+        if existingAlarm == nil
+            && !alarmService.isAuthorized
+            && alarmService.hasBeenAskedForAuthorization {
+            showingPermissionAlert = true
+            return
+        }
+
         if existingAlarm != nil {
-            // Open unified sheet for existing alarm
             sheetZman = zman
         } else if canAddAlarm {
-            // Open unified sheet for new alarm
             sheetZman = zman
         } else {
             showingPremiumAlert = true

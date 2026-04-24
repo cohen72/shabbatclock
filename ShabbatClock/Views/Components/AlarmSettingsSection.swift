@@ -14,19 +14,18 @@ struct AlarmSettingsSection: View {
   @State private var showingPremium = false
   
   /// The only duration available to free users. Anything longer requires Premium.
-  private static let freeDurationSeconds = 15
-  
+  private static let freeDurationSeconds = 60
+
   private var alarmDurationOptions: [(String, Int)] {
     [
-      ("15 sec", 15),
-      ("30 sec", 30),
-      ("1 min", 60),
+      ("60 sec", 60),
       ("2 min", 120),
       ("3 min", 180),
+      ("4 min", 240),
       ("5 min", 300),
     ]
   }
-  
+
   private func isLocked(_ seconds: Int) -> Bool {
     !storeManager.isPremium && seconds > Self.freeDurationSeconds
   }
@@ -149,40 +148,11 @@ struct AlarmSettingsSection: View {
         }
         
         Spacer()
-        
-        if alarmService.isFallbackMode {
-          Text("30 sec")
-            .font(AppFont.body())
-            .foregroundStyle(.textSecondary)
-        } else {
-          durationMenu
-        }
+
+        durationMenu
       }
       .padding(16)
       .themeCard(cornerRadius: 14)
-      
-      // Fallback mode hint
-      if alarmService.isFallbackMode {
-        Button {
-          if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
-          }
-        } label: {
-          HStack(spacing: 6) {
-            Image(systemName: "info.circle")
-              .font(.system(size: 11))
-            Text("Allow alarms in Settings for longer durations")
-              .font(.system(size: 11))
-              .lineLimit(1)
-            Spacer(minLength: 0)
-            Image(systemName: "arrow.up.forward")
-              .font(.system(size: 9))
-          }
-          .foregroundStyle(.goldAccent)
-          .padding(.horizontal, 16)
-        }
-      }
-      
     }
   }
   

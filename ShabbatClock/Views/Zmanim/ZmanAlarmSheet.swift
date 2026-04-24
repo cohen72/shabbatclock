@@ -51,7 +51,7 @@ struct ZmanAlarmSheet: View {
         _minutesBefore = State(initialValue: alarm?.zmanMinutesBefore ?? initialMinutesBefore ?? 0)
         let fallbackSound = UserDefaults.standard.string(forKey: "defaultSound") ?? "Lecha Dodi"
         _draftSoundName = State(initialValue: alarm?.soundName ?? fallbackSound)
-        let defaultDuration = UserDefaults.standard.object(forKey: "defaultAlarmDuration") as? Int ?? 15
+        let defaultDuration = UserDefaults.standard.object(forKey: "defaultAlarmDuration") as? Int ?? 60
         _draftAlarmDuration = State(initialValue: alarm?.alarmDurationSeconds ?? defaultDuration)
         _draftLabel = State(initialValue: alarm?.label ?? initialLabel ?? zman.englishName)
     }
@@ -172,10 +172,6 @@ struct ZmanAlarmSheet: View {
                             commitSave()
                         }
                     }
-                },
-                onSkip: {
-                    showingAlarmPermission = false
-                    commitSave()
                 }
             )
         }
@@ -187,10 +183,6 @@ struct ZmanAlarmSheet: View {
                         await alarmService.requestNotificationAuthorization()
                         commitSave()
                     }
-                },
-                onSkip: {
-                    showingNotificationPermission = false
-                    commitSave()
                 }
             )
         }
@@ -404,11 +396,9 @@ struct ZmanAlarmSheet: View {
         }
         #endif
 
-        if alarmService.isFallbackMode {
-            alarm.alarmDurationSeconds = AlarmKitService.fallbackMaxDuration
-        } else if !StoreManager.shared.isPremium && draftAlarmDuration > 15 {
-            // Free tier caps auto-stop at 15s; longer durations are premium-only.
-            alarm.alarmDurationSeconds = 15
+        // Free tier is capped at 60s auto-stop; longer durations are premium-only.
+        if !StoreManager.shared.isPremium && draftAlarmDuration > 60 {
+            alarm.alarmDurationSeconds = 60
         } else {
             alarm.alarmDurationSeconds = draftAlarmDuration
         }

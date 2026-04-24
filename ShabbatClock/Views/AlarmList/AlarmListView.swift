@@ -12,6 +12,7 @@ struct AlarmListView: View {
   @State private var newAlarm: Alarm?
   @State private var showingPremiumAlert = false
   @State private var showingPremium = false
+  @State private var showingPermissionAlert = false
   
   // Zman alarm sheet: triggered when tapping a zman alarm in the list
   @State private var zmanSheetAlarm: Alarm?
@@ -34,8 +35,8 @@ struct AlarmListView: View {
           .ignoresSafeArea()
 
         List {
-          // Permission denied banner (non-dismissible)
-          if alarmService.isBothDenied {
+          // Permission denied banner (shown when AlarmKit is denied — alarms can't ring)
+          if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
             permissionDeniedBanner
               .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
               .listRowBackground(Color.clear)
@@ -110,8 +111,17 @@ struct AlarmListView: View {
               }
             }
             
-            // Add alarm menu (+)
-            if canAddAlarm {
+            // Add alarm menu (+). When AlarmKit is denied, show a lock button
+            // instead — tapping it opens an alert with a direct Settings link.
+            if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
+              Button {
+                showingPermissionAlert = true
+              } label: {
+                Image(systemName: "lock.fill")
+                  .font(.system(size: 20, weight: .semibold))
+                  .foregroundStyle(.red.opacity(0.85))
+              }
+            } else if canAddAlarm {
               Menu {
                 Button {
                   newAlarm = Alarm()
@@ -270,6 +280,16 @@ struct AlarmListView: View {
     } message: {
       Text("Free users can create up to \(freeAlarmLimit) alarms. Upgrade to Premium for unlimited alarms and more sounds!")
     }
+    .alert("Alarms Need Permission", isPresented: $showingPermissionAlert) {
+      Button("Cancel", role: .cancel) {}
+      Button("Open Settings") {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+          UIApplication.shared.open(url)
+        }
+      }
+    } message: {
+      Text("Enable alarms in Settings to let Shabbat Clock ring on schedule.")
+    }
     .sheet(isPresented: $showingPremium) {
       PremiumView()
         .applyLanguageOverride(AppLanguage.current)
@@ -280,7 +300,7 @@ struct AlarmListView: View {
   
   private var emptyStateView: some View {
     VStack(spacing: 0) {
-      if alarmService.isBothDenied {
+      if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
         permissionDeniedBanner
           .padding(.horizontal, 20)
           .padding(.top, 16)
@@ -313,42 +333,7 @@ struct AlarmListView: View {
   // MARK: - Permission Denied Banner
 
   private var permissionDeniedBanner: some View {
-    Button {
-      if let url = URL(string: UIApplication.openSettingsURLString) {
-        UIApplication.shared.open(url)
-      }
-    } label: {
-      HStack(spacing: 12) {
-        Image(systemName: "exclamationmark.triangle.fill")
-          .font(.system(size: 16))
-          .foregroundStyle(.red)
-
-        VStack(alignment: .leading, spacing: 2) {
-          Text("Alarms Can't Ring")
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(.textPrimary)
-          Text("Allow alarms and notifications in Settings")
-            .font(.system(size: 11))
-            .foregroundStyle(.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
-        }
-
-        Spacer(minLength: 0)
-
-        Image(systemName: "arrow.up.forward")
-          .font(.system(size: 12, weight: .semibold))
-          .foregroundStyle(.red.opacity(0.6))
-      }
-      .padding(12)
-      .background(
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-          .fill(Color.red.opacity(0.08))
-          .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-              .stroke(Color.red.opacity(0.2), lineWidth: 0.5)
-          )
-      )
-    }
+    AlarmPermissionBanner()
   }
 
   // MARK: - Actions

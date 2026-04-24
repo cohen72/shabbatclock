@@ -67,22 +67,19 @@ struct DebugView: View {
         }
         .fullScreenCover(isPresented: $showingLocationPrompt) {
             PermissionPromptView.location(
-                onContinue: { showingLocationPrompt = false },
-                onSkip: { showingLocationPrompt = false }
+                onContinue: { showingLocationPrompt = false }
             )
             .applyLanguageOverride(AppLanguage.current)
         }
         .fullScreenCover(isPresented: $showingAlarmPrompt) {
             PermissionPromptView.alarms(
-                onContinue: { showingAlarmPrompt = false },
-                onSkip: { showingAlarmPrompt = false }
+                onContinue: { showingAlarmPrompt = false }
             )
             .applyLanguageOverride(AppLanguage.current)
         }
         .fullScreenCover(isPresented: $showingNotificationPrompt) {
             PermissionPromptView.notifications(
-                onContinue: { showingNotificationPrompt = false },
-                onSkip: { showingNotificationPrompt = false }
+                onContinue: { showingNotificationPrompt = false }
             )
             .applyLanguageOverride(AppLanguage.current)
         }
@@ -265,7 +262,7 @@ struct DebugView: View {
             SectionHeader(title: "AlarmKit", icon: "alarm.fill")
 
             VStack(spacing: 1) {
-                stateRow("Fallback Mode", value: alarmService.isFallbackMode ? "Yes (30s)" : "No")
+                stateRow("Authorized", value: alarmService.isAuthorized ? "Yes" : "No")
                 stateRow("Active Alarms", value: "\(alarmService.activeAlarms.count)")
                 stateRow("Next Alarm", value: alarmService.nextAlarmDate.map { dateString($0) } ?? "None")
 
@@ -368,7 +365,7 @@ struct DebugView: View {
         }
     }
 
-    /// Creates a zman alarm that fires 1 minute from now with 30s auto-stop.
+    /// Creates a zman alarm that fires 1 minute from now with 60s auto-stop.
     /// Uses the same code path as ZmanAlarmSheet to test the full flow.
     private func createTestZmanAlarm() {
         let calendar = Calendar.current
@@ -383,7 +380,7 @@ struct DebugView: View {
         alarm.label = "Test Zman"
         alarm.soundName = "Lecha Dodi"
         alarm.snoozeEnabled = false
-        alarm.alarmDurationSeconds = 30
+        alarm.alarmDurationSeconds = 60
         alarm.zmanTypeRawValue = "netz"
         alarm.zmanMinutesBefore = 0
 
@@ -392,7 +389,7 @@ struct DebugView: View {
         Task {
             await alarmService.enable(alarm)
             let timeStr = String(format: "%d:%02d", hour, minute)
-            testAlarmStatus = "Fires \(timeStr), 30s stop"
+            testAlarmStatus = "Fires \(timeStr), 60s stop"
         }
     }
 
