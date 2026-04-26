@@ -49,7 +49,7 @@ struct ZmanAlarmSheet: View {
 
         let alarm = existingAlarm
         _minutesBefore = State(initialValue: alarm?.zmanMinutesBefore ?? initialMinutesBefore ?? 0)
-        let fallbackSound = UserDefaults.standard.string(forKey: "defaultSound") ?? "Lecha Dodi"
+        let fallbackSound = UserDefaults.standard.string(forKey: "defaultSound") ?? "Shalom Aleichem"
         _draftSoundName = State(initialValue: alarm?.soundName ?? fallbackSound)
         let defaultDuration = UserDefaults.standard.object(forKey: "defaultAlarmDuration") as? Int ?? 60
         _draftAlarmDuration = State(initialValue: alarm?.alarmDurationSeconds ?? defaultDuration)
@@ -65,21 +65,15 @@ struct ZmanAlarmSheet: View {
     }
 
     private var fireTimeString: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLanguage.current.effectiveLocale
-        formatter.dateFormat = "h:mm"
-        return formatter.string(from: computedFireTime)
+        TimeFormatter.timeOnly(computedFireTime)
     }
 
-    private var firePeriodString: String {
-        Calendar.current.component(.hour, from: computedFireTime) < 12 ? "AM" : "PM"
+    private var firePeriodString: String? {
+        TimeFormatter.period(computedFireTime)
     }
 
     private var zmanTimeString: String {
-        let formatter = DateFormatter()
-        formatter.locale = AppLanguage.current.effectiveLocale
-        formatter.dateFormat = "h:mm a"
-        return formatter.string(from: zman.time)
+        TimeFormatter.fullTime(zman.time)
     }
 
     private var fireRelativeDay: String {
@@ -234,9 +228,11 @@ struct ZmanAlarmSheet: View {
                             .monospacedDigit()
                             .foregroundStyle(.textPrimary)
 
-                        Text(firePeriodString)
-                            .font(.system(size: 13, weight: .thin, design: .default))
-                            .foregroundStyle(.textSecondary.opacity(0.8))
+                        if let firePeriodString {
+                            Text(firePeriodString)
+                                .font(.system(size: 13, weight: .thin, design: .default))
+                                .foregroundStyle(.textSecondary.opacity(0.8))
+                        }
                     }
                 }
                 .padding(.horizontal, 16)
@@ -274,9 +270,7 @@ struct ZmanAlarmSheet: View {
                         .foregroundStyle(.textPrimary)
                     Spacer()
                     if let override = debugFireTimeOverride {
-                        let f = DateFormatter()
-                        let _ = (f.dateFormat = "h:mm:ss a")
-                        Text(f.string(from: override))
+                        Text(TimeFormatter.fullTime(override))
                             .font(.system(size: 12, design: .monospaced))
                             .foregroundStyle(.orange)
                     } else {
@@ -405,6 +399,16 @@ struct ZmanAlarmSheet: View {
 
         if isNew {
             modelContext.insert(alarm)
+            Analytics.track(.alarmCreated(
+                source: .zman,
+                zmanType: zman.type.rawValue,
+                hasRepeat: false,
+                repeatDayCount: 0,
+                soundCategory: AlarmSound.sound(named: draftSoundName)?.category.rawValue ?? "unknown",
+                timeBucket: .bucket(hour: alarm.hour)
+            ))
+        } else {
+            Analytics.track(.alarmEdited(source: .zman))
         }
 
         Task {

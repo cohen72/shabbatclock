@@ -86,10 +86,11 @@ struct AlarmSound: Identifiable, Hashable {
 // MARK: - Sound Catalog
 extension AlarmSound {
     static let allSounds: [AlarmSound] = [
-        // Shabbat Melodies (FREE)
-        AlarmSound(id: "lecha-dodi", name: "Lecha Dodi", category: .shabbatMelodies, fileName: "Lecha Dodi", fileExtension: "m4a", isPremium: false),
-        AlarmSound(id: "ana-bekoach", name: "Ana Bekoach", category: .shabbatMelodies, fileName: "Ana Bekoach", fileExtension: "m4a", isPremium: false),
-        AlarmSound(id: "el-adon", name: "El Adon", category: .shabbatMelodies, fileName: "El Adon", fileExtension: "m4a", isPremium: false),
+        // Shabbat Melodies (Shalom Aleichem FREE; rest PREMIUM)
+        AlarmSound(id: "shalom-aleichem", name: "Shalom Aleichem", category: .shabbatMelodies, fileName: "Shalom Aleichem", fileExtension: "m4a", isPremium: false),
+        AlarmSound(id: "lecha-dodi", name: "Lecha Dodi", category: .shabbatMelodies, fileName: "Lecha Dodi", fileExtension: "m4a", isPremium: true),
+        AlarmSound(id: "ana-bekoach", name: "Ana Bekoach", category: .shabbatMelodies, fileName: "Ana Bekoach", fileExtension: "m4a", isPremium: true),
+        AlarmSound(id: "el-adon", name: "El Adon", category: .shabbatMelodies, fileName: "El Adon", fileExtension: "m4a", isPremium: true),
         AlarmSound(id: "el-adon-regular", name: "El Adon (Regular)", category: .shabbatMelodies, fileName: "El Adon_regularTempo", fileExtension: "m4a", isPremium: true),
 
         // Nature (FREE)
@@ -163,5 +164,5 @@ extension AlarmSound {
         allSounds.first { $0.id == id }
     }
 
-    static let defaultSound = allSounds.first { $0.name == "Lecha Dodi" } ?? allSounds[0]
+    static let defaultSound = allSounds.first { $0.name == "Shalom Aleichem" } ?? allSounds[0]
 }

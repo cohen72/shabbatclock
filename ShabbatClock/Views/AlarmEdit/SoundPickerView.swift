@@ -49,7 +49,11 @@ struct SoundPickerView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingPremium) {
             PremiumView()
+                .trigger(.lockedSound)
                 .applyLanguageOverride(AppLanguage.current)
+        }
+        .onChange(of: showingPremium) { _, newValue in
+            if newValue { Analytics.track(.freeLimitHit(feature: .sound)) }
         }
         .sheet(isPresented: $showingRecorder) {
             SoundRecordingView { _ in
@@ -268,9 +272,9 @@ struct SoundPickerView: View {
         if count == 0 {
             return "This recording will be permanently deleted."
         } else if count == 1 {
-            return "1 alarm uses this sound and will switch to \"Lecha Dodi\"."
+            return "1 alarm uses this sound and will switch to \"Shalom Aleichem\"."
         } else {
-            return "\(count) alarms use this sound and will switch to \"Lecha Dodi\"."
+            return "\(count) alarms use this sound and will switch to \"Shalom Aleichem\"."
         }
     }
 

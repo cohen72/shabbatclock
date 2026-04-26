@@ -3,6 +3,7 @@ import SwiftData
 
 /// Main clock view - the home screen of the app.
 struct MainClockView: View {
+
     @Environment(\.modelContext) private var modelContext
     @Query(filter: #Predicate<Alarm> { $0.isEnabled }, sort: \Alarm.hour) private var enabledAlarms: [Alarm]
     @Environment(AlarmKitService.self) private var alarmService
@@ -23,6 +24,15 @@ struct MainClockView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
+                        // MARK: Week Arc — sun-dot tracing the week to Shabbat
+                        // Disabled for now — needs design iteration. See ShabbatWeekArcCard.swift.
+                        // ShabbatWeekArcCard(
+                        //     now: currentTime,
+                        //     candleLighting: zmanimService.candleLightingTime,
+                        //     havdalah: zmanimService.havdalahTime
+                        // )
+                        // .padding(.top, 4)
+
                         // MARK: Hero — Time + Mini Clock
                         heroTimeSection
                             .padding(.top, 4)
@@ -135,9 +145,11 @@ struct MainClockView: View {
                             .foregroundStyle(.textPrimary)
                             .monospacedDigit()
 
-                        Text(periodString)
-                            .font(.system(size: 18, weight: .thin))
-                            .foregroundStyle(.textSecondary.opacity(0.8))
+                        if let periodString {
+                            Text(periodString)
+                                .font(.system(size: 18, weight: .thin))
+                                .foregroundStyle(.textSecondary.opacity(0.8))
+                        }
                     }
                     .environment(\.layoutDirection, .leftToRight)
 
@@ -428,19 +440,15 @@ struct MainClockView: View {
     }
 
     private var digitalTimeString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm"
-        return formatter.string(from: currentTime)
+        TimeFormatter.timeOnly(currentTime)
     }
 
-    private var periodString: String {
-        Calendar.current.component(.hour, from: currentTime) < 12 ? "AM" : "PM"
+    private var periodString: String? {
+        TimeFormatter.period(currentTime)
     }
 
     private func nextAlarmTimeString(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        return formatter.string(from: date)
+        TimeFormatter.fullTime(date)
     }
 }
 

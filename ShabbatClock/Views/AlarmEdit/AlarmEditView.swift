@@ -6,7 +6,7 @@ struct AlarmEditView: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(\.modelContext) private var modelContext
   @Environment(AlarmKitService.self) private var alarmService
-  
+
   let alarm: Alarm
   let isNew: Bool
   
@@ -25,7 +25,7 @@ struct AlarmEditView: View {
   @State private var showingNotificationPermission = false
 
   @AppStorage("isPremium") private var isPremium = false
-  @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
+  @AppStorage("defaultSound") private var defaultSound = "Shalom Aleichem"
   @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 60
   
   private let snoozeDurationOptions: [(String, Int)] = [
@@ -162,6 +162,25 @@ struct AlarmEditView: View {
     .datePickerStyle(.wheel)
     .labelsHidden()
     .frame(height: 160)
+    // Time is always read hour → minute → period, regardless of language.
+    // Matches the digital clock display on the main screen and Apple's own Clock app.
+    .environment(\.layoutDirection, .leftToRight)
+    // Honor the user's in-app 12/24h preference. Falls back to the iOS-level
+    // 24-Hour Time setting via `.autoupdatingCurrent` when preference is `.system`.
+    .environment(\.locale, pickerLocale)
+  }
+
+  /// Locale driving the DatePicker's 12/24h hour format.
+  ///
+  /// Using region-bound locales (`en_US`, `en_GB`) lets DatePicker's `j`-template
+  /// hour symbol resolve to the right format — bare `en` / `he` default to 12h,
+  /// which is why we can't just reuse the app-language locale here.
+  private var pickerLocale: Locale {
+    switch TimeFormatter.userPreference {
+    case .system: return .autoupdatingCurrent
+    case .twelveHour: return Locale(identifier: "en_US")
+    case .twentyFourHour: return Locale(identifier: "en_GB")
+    }
   }
   
   // MARK: - Repeat Section
@@ -313,8 +332,10 @@ struct AlarmEditView: View {
     alarm.label = draftLabel
     alarm.soundName = draftSoundName
     alarm.repeatDays = draftRepeatDays
-    alarm.snoozeEnabled = draftSnoozeEnabled
-    alarm.snoozeDurationSeconds = draftSnoozeEnabled ? draftSnoozeDuration : 0
+    // Snooze is disabled app-wide for now — persist false regardless of draft state
+    // so no saved alarm carries a legacy-default `true` into the future.
+    alarm.snoozeEnabled = false
+    alarm.snoozeDurationSeconds = 0
     alarm.isEnabled = true
 
     // Free tier is capped at 60s auto-stop; longer durations are premium-only.
@@ -326,6 +347,16 @@ struct AlarmEditView: View {
     
     if isNew {
       modelContext.insert(alarm)
+      Analytics.track(.alarmCreated(
+        source: .manual,
+        zmanType: nil,
+        hasRepeat: !draftRepeatDays.isEmpty,
+        repeatDayCount: draftRepeatDays.count,
+        soundCategory: AlarmSound.sound(named: draftSoundName)?.category.rawValue ?? "unknown",
+        timeBucket: .bucket(hour: draftHour)
+      ))
+    } else {
+      Analytics.track(.alarmEdited(source: .manual))
     }
 
     Task {
@@ -336,6 +367,7 @@ struct AlarmEditView: View {
   
   private func deleteAlarm() {
     let alarmToDelete = alarm
+    Analytics.track(.alarmDeleted(source: alarmToDelete.zmanTypeRawValue == nil ? .manual : .zman))
     dismiss()
     DispatchQueue.main.async {
       alarmService.delete(alarmToDelete)

@@ -5,10 +5,12 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(AlarmKitService.self) private var alarmService
+    @EnvironmentObject private var remoteConfig: RemoteConfigService
 
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("ambientMusicEnabled") private var ambientMusicEnabled = false
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedTab: Int = 0
@@ -26,11 +28,12 @@ struct ContentView: View {
     }
 
     init() {
-        let navAppearance = UINavigationBarAppearance()
-        navAppearance.configureWithTransparentBackground()
-        UINavigationBar.appearance().standardAppearance = navAppearance
-        UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
-        UINavigationBar.appearance().compactAppearance = navAppearance
+        // Nav bar appearance intentionally not overridden — iOS 26 provides
+        // automatic Liquid Glass blur that kicks in when content scrolls
+        // under the bar, and remains transparent at the scroll edge. A global
+        // `configureWithTransparentBackground()` swizzle defeats that blur and
+        // lets ScrollView content flicker through the bar during tab-switch
+        // snapshot transitions.
 
         let segmentFont = UIFont.systemFont(ofSize: 13, weight: .medium)
         UISegmentedControl.appearance().setTitleTextAttributes(
@@ -42,7 +45,8 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        let zmanimTabEnabled = remoteConfig.isZmanimTabEnabled
+        return TabView(selection: $selectedTab) {
             SwiftUI.Tab("Clock", systemImage: "clock.fill", value: 0) {
                 MainClockView()
             }
@@ -51,8 +55,10 @@ struct ContentView: View {
                 AlarmListView()
             }
 
-            SwiftUI.Tab("Zmanim", systemImage: "sun.horizon.fill", value: 2) {
-                ZmanimView()
+            if zmanimTabEnabled {
+                SwiftUI.Tab("Zmanim", systemImage: "sun.horizon.fill", value: 2) {
+                    ZmanimView()
+                }
             }
 
             SwiftUI.Tab("Settings", systemImage: "gearshape.fill", value: 3) {
@@ -62,7 +68,7 @@ struct ContentView: View {
         .tint(.accentPurple)
         .preferredColorScheme(resolvedColorScheme)
         .applyLanguageOverride(resolvedLanguage)
-        .id("lang-\(appLanguage)") // Force full view rebuild when language changes
+        .id("lang-\(appLanguage)-zmanim-\(zmanimTabEnabled)") // Force full view rebuild when language or feature flags change
         .onAppear {
             alarmService.configure(with: modelContext)
             ZmanAlarmSyncService.shared.configure(with: modelContext)
@@ -74,10 +80,51 @@ struct ContentView: View {
                     showingOnboarding = true
                 }
             }
+            // Set analytics super properties now that services are configured.
+            // These attach to every subsequent event until they change.
+            let alarmCount = (try? modelContext.fetch(FetchDescriptor<Alarm>()).count) ?? 0
+            Analytics.setSuperProperties(
+                isPremium: StoreManager.shared.isPremium,
+                appLanguage: appLanguage,
+                appearanceMode: appearanceMode,
+                alarmCount: alarmCount,
+                hasLocation: LocationManager.shared.isAuthorized || LocationManager.shared.isUsingManualLocation
+            )
+        }
+        .onChange(of: selectedTab) { _, new in
+            let tab: AnalyticsEvent.Tab
+            switch new {
+            case 0: tab = .clock
+            case 1: tab = .alarms
+            case 2: tab = .zmanim
+            case 3: tab = .settings
+            default: return
+            }
+            Analytics.track(.tabSwitched(tab: tab))
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
+                alarmService.refreshAlarmAuthorization()
                 alarmService.refreshNotificationAuthorization()
+                // Resume ambient music when returning to foreground (not during onboarding —
+                // onboarding owns its own track via startBackgroundMusic there).
+                if !showingOnboarding {
+                    updateAmbientMusic()
+                }
+            } else if newPhase == .background {
+                AudioManager.shared.stopBackgroundMusic(fadeOutDuration: 0.3)
+            }
+        }
+        .onChange(of: ambientMusicEnabled) { _, _ in
+            guard !showingOnboarding else { return }
+            updateAmbientMusic()
+        }
+        .onChange(of: showingOnboarding) { _, isShowing in
+            // When onboarding dismisses, kick off the main-app ambient track if the
+            // user opted in (default is off). Before onboarding completes, the
+            // onboarding screen owns the track.
+            if !isShowing {
+                updateAmbientMusic()
             }
         }
         .fullScreenCover(isPresented: $showingOnboarding) {
@@ -94,6 +141,15 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .openShabbatChecklist)) { _ in
             showingShabbatChecklist = true
+        }
+    }
+
+    /// Starts or stops ambient music based on the user's settings toggle.
+    private func updateAmbientMusic() {
+        if ambientMusicEnabled, let sound = AlarmSound.sound(byId: "shalom-aleichem") {
+            AudioManager.shared.startBackgroundMusic(sound: sound)
+        } else {
+            AudioManager.shared.stopBackgroundMusic()
         }
     }
 }

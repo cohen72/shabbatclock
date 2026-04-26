@@ -23,7 +23,7 @@ SCREEN_CORNER_R = 62
 DEVICE_Y = 720
 
 VERB_SIZE_MAX = 240
-VERB_SIZE_MIN = 140
+VERB_SIZE_MIN = 110
 DESC_SIZE = 110
 # Gap expressed as a ratio of desc font size — script-agnostic
 VERB_DESC_GAP_RATIO = 0.15   # 15% of desc font size between verb bottom and desc top

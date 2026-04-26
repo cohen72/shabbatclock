@@ -59,6 +59,7 @@ struct AlarmSettingsSection: View {
     }
     .sheet(isPresented: $showingPremium) {
       PremiumView()
+        .trigger(.lockedSound)
         .applyLanguageOverride(AppLanguage.current)
     }
     .sheet(isPresented: $showingRingSetup) {

@@ -65,7 +65,20 @@ struct PremiumView: View {
             withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
                 pulseAnimation = true
             }
+            Analytics.track(.paywallViewed(trigger: trigger))
         }
+    }
+
+    /// Context that surfaces this paywall. Set by the caller via `trigger(_:)` so
+    /// we know what drove the user to consider upgrading (alarm limit, settings, etc.).
+    /// Stored in the view so it flows into `paywallViewed` on appear.
+    var trigger: AnalyticsEvent.PaywallTrigger = .settings
+
+    /// Builder so callers can set the trigger without breaking existing call sites.
+    func trigger(_ trigger: AnalyticsEvent.PaywallTrigger) -> PremiumView {
+        var copy = self
+        copy.trigger = trigger
+        return copy
     }
 
     // MARK: - Hero Section
@@ -293,6 +306,8 @@ struct PremiumView: View {
                     await store.restorePurchases()
                     isLoading = false
                     if store.isPremium {
+                        Analytics.track(.purchaseRestored)
+                        Analytics.setSuperProperty("is_premium", value: true)
                         dismiss()
                     } else {
                         errorMessage = String(localized: "No previous purchases found")
@@ -331,6 +346,10 @@ struct PremiumView: View {
 
     private func purchaseSelected() {
         guard let product = store.products.first(where: { $0.id == selectedPlan }) else { return }
+        let plan: AnalyticsEvent.Plan = selectedPlan == StoreManager.yearlyID ? .yearly : .weekly
+
+        Analytics.track(.paywallPlanSelected(plan: plan))
+        Analytics.track(.purchaseStarted(plan: plan))
 
         isLoading = true
         Task {
@@ -338,10 +357,17 @@ struct PremiumView: View {
                 let success = try await store.purchase(product)
                 isLoading = false
                 if success {
+                    Analytics.track(.purchaseCompleted(plan: plan))
+                    Analytics.setSuperProperty("is_premium", value: true)
                     dismiss()
+                } else {
+                    // StoreManager.purchase returns false for both userCancelled and pending.
+                    // Treat as cancelled — pending is rare enough that this is acceptable noise.
+                    Analytics.track(.purchaseCancelled(plan: plan))
                 }
             } catch {
                 isLoading = false
+                Analytics.track(.purchaseFailed(plan: plan, reason: String(describing: error)))
                 errorMessage = error.localizedDescription
                 showingError = true
             }

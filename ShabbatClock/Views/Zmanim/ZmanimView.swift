@@ -6,6 +6,7 @@ struct ZmanimView: View {
     @StateObject private var zmanimService = ZmanimService.shared
     @StateObject private var locationManager = LocationManager.shared
     @Environment(AlarmKitService.self) private var alarmService
+    @EnvironmentObject private var remoteConfig: RemoteConfigService
     @Query(sort: \Alarm.hour) private var allAlarms: [Alarm]
 
     @State private var showingCitySearch = false
@@ -26,8 +27,8 @@ struct ZmanimView: View {
         selectedDay == .today ? zmanimService.todayZmanim : tomorrowZmanim
     }
 
-    // Premium
-    private let freeAlarmLimit = 2
+    // Premium (free alarm limit driven by Remote Config)
+    private var freeAlarmLimit: Int { remoteConfig.freeAlarmLimit }
     @AppStorage("isPremium") private var isPremium = false
 
     /// All zman-linked alarms by type (unfiltered). Used for tap handling
@@ -109,7 +110,8 @@ struct ZmanimView: View {
                             if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
                                 AlarmPermissionBanner()
                                     .padding(.horizontal, 20)
-                                    .padding(.top, 12)
+                                    .padding(.top, 16)
+                                    .padding(.bottom, 10)
                             }
 
                             // Today / Tomorrow toggle
@@ -239,6 +241,7 @@ struct ZmanimView: View {
         }
         .sheet(isPresented: $showingPremium) {
             PremiumView()
+                .trigger(.zmanAlarmLimit)
                 .applyLanguageOverride(AppLanguage.current)
         }
         .fullScreenCover(isPresented: $showingLocationPrompt) {

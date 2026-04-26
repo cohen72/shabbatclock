@@ -35,9 +35,12 @@ final class Alarm {
         set { snoozeDurationSecondsValue = newValue }
     }
 
-    /// Whether snooze is enabled (defaults to true for migrated alarms).
+    /// Whether snooze is enabled. Always false app-wide for now — the UI hides snooze
+    /// entirely, AlarmKitService ignores the flag when scheduling, and all save paths
+    /// persist false. Field is retained so snooze can be re-enabled later without a
+    /// schema migration (e.g., weekday alarms).
     var snoozeEnabled: Bool {
-        get { snoozeEnabledValue ?? true }
+        get { snoozeEnabledValue ?? false }
         set { snoozeEnabledValue = newValue }
     }
 
@@ -53,13 +56,13 @@ final class Alarm {
         minute: Int = 0,
         isEnabled: Bool = true,
         label: String = String(localized: "Alarm"),
-        soundName: String = "Lecha Dodi",
+        soundName: String = "Shalom Aleichem",
         repeatDays: [Int] = [],
         createdAt: Date = Date(),
         lastFiredAt: Date? = nil,
         alarmKitID: UUID? = nil,
-        snoozeDurationSeconds: Int = 5 * 60,
-        snoozeEnabled: Bool = true,
+        snoozeDurationSeconds: Int = 0,
+        snoozeEnabled: Bool = false,
         alarmDurationSeconds: Int = 60
     ) {
         self.id = id
@@ -79,19 +82,22 @@ final class Alarm {
 
     // MARK: - Computed Properties
 
+    /// Numeric time portion ("7:30" or "19:30"), no AM/PM.
+    /// Renders in 12h or 24h based on the user's iOS time-format preference.
     var timeString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm"
-        let date = Calendar.current.date(from: DateComponents(hour: hour, minute: minute)) ?? Date()
-        return formatter.string(from: date)
+        TimeFormatter.timeOnly(TimeFormatter.date(hour: hour, minute: minute))
     }
 
+    /// Localized AM/PM marker, or empty string when the user is on 24-hour time.
+    /// Views that render this as a separate styled view should check for empty
+    /// and hide the label entirely.
     var periodString: String {
-        hour < 12 ? "AM" : "PM"
+        TimeFormatter.period(TimeFormatter.date(hour: hour, minute: minute)) ?? ""
     }
 
+    /// Full localized time — "7:30 AM" in 12h, "19:30" in 24h.
     var formattedTime: String {
-        "\(timeString) \(periodString)"
+        TimeFormatter.fullTime(TimeFormatter.date(hour: hour, minute: minute))
     }
 
     var repeatDaysString: String {

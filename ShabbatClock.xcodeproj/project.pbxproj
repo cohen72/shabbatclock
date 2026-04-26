@@ -10,8 +10,9 @@
 		27A8F7D5C4375871A26FD7D4 /* AlarmSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */; };
 		27A8F7D6C4375871A26FD7D5 /* RingSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680694A0330FB9B8F8E8E /* RingSetupView.swift */; };
 		27A8F7D7C4375871A26FD7D6 /* ZmanArcCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680704A0330FB9B8F8E90 /* ZmanArcCard.swift */; };
-		27A8F7E1C4375871A26FD7E1 /* AlarmPermissionBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680714A0330FB9B8F8E91 /* AlarmPermissionBanner.swift */; };
+		AAA00001A0330FB9B8F8E901 /* ShabbatWeekArcCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA00001A0330FB9B8F8E902 /* ShabbatWeekArcCard.swift */; };
 		27A8F7D8C4375871A26FD7D7 /* ShabbatChecklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */; };
+		27A8F7E1C4375871A26FD7E1 /* AlarmPermissionBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680714A0330FB9B8F8E91 /* AlarmPermissionBanner.swift */; };
 		AAA00001 /* ShabbatClockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00001 /* ShabbatClockApp.swift */; };
 		AAA00002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00002 /* ContentView.swift */; };
 		AAA00010 /* Alarm.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00010 /* Alarm.swift */; };
@@ -25,6 +26,7 @@
 		AAA00027 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00027 /* StoreManager.swift */; };
 		AAA00030 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00030 /* Theme.swift */; };
 		AAA00031 /* AppURLs.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00031 /* AppURLs.swift */; };
+		AAA00032 /* TimeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00032 /* TimeFormatter.swift */; };
 		AAA00040 /* NightSkyBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00040 /* NightSkyBackground.swift */; };
 		AAA00050 /* AnalogClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00050 /* AnalogClockView.swift */; };
 		AAA00051 /* MainClockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00051 /* MainClockView.swift */; };
@@ -46,6 +48,9 @@
 		AAA00404 /* SoundRecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00404 /* SoundRecordingView.swift */; };
 		AAA00405 /* CustomSoundDeletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00405 /* CustomSoundDeletion.swift */; };
 		AAA00406 /* CustomSoundsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00406 /* CustomSoundsSettingsView.swift */; };
+		AAANALY01 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBANALY01 /* AnalyticsService.swift */; };
+		AAASECRE01 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = BBBSECRE01 /* Secrets.plist */; };
+		AARMTCFG01 /* RemoteConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBRMTCFG01 /* RemoteConfigService.swift */; };
 		BF7213DF338B8C9C1EB62A43 /* ZmanAlarmSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */; };
 		D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A4226EB6DEE08BEB8E2C17 /* ZmanAlarmSheet.swift */; };
 		DD112234 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112233 /* Localizable.xcstrings */; };
@@ -55,6 +60,10 @@
 		DD8859E5 /* SwipeToDelete.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBC /* SwipeToDelete.swift */; };
 		DDAB2E76 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4824B /* CitySearchView.swift */; };
 		ED823EEC2F9B8C9C0084B452 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = ED823EEB2F9B8C9C0084B452 /* Mixpanel */; };
+		ED823F892F9D36E60084B452 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = ED823F882F9D36E60084B452 /* FirebaseAnalytics */; };
+		ED823F8B2F9D36E60084B452 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = ED823F8A2F9D36E60084B452 /* FirebaseRemoteConfig */; };
+		ED823F922F9D39F30084B452 /* RemoteConfigDefaults.plist in Resources */ = {isa = PBXBuildFile; fileRef = ED823F912F9D39F30084B452 /* RemoteConfigDefaults.plist */; };
+		ED823FC02F9D3B850084B452 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ED823FBF2F9D3B850084B452 /* GoogleService-Info.plist */; };
 		EDE72F3C2F8BFB3100E40DFF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDE72F3B2F8BFB3100E40DFF /* WidgetKit.framework */; };
 		EDE72F3E2F8BFB3100E40DFF /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDE72F3D2F8BFB3100E40DFF /* SwiftUI.framework */; };
 		EDE72F4B2F8BFB3200E40DFF /* widgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -104,6 +113,7 @@
 		BBB00028 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		BBB00030 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		BBB00031 /* AppURLs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppURLs.swift; sourceTree = "<group>"; };
+		BBB00032 /* TimeFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeFormatter.swift; sourceTree = "<group>"; };
 		BBB00040 /* NightSkyBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightSkyBackground.swift; sourceTree = "<group>"; };
 		BBB00050 /* AnalogClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalogClockView.swift; sourceTree = "<group>"; };
 		BBB00051 /* MainClockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainClockView.swift; sourceTree = "<group>"; };
@@ -126,6 +136,9 @@
 		BBB00404 /* SoundRecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundRecordingView.swift; sourceTree = "<group>"; };
 		BBB00405 /* CustomSoundDeletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundDeletion.swift; sourceTree = "<group>"; };
 		BBB00406 /* CustomSoundsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSoundsSettingsView.swift; sourceTree = "<group>"; };
+		BBBANALY01 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		BBBRMTCFG01 /* RemoteConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteConfigService.swift; sourceTree = "<group>"; };
+		BBBSECRE01 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 		C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatReminderService.swift; sourceTree = "<group>"; };
 		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
 		CC27FEBB /* PermissionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPromptView.swift; sourceTree = "<group>"; };
@@ -136,9 +149,12 @@
 		D53680694A0330FB9B8F8E8E /* RingSetupView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RingSetupView.swift; sourceTree = "<group>"; };
 		D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatChecklistView.swift; sourceTree = "<group>"; };
 		D53680704A0330FB9B8F8E90 /* ZmanArcCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZmanArcCard.swift; sourceTree = "<group>"; };
+		AAA00001A0330FB9B8F8E902 /* ShabbatWeekArcCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatWeekArcCard.swift; sourceTree = "<group>"; };
 		D53680714A0330FB9B8F8E91 /* AlarmPermissionBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlarmPermissionBanner.swift; sourceTree = "<group>"; };
 		DD112233 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		DD112235 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		ED823F912F9D39F30084B452 /* RemoteConfigDefaults.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = RemoteConfigDefaults.plist; sourceTree = "<group>"; };
+		ED823FBF2F9D3B850084B452 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		EDE72F392F8BFB3100E40DFF /* widgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = widgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDE72F3B2F8BFB3100E40DFF /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		EDE72F3D2F8BFB3100E40DFF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -166,6 +182,8 @@
 			files = (
 				ED823EEC2F9B8C9C0084B452 /* Mixpanel in Frameworks */,
 				EDF6A1E02F23A6860052797F /* KosherSwift in Frameworks */,
+				ED823F892F9D36E60084B452 /* FirebaseAnalytics in Frameworks */,
+				ED823F8B2F9D36E60084B452 /* FirebaseRemoteConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,6 +228,7 @@
 				EEE00006 /* Views */,
 				EEE00007 /* Resources */,
 				BBB00201 /* Info.plist */,
+				ED823FBF2F9D3B850084B452 /* GoogleService-Info.plist */,
 				BBB00028 /* Products.storekit */,
 				EDF6A1E42F23BA5C0052797F /* Media.xcassets */,
 			);
@@ -250,6 +269,8 @@
 				BBB00024 /* ZmanimService.swift */,
 				028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */,
 				C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */,
+				BBBANALY01 /* AnalyticsService.swift */,
+				BBBRMTCFG01 /* RemoteConfigService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -259,6 +280,7 @@
 			children = (
 				BBB00030 /* Theme.swift */,
 				BBB00031 /* AppURLs.swift */,
+				BBB00032 /* TimeFormatter.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -283,6 +305,8 @@
 				BBB00200 /* Sounds */,
 				DD112233 /* Localizable.xcstrings */,
 				DD112235 /* InfoPlist.xcstrings */,
+				ED823F912F9D39F30084B452 /* RemoteConfigDefaults.plist */,
+				BBBSECRE01 /* Secrets.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -299,6 +323,7 @@
 				D53680694A0330FB9B8F8E8E /* RingSetupView.swift */,
 				D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */,
 				D53680704A0330FB9B8F8E90 /* ZmanArcCard.swift */,
+				AAA00001A0330FB9B8F8E902 /* ShabbatWeekArcCard.swift */,
 				D53680714A0330FB9B8F8E91 /* AlarmPermissionBanner.swift */,
 			);
 			path = Components;
@@ -412,6 +437,8 @@
 			packageProductDependencies = (
 				EDF6A1DF2F23A6860052797F /* KosherSwift */,
 				ED823EEB2F9B8C9C0084B452 /* Mixpanel */,
+				ED823F882F9D36E60084B452 /* FirebaseAnalytics */,
+				ED823F8A2F9D36E60084B452 /* FirebaseRemoteConfig */,
 			);
 			productName = ShabbatClock;
 			productReference = CCC00001 /* ShabbatClock.app */;
@@ -448,6 +475,7 @@
 			packageReferences = (
 				EDF6A1DE2F23A6860052797F /* XCRemoteSwiftPackageReference "KosherSwift" */,
 				ED823EEA2F9B8C9C0084B452 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
+				ED823F872F9D36E60084B452 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = EEE00999 /* Products */;
 			projectDirPath = "";
@@ -472,9 +500,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				EDF6A1E52F23BA5C0052797F /* Media.xcassets in Resources */,
+				ED823F922F9D39F30084B452 /* RemoteConfigDefaults.plist in Resources */,
 				AAA00200 /* Sounds in Resources */,
 				DD112234 /* Localizable.xcstrings in Resources */,
 				DD112236 /* InfoPlist.xcstrings in Resources */,
+				ED823FC02F9D3B850084B452 /* GoogleService-Info.plist in Resources */,
+				AAASECRE01 /* Secrets.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -508,10 +539,13 @@
 				AAA00025 /* AlarmKitService.swift in Sources */,
 				AAA00026 /* StopAlarmIntent.swift in Sources */,
 				AAA00027 /* StoreManager.swift in Sources */,
+				AAANALY01 /* AnalyticsService.swift in Sources */,
+				AARMTCFG01 /* RemoteConfigService.swift in Sources */,
 				AAA00023 /* LocationManager.swift in Sources */,
 				AAA00024 /* ZmanimService.swift in Sources */,
 				AAA00030 /* Theme.swift in Sources */,
 				AAA00031 /* AppURLs.swift in Sources */,
+				AAA00032 /* TimeFormatter.swift in Sources */,
 				AAA00040 /* NightSkyBackground.swift in Sources */,
 				DDAB2E76 /* CitySearchView.swift in Sources */,
 				DD8859E3 /* LocationRow.swift in Sources */,
@@ -533,6 +567,7 @@
 				27A8F7D5C4375871A26FD7D4 /* AlarmSettingsSection.swift in Sources */,
 				27A8F7D6C4375871A26FD7D5 /* RingSetupView.swift in Sources */,
 				27A8F7D7C4375871A26FD7D6 /* ZmanArcCard.swift in Sources */,
+				AAA00001A0330FB9B8F8E901 /* ShabbatWeekArcCard.swift in Sources */,
 				27A8F7E1C4375871A26FD7E1 /* AlarmPermissionBanner.swift in Sources */,
 				27A8F7D8C4375871A26FD7D7 /* ShabbatChecklistView.swift in Sources */,
 				D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */,
@@ -558,7 +593,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widgets/widgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = widgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = widgets;
@@ -569,7 +604,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -589,7 +624,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widgets/widgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = widgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = widgets;
@@ -600,7 +635,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -744,7 +779,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ShabbatClock/ShabbatClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShabbatClock/Info.plist;
@@ -760,7 +795,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -779,7 +814,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ShabbatClock/ShabbatClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShabbatClock/Info.plist;
@@ -795,7 +830,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -847,6 +882,14 @@
 				minimumVersion = 6.3.0;
 			};
 		};
+		ED823F872F9D36E60084B452 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.12.1;
+			};
+		};
 		EDF6A1DE2F23A6860052797F /* XCRemoteSwiftPackageReference "KosherSwift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Elyahu41/KosherSwift.git";
@@ -862,6 +905,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = ED823EEA2F9B8C9C0084B452 /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
 			productName = Mixpanel;
+		};
+		ED823F882F9D36E60084B452 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ED823F872F9D36E60084B452 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		ED823F8A2F9D36E60084B452 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ED823F872F9D36E60084B452 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
 		};
 		EDF6A1DF2F23A6860052797F /* KosherSwift */ = {
 			isa = XCSwiftPackageProductDependency;

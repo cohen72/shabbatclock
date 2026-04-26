@@ -13,8 +13,16 @@ struct OnboardingView: View {
 
     @State private var currentPage: Int = 0
     @State private var zoomedImage: String?
+    /// Mute state for the onboarding ambient track. Persisted so the choice
+    /// carries over if the user re-enters the flow (debug reset, reinstall).
+    @AppStorage("onboardingMusicMuted") private var isMusicMuted = false
 
     private let totalPages = 5
+
+    /// Background music track played during onboarding.
+    private var onboardingMusic: AlarmSound? {
+        AlarmSound.sound(byId: "shalom-aleichem")
+    }
 
     var body: some View {
         ZStack {
@@ -30,12 +38,36 @@ struct OnboardingView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.easeInOut(duration: 0.3), value: currentPage)
+            .onAppear { Analytics.track(.onboardingStarted) }
+            .onChange(of: currentPage) { _, new in
+                let page: AnalyticsEvent.OnboardingPage
+                switch new {
+                case 0: page = .welcome
+                case 1: page = .alarms
+                case 2: page = .ringSetup
+                case 3: page = .notifications
+                case 4: page = .location
+                default: return
+                }
+                Analytics.track(.onboardingPageViewed(page: page))
+            }
 
             // Page indicator at bottom
             VStack {
                 Spacer()
                 pageIndicator
                     .padding(.bottom, 16)
+            }
+
+            // Mute toggle — top trailing. Respects RTL via .topTrailing alignment.
+            VStack {
+                HStack {
+                    Spacer()
+                    muteButton
+                        .padding(.top, 8)
+                        .padding(.trailing, 16)
+                }
+                Spacer()
             }
         }
         .overlay {
@@ -48,6 +80,44 @@ struct OnboardingView: View {
                 .transition(.opacity)
             }
         }
+        .onAppear { startMusicIfNeeded() }
+        .onDisappear { AudioManager.shared.stopBackgroundMusic() }
+        .onChange(of: isMusicMuted) { _, muted in
+            if muted {
+                AudioManager.shared.stopBackgroundMusic()
+            } else {
+                startMusicIfNeeded()
+            }
+        }
+    }
+
+    /// Starts the ambient onboarding music if not muted and not already playing.
+    private func startMusicIfNeeded() {
+        guard !isMusicMuted else { return }
+        guard let sound = onboardingMusic else { return }
+        AudioManager.shared.startBackgroundMusic(sound: sound)
+    }
+
+    // MARK: - Mute Toggle
+
+    private var muteButton: some View {
+        Button {
+            isMusicMuted.toggle()
+        } label: {
+            Image(systemName: isMusicMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.textSecondary)
+                .frame(width: 36, height: 36)
+                .background(
+                    Circle()
+                        .fill(Color.surfaceCard.opacity(0.5))
+                        .overlay(
+                            Circle()
+                                .stroke(Color.surfaceBorder, lineWidth: 0.5)
+                        )
+                )
+        }
+        .accessibilityLabel(Text(isMusicMuted ? "Unmute music" : "Mute music"))
     }
 
     // MARK: - Page 1: Welcome
@@ -76,16 +146,22 @@ struct OnboardingView: View {
             deniedDetails: "Alarms are turned off. You can enable them anytime in Settings → Shabbat Clock → Alarms.",
             isAuthorized: alarmService.isAuthorized,
             isDenied: alarmService.isAlarmDenied,
+            buttonTitle: "Allow Alarms",
             action: {
                 if alarmService.isAuthorized {
+                    // Already authorized — green-checkmark state was tapped; advance.
                     advanceTo(2)
                 } else {
+                    Analytics.track(.onboardingPermissionPrompted(permission: .alarms))
                     Task {
                         await alarmService.requestAuthorization()
+                        // Don't auto-advance — let the page rebind to the authorized or
+                        // denied state so the user sees the outcome, then taps Continue.
                         if alarmService.isAuthorized {
-                            advanceTo(2)
+                            Analytics.track(.onboardingPermissionGranted(permission: .alarms))
+                        } else {
+                            Analytics.track(.onboardingPermissionDenied(permission: .alarms))
                         }
-                        // Denied: stay on page so user sees Open Settings + Continue
                     }
                 }
             },
@@ -246,115 +322,79 @@ struct OnboardingView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Page 4: Notifications (custom layout for urgency)
+    // MARK: - Page 4: Notifications
 
     private var notificationsPage: some View {
-        VStack(spacing: 0) {
-            Spacer()
-
-            // Icon
-            Image(systemName: "bell.badge.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(.goldAccent)
-                .padding(.bottom, 28)
-
-            // Headline
-            Text("Pre-Shabbat Reminder")
-                .font(.system(size: 32, weight: .bold))
-                .foregroundStyle(.textPrimary)
-                .multilineTextAlignment(.center)
-                .padding(.bottom, 8)
-
-            // Subtitle
-            Text("Get a heads-up before\nShabbat starts.")
-                .font(.system(size: 22, weight: .medium))
-                .foregroundStyle(.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.bottom, 20)
-
-            // Details
-            Text("We'll remind you Friday afternoon to review your alarms. You can change the timing anytime in Settings.")
-                .font(AppFont.body(15))
-                .foregroundStyle(.textSecondary.opacity(0.8))
-                .multilineTextAlignment(.center)
-                .lineSpacing(3)
-                .padding(.horizontal, 40)
-                .padding(.bottom, 20)
-
-            Spacer()
-
-            // CTA
-            Button {
+        OnboardingPage(
+            icon: "bell.badge.fill",
+            iconColor: .goldAccent,
+            headline: "Pre-Shabbat Reminder",
+            subtitle: "Get a heads-up before\nShabbat starts.",
+            details: "We'll remind you Friday afternoon to review your alarms. You can change the timing anytime in Settings.",
+            deniedDetails: "Notifications are turned off. Enable them in Settings → Shabbat Clock → Notifications to get your pre-Shabbat reminder.",
+            isAuthorized: alarmService.isNotificationAuthorized,
+            isDenied: alarmService.isNotificationDenied,
+            buttonTitle: "Allow Notifications",
+            action: {
                 if alarmService.isNotificationAuthorized {
+                    // Already authorized — green-checkmark state was tapped; advance.
                     advanceTo(4)
                 } else {
+                    Analytics.track(.onboardingPermissionPrompted(permission: .notifications))
                     Task {
                         await alarmService.requestNotificationAuthorization()
-                        advanceTo(4)
+                        // Don't auto-advance — let the page rebind so the user sees the
+                        // authorized or denied state and taps Continue themselves.
+                        if alarmService.isNotificationAuthorized {
+                            Analytics.track(.onboardingPermissionGranted(permission: .notifications))
+                        } else {
+                            Analytics.track(.onboardingPermissionDenied(permission: .notifications))
+                        }
                     }
                 }
-            } label: {
-                HStack(spacing: 8) {
-                    if alarmService.isNotificationAuthorized {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 18))
-                    }
-                    Text(alarmService.isNotificationAuthorized
-                         ? "Alerts Enabled" : "Allow Notifications")
-                        .font(.system(size: 18, weight: .bold))
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-                .background(
-                    RoundedRectangle(cornerRadius: 18)
-                        .fill(alarmService.isNotificationAuthorized
-                              ? Color.green.opacity(0.8) : Color.accentPurple)
-                        .shadow(color: (alarmService.isNotificationAuthorized
-                                        ? Color.green : Color.accentPurple).opacity(0.4),
-                                radius: 12, y: 4)
-                )
-            }
-            .padding(.horizontal, 32)
-
-            // Skip
-            Button { advanceTo(4) } label: {
-                Text("Not Now")
-                    .font(AppFont.body(14))
-                    .foregroundStyle(.textSecondary)
-            }
-            .padding(.top, 14)
-
-            Spacer()
-                .frame(height: 50)
-        }
+            },
+            continueAction: { advanceTo(4) }
+        )
     }
 
-    // MARK: - Page 4: Location
+    // MARK: - Page 5: Location
 
     private var locationPage: some View {
         OnboardingPage(
             icon: "location.fill",
             iconColor: .accentPurple,
-            headline: "Prayer Times",
-            subtitle: "Accurate zmanim\nfor your location.",
+            headline: "Shabbat Times",
+            subtitle: "Precise times\nfor your location.",
             details: "Get precise candle lighting and havdalah times based on where you are. You can also choose your city manually.",
-            buttonTitle: locationManager.isAuthorized ? "Location Enabled" : "Enable Location",
-            buttonIcon: locationManager.isAuthorized ? "checkmark.circle.fill" : nil,
-            isAlreadyGranted: locationManager.isAuthorized,
+            deniedDetails: "Location is turned off. Enable it in Settings → Shabbat Clock → Location, or choose your city manually from the main screen.",
+            isAuthorized: locationManager.isAuthorized,
+            isDenied: locationManager.authorizationStatus == .denied
+                || locationManager.authorizationStatus == .restricted,
+            buttonTitle: "Allow Location",
             action: {
                 if locationManager.isAuthorized {
                     completeOnboarding()
                 } else {
+                    Analytics.track(.onboardingPermissionPrompted(permission: .location))
                     locationManager.requestPermission()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        completeOnboarding()
-                    }
+                    // Wait for the system dialog to resolve before deciding next step.
+                    // The page rebinds via authorizationStatus observation and will show
+                    // either the authorized checkmark or the Open Settings denied state.
+                    // Granted/denied tracking happens via .onChange below.
                 }
             },
-            skipAction: { completeOnboarding() },
+            continueAction: { completeOnboarding() },
             isFinal: true
         )
+        .onChange(of: locationManager.authorizationStatus) { _, new in
+            switch new {
+            case .authorizedWhenInUse, .authorizedAlways:
+                Analytics.track(.onboardingPermissionGranted(permission: .location))
+            case .denied, .restricted:
+                Analytics.track(.onboardingPermissionDenied(permission: .location))
+            default: break
+            }
+        }
     }
 
     // MARK: - Page Indicator
@@ -379,6 +419,11 @@ struct OnboardingView: View {
     }
 
     private func completeOnboarding() {
+        Analytics.track(.onboardingCompleted(
+            alarmAuthorized: alarmService.isAuthorized,
+            notificationsAuthorized: alarmService.isNotificationAuthorized,
+            locationAuthorized: locationManager.isAuthorized
+        ))
         onComplete()
     }
 }
@@ -386,6 +431,16 @@ struct OnboardingView: View {
 // MARK: - Onboarding Page (Reusable)
 
 /// A single page in the onboarding flow with bold visual hierarchy.
+///
+/// Renders three states for permission pages (Apple Guideline 5.1.1(iv) compliant):
+/// - **Not requested yet**: primary button triggers the system permission dialog.
+/// - **Authorized**: green checkmark state, primary button advances to next page.
+/// - **Denied**: Open Settings primary button (deep-links to iOS Settings), small
+///   Continue link below to advance past the page. There is no skip button that
+///   precedes the system dialog — the only way to bypass is through Apple's dialog.
+///
+/// For non-permission pages (Welcome, Ring Setup), pass `isAuthorized: true` and
+/// a plain action — the page behaves like a standard continue-only screen.
 private struct OnboardingPage: View {
     let icon: String
     let iconColor: Color
@@ -397,13 +452,41 @@ private struct OnboardingPage: View {
     var isAuthorized: Bool = false
     var isDenied: Bool = false
     var buttonTitle: LocalizedStringResource = "Continue"
-    var buttonIcon: String? = nil
-    var isAlreadyGranted: Bool = false
+    /// Primary action:
+    /// - On first view: triggers the system permission dialog (caller owns this).
+    /// - When authorized: advances to the next page.
+    /// - When denied: unused (Open Settings is handled internally).
     let action: () -> Void
-    var skipAction: (() -> Void)? = nil
-    /// Called when the user taps "Continue" on the denied state (to skip past this page).
+    /// Called when the user taps the small "Continue" link in the denied state
+    /// to advance past this page. Required for permission pages.
     var continueAction: (() -> Void)? = nil
     var isFinal: Bool = false
+
+    /// Copy shown under the subtitle — swaps to denied copy when permission was denied.
+    private var effectiveDetails: LocalizedStringResource {
+        if isDenied, let deniedDetails { return deniedDetails }
+        return details
+    }
+
+    /// The primary CTA title based on state.
+    private var primaryTitle: LocalizedStringResource {
+        if isDenied { return "Open Settings" }
+        if isAuthorized { return isFinal ? "Done" : "Continue" }
+        return buttonTitle
+    }
+
+    /// System-image name shown to the left of the primary CTA title.
+    private var primaryIcon: String? {
+        if isDenied { return "gear" }
+        if isAuthorized { return "checkmark.circle.fill" }
+        return nil
+    }
+
+    /// Background color for the primary CTA.
+    private var primaryFill: Color {
+        if isAuthorized { return Color.green.opacity(0.8) }
+        return Color.accentPurple
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -431,8 +514,8 @@ private struct OnboardingPage: View {
                 .padding(.horizontal, 32)
                 .padding(.bottom, 20)
 
-            // Details — supporting context
-            Text(details)
+            // Details — supporting context (swaps to denied copy when applicable)
+            Text(effectiveDetails)
                 .font(AppFont.body(15))
                 .foregroundStyle(.textSecondary.opacity(0.8))
                 .multilineTextAlignment(.center)
@@ -441,14 +524,22 @@ private struct OnboardingPage: View {
 
             Spacer()
 
-            // CTA button — large, prominent, unmissable
-            Button(action: action) {
+            // Primary CTA — unmissable
+            Button {
+                if isDenied {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                } else {
+                    action()
+                }
+            } label: {
                 HStack(spacing: 8) {
-                    if let buttonIcon {
-                        Image(systemName: buttonIcon)
+                    if let primaryIcon {
+                        Image(systemName: primaryIcon)
                             .font(.system(size: 18))
                     }
-                    Text(buttonTitle)
+                    Text(primaryTitle)
                         .font(.system(size: 18, weight: .bold))
                 }
                 .foregroundStyle(.white)
@@ -456,18 +547,18 @@ private struct OnboardingPage: View {
                 .padding(.vertical, 20)
                 .background(
                     RoundedRectangle(cornerRadius: 18)
-                        .fill(isAlreadyGranted ? Color.green.opacity(0.8) : Color.accentPurple)
-                        .shadow(color: (isAlreadyGranted
-                                        ? Color.green : Color.accentPurple).opacity(0.4),
-                                radius: 12, y: 4)
+                        .fill(primaryFill)
+                        .shadow(color: primaryFill.opacity(0.4), radius: 12, y: 4)
                 )
             }
             .padding(.horizontal, 32)
 
-            // Skip
-            if let skipAction {
-                Button(action: skipAction) {
-                    Text(isFinal ? "Maybe Later" : "Not Now")
+            // Secondary "Continue" link — shown ONLY after user responded to the system
+            // permission dialog with "Deny". This is the documented-compliant escape hatch:
+            // Apple's rule (5.1.1(iv)) forbids a skip button BEFORE the system dialog, not after.
+            if isDenied, let continueAction {
+                Button(action: continueAction) {
+                    Text("Continue")
                         .font(AppFont.body(14))
                         .foregroundStyle(.textSecondary)
                 }

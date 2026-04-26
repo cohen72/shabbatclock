@@ -13,34 +13,34 @@ struct AlarmPermissionBanner: View {
                 UIApplication.shared.open(url)
             }
         } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.red)
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Image(systemName: "exclamationmark.circle")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.goldAccent)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Alarms Can't Ring")
+                    Text("Alarm Permission Needed")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.textPrimary)
-                    Text("Enable alarms in Settings to let Shabbat Clock wake you")
+                    Text("Tap to enable in Shabbat Clock Settings")
                         .font(.system(size: 11))
                         .foregroundStyle(.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(1)
                 }
 
                 Spacer(minLength: 0)
 
                 Image(systemName: "arrow.up.forward")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.red.opacity(0.6))
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.textSecondary.opacity(0.5))
             }
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.red.opacity(0.08))
+                    .fill(Color.goldAccent.opacity(0.08))
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(Color.red.opacity(0.2), lineWidth: 0.5)
+                            .stroke(Color.goldAccent.opacity(0.2), lineWidth: 0.5)
                     )
             )
         }

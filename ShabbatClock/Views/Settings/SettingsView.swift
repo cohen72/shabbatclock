@@ -4,12 +4,19 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.requestReview) private var requestReview
     @AppStorage("isPremium") private var isPremium = false
-    @AppStorage("defaultSound") private var defaultSound = "Lecha Dodi"
+    @AppStorage("defaultSound") private var defaultSound = "Shalom Aleichem"
     @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 60
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage: String = AppLanguage.system.rawValue
     @AppStorage("shabbatReminderEnabled") private var shabbatReminderEnabled = true
     @AppStorage("shabbatReminderMinutesBefore") private var shabbatReminderMinutesBefore = 120
+    /// When enabled, a soft ambient track plays while the user is using the app.
+    /// Default is off — opt-in, not opt-out.
+    @AppStorage("ambientMusicEnabled") private var ambientMusicEnabled = false
+    /// Overrides iOS's 24-Hour Time setting. `.system` honors the OS; `.twelveHour`
+    /// / `.twentyFourHour` force the format. Provided because US region hides the
+    /// OS-level toggle and users in that region have no other way to pick 24h.
+    @AppStorage("timeFormat") private var timeFormat: String = TimeFormat.system.rawValue
 
     @Environment(AlarmKitService.self) private var alarmService
     @Environment(\.modelContext) private var modelContext
@@ -17,6 +24,8 @@ struct SettingsView: View {
     @State private var showingPremium = false
     @State private var showingAbout = false
     @State private var showingCitySearch = false
+    @State private var installID: String?
+    @State private var didCopyInstallID = false
     #if DEBUG
     @State private var showingDebug = false
     #endif
@@ -46,6 +55,9 @@ struct SettingsView: View {
                         // Appearance section
                         appearanceSection
 
+                        // Ambient music section
+                        ambientMusicSection
+
                         // Language section
                         languageSection
 
@@ -64,6 +76,7 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showingPremium) {
                 PremiumView()
+                    .trigger(.settings)
                     .applyLanguageOverride(AppLanguage.current)
             }
             .sheet(isPresented: $showingAbout) {
@@ -107,18 +120,17 @@ struct SettingsView: View {
                     UIApplication.shared.open(url)
                 }
             } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 20))
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Image(systemName: "exclamationmark.circle")
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(.goldAccent)
-                        .frame(width: 32)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Alarms Disabled")
+                        Text("Alarm Permission Needed")
                             .font(AppFont.body())
                             .foregroundStyle(.textPrimary)
 
-                        Text("Enable alarms in Settings to ring on schedule")
+                        Text("Tap to enable in Shabbat Clock Settings")
                             .font(AppFont.caption(12))
                             .foregroundStyle(.textSecondary)
                             .lineLimit(1)
@@ -262,10 +274,6 @@ struct SettingsView: View {
                     }
 
                     Spacer()
-
-                    Image(systemName: "chevron.forward")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.textSecondary)
                 }
                 .padding(16)
                 .settingsCard()
@@ -285,6 +293,38 @@ struct SettingsView: View {
                 Text("Dark").tag(AppearanceMode.dark.rawValue)
             }
             .pickerStyle(.segmented)
+            .padding(16)
+            .settingsCard()
+
+            Picker("Time Format", selection: $timeFormat) {
+                Text("System").tag(TimeFormat.system.rawValue)
+                Text("12-hour").tag(TimeFormat.twelveHour.rawValue)
+                Text("24-hour").tag(TimeFormat.twentyFourHour.rawValue)
+            }
+            .pickerStyle(.segmented)
+            .padding(16)
+            .settingsCard()
+        }
+    }
+
+    // MARK: - Ambient Music Section
+
+    private var ambientMusicSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Music", icon: "music.note")
+
+            Toggle(isOn: $ambientMusicEnabled) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Ambient Music")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.textPrimary)
+
+                    Text("Play Shalom Aleichem softly while using the app")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.textSecondary)
+                }
+            }
+            .tint(.goldAccent)
             .padding(16)
             .settingsCard()
         }
@@ -511,6 +551,9 @@ struct SettingsView: View {
                 defaultAlarmDuration = 60
             }
         }
+        .task {
+            installID = await Analytics.installationID()
+        }
     }
 
     // MARK: - About Section
@@ -540,6 +583,43 @@ struct SettingsView: View {
                                 .foregroundStyle(.textSecondary)
                         }
                     }
+                }
+
+                settingsRow {
+                    Button {
+                        guard let id = installID else { return }
+                        UIPasteboard.general.string = id
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            didCopyInstallID = true
+                        }
+                        Task {
+                            try? await Task.sleep(for: .seconds(2))
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                didCopyInstallID = false
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Text("Your User ID")
+                            Spacer()
+                            if let id = installID {
+                                Text(didCopyInstallID ? String(localized: "Copied") : id)
+                                    .font(AppFont.body(13).monospaced())
+                                    .foregroundStyle(didCopyInstallID ? .goldAccent : .textSecondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                                    .frame(maxWidth: 140, alignment: .trailing)
+                                Image(systemName: didCopyInstallID ? "checkmark" : "doc.on.doc")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(didCopyInstallID ? .goldAccent : .textSecondary)
+                            } else {
+                                ProgressView()
+                                    .scaleEffect(0.7)
+                            }
+                        }
+                    }
+                    .disabled(installID == nil)
                 }
 
                 settingsRow {

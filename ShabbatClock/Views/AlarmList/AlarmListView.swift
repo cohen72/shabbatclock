@@ -7,6 +7,7 @@ struct AlarmListView: View {
   @Query(sort: \Alarm.hour) private var alarms: [Alarm]
   @Environment(AlarmKitService.self) private var alarmService
   @StateObject private var zmanimService = ZmanimService.shared
+  @EnvironmentObject private var remoteConfig: RemoteConfigService
   
   @State private var selectedAlarm: Alarm?
   @State private var newAlarm: Alarm?
@@ -24,8 +25,8 @@ struct AlarmListView: View {
   // the navigation title on initial appearance.
   @State private var hasAppeared = false
 
-  // Free tier limit
-  private let freeAlarmLimit = 2
+  // Free tier limit (driven by Remote Config)
+  private var freeAlarmLimit: Int { remoteConfig.freeAlarmLimit }
   @AppStorage("isPremium") private var isPremium = false
   
   var body: some View {
@@ -38,7 +39,7 @@ struct AlarmListView: View {
           // Permission denied banner (shown when AlarmKit is denied — alarms can't ring)
           if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
             permissionDeniedBanner
-              .listRowInsets(EdgeInsets(top: 6, leading: 20, bottom: 6, trailing: 20))
+              .listRowInsets(EdgeInsets(top: 16, leading: 20, bottom: 10, trailing: 20))
               .listRowBackground(Color.clear)
               .listRowSeparator(.hidden)
           }
@@ -119,12 +120,13 @@ struct AlarmListView: View {
               } label: {
                 Image(systemName: "lock.fill")
                   .font(.system(size: 20, weight: .semibold))
-                  .foregroundStyle(.red.opacity(0.85))
+                  .foregroundStyle(.goldAccent)
               }
             } else if canAddAlarm {
               Menu {
                 Button {
-                  newAlarm = Alarm()
+                  let currentHour = Calendar.current.component(.hour, from: Date())
+                  newAlarm = Alarm(hour: currentHour, minute: 0)
                 } label: {
                   Label("Custom Alarm", systemImage: "clock")
                 }
@@ -157,28 +159,30 @@ struct AlarmListView: View {
                 }
                 
                 // Zman presets
-                Section {
-                  Button {
-                    createZmanPresetAlarm(
-                      zmanType: .netz,
-                      minutesBefore: 0,
-                      label: String(localized: "Netz Minyan")
-                    )
-                  } label: {
-                    Label(String(localized: "Netz Minyan"), systemImage: zmanPresetIcon(for: .netz))
-                  }
+                if remoteConfig.isZmanimTabEnabled {
+                  Section {
+                    Button {
+                      createZmanPresetAlarm(
+                        zmanType: .netz,
+                        minutesBefore: 0,
+                        label: String(localized: "Netz Minyan")
+                      )
+                    } label: {
+                      Label(String(localized: "Netz Minyan"), systemImage: zmanPresetIcon(for: .netz))
+                    }
 
-                  Button {
-                    createZmanPresetAlarm(
-                      zmanType: .alotHashachar,
-                      minutesBefore: 30,
-                      label: String(localized: "Early Minyan")
-                    )
-                  } label: {
-                    Label(String(localized: "Early Minyan"), systemImage: zmanPresetIcon(for: .alotHashachar))
+                    Button {
+                      createZmanPresetAlarm(
+                        zmanType: .alotHashachar,
+                        minutesBefore: 30,
+                        label: String(localized: "Early Minyan")
+                      )
+                    } label: {
+                      Label(String(localized: "Early Minyan"), systemImage: zmanPresetIcon(for: .alotHashachar))
+                    }
+                  } header: {
+                    Label("Zmanim", systemImage: "sun.min")
                   }
-                } header: {
-                  Label("Zmanim", systemImage: "sun.min")
                 }
               } label: {
                 Image(systemName: "plus")
@@ -280,6 +284,9 @@ struct AlarmListView: View {
     } message: {
       Text("Free users can create up to \(freeAlarmLimit) alarms. Upgrade to Premium for unlimited alarms and more sounds!")
     }
+    .onChange(of: showingPremiumAlert) { _, newValue in
+      if newValue { Analytics.track(.freeLimitHit(feature: .alarm)) }
+    }
     .alert("Alarms Need Permission", isPresented: $showingPermissionAlert) {
       Button("Cancel", role: .cancel) {}
       Button("Open Settings") {
@@ -292,20 +299,15 @@ struct AlarmListView: View {
     }
     .sheet(isPresented: $showingPremium) {
       PremiumView()
+        .trigger(.alarmLimit)
         .applyLanguageOverride(AppLanguage.current)
     }
   }
-  
+
   // MARK: - Empty State
   
   private var emptyStateView: some View {
     VStack(spacing: 0) {
-      if !alarmService.isAuthorized && alarmService.hasBeenAskedForAuthorization {
-        permissionDeniedBanner
-          .padding(.horizontal, 20)
-          .padding(.top, 16)
-      }
-
       Spacer()
 
       VStack(spacing: 24) {

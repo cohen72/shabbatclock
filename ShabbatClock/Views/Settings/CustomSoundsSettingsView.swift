@@ -67,7 +67,11 @@ struct CustomSoundsSettingsView: View {
         }
         .sheet(isPresented: $showingPremium) {
             PremiumView()
+                .trigger(.customSounds)
                 .applyLanguageOverride(AppLanguage.current)
+        }
+        .onChange(of: showingPremium) { _, newValue in
+            if newValue { Analytics.track(.freeLimitHit(feature: .customSound)) }
         }
         .confirmationDialog(
             dialogTitle,
@@ -229,9 +233,9 @@ struct CustomSoundsSettingsView: View {
         if count == 0 {
             return "This recording will be permanently deleted."
         } else if count == 1 {
-            return "1 alarm uses this sound and will switch to \"Lecha Dodi\"."
+            return "1 alarm uses this sound and will switch to \"Shalom Aleichem\"."
         } else {
-            return "\(count) alarms use this sound and will switch to \"Lecha Dodi\"."
+            return "\(count) alarms use this sound and will switch to \"Shalom Aleichem\"."
         }
     }
 

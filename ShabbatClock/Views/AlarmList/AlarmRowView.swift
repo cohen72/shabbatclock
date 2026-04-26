@@ -58,9 +58,11 @@ struct AlarmRowView: View {
             .monospacedDigit()
             .foregroundStyle(alarm.isEnabled ? .textPrimary : .textSecondary.opacity(0.6))
           
-          Text(alarm.periodString)
-            .font(.system(size: 22, weight: .thin, design: .default))
-            .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.8 : 0.4))
+          if !alarm.periodString.isEmpty {
+            Text(alarm.periodString)
+              .font(.system(size: 22, weight: .thin, design: .default))
+              .foregroundStyle(.textSecondary.opacity(alarm.isEnabled ? 0.8 : 0.4))
+          }
         }
         
         // Label (or zman description) + duration
@@ -166,7 +168,9 @@ struct AlarmRowView: View {
   
   private var durationLabel: String {
     let seconds = alarm.alarmDurationSeconds
-    if seconds < 60 { return "\(seconds)s" }
+    // Show the 60-second minimum as "60s" (matches the picker label and reads as
+    // a short duration); everything above rounds to whole minutes.
+    if seconds <= 60 { return "\(seconds)s" }
     let minutes = seconds / 60
     return "\(minutes)m"
   }
@@ -220,7 +224,7 @@ struct AlarmRowView: View {
 
 struct AlarmRowCompact: View {
   @Bindable var alarm: Alarm
-  
+
   var body: some View {
     HStack(spacing: 12) {
       VStack(alignment: .leading, spacing: 2) {
@@ -229,9 +233,11 @@ struct AlarmRowCompact: View {
             .font(AppFont.header(22))
             .foregroundStyle(alarm.isEnabled ? .textPrimary : .textSecondary)
           
-          Text(alarm.periodString)
-            .font(AppFont.caption(11))
-            .foregroundStyle(.textSecondary)
+          if !alarm.periodString.isEmpty {
+            Text(alarm.periodString)
+              .font(AppFont.caption(11))
+              .foregroundStyle(.textSecondary)
+          }
         }
         
         Text(alarm.label)

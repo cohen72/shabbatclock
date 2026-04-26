@@ -4,9 +4,6 @@
     "" : {
 
     },
-    " " : {
-
-    },
     "--:--" : {
 
     },
@@ -92,18 +89,18 @@
         }
       }
     },
-    "%lld alarms use this sound and will switch to \"Lecha Dodi\"." : {
+    "%lld alarms use this sound and will switch to \"Shalom Aleichem\"." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld alarms use this sound and will switch to \"Lecha Dodi\"."
+            "value" : "%lld alarms use this sound and will switch to \"Shalom Aleichem\"."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld התראות משתמשות בצליל הזה ויעברו ל\"לכה דודי\"."
+            "value" : "%lld התראות משתמשות בצליל הזה ויעברו ל\"שלום עליכם\"."
           }
         }
       }
@@ -170,18 +167,18 @@
         }
       }
     },
-    "1 alarm uses this sound and will switch to \"Lecha Dodi\"." : {
+    "1 alarm uses this sound and will switch to \"Shalom Aleichem\"." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1 alarm uses this sound and will switch to \"Lecha Dodi\"."
+            "value" : "1 alarm uses this sound and will switch to \"Shalom Aleichem\"."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "התראה אחת משתמשת בצליל הזה ותעבור ל\"לכה דודי\"."
+            "value" : "התראה אחת משתמשת בצליל הזה ותעבור ל\"שלום עליכם\"."
           }
         }
       }
@@ -198,6 +195,7 @@
       }
     },
     "1 min" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -233,31 +231,12 @@
       }
     },
     "2 min" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "2 דק׳"
-          }
-        }
-      }
-    },
-    "4 min" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "4 דק׳"
-          }
-        }
-      }
-    },
-    "60 sec" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "60 שנ׳"
           }
         }
       }
@@ -274,11 +253,23 @@
       }
     },
     "3 min" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "3 דק׳"
+          }
+        }
+      }
+    },
+    "4 min" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4 דק׳"
           }
         }
       }
@@ -303,6 +294,17 @@
         }
       }
     },
+    "12-hour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "12 שעות"
+          }
+        }
+      }
+    },
     "15 min" : {
       "localizations" : {
         "he" : {
@@ -313,12 +315,34 @@
         }
       }
     },
+    "24-hour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 שעות"
+          }
+        }
+      }
+    },
     "30 min" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "30 דק׳"
+          }
+        }
+      }
+    },
+    "60 sec" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "60 שנ׳"
           }
         }
       }
@@ -396,17 +420,8 @@
         }
       }
     },
-    "Accurate zmanim\nfor your location." : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "זמנים מדויקים\nלמיקום שלך."
-          }
-        }
-      }
-    },
     "Actions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -448,6 +463,16 @@
         }
       }
     },
+    "Alarm auto-stopped" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההתראה נעצרה אוטומטית"
+          }
+        }
+      }
+    },
     "Alarm ID" : {
       "localizations" : {
         "he" : {
@@ -464,6 +489,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "התראות שעון מעורר"
+          }
+        }
+      }
+    },
+    "Alarm Permission Needed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נדרשת הרשאה להתראות"
           }
         }
       }
@@ -499,9 +535,6 @@
         }
       }
     },
-    "AlarmKit" : {
-
-    },
     "Alarms" : {
       "localizations" : {
         "he" : {
@@ -512,7 +545,11 @@
         }
       }
     },
+    "Alarms are turned off. You can enable them anytime in Settings → Shabbat Clock → Alarms." : {
+
+    },
     "Alarms Can't Ring" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -523,11 +560,23 @@
       }
     },
     "Alarms Disabled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ההתראות מושבתות"
+          }
+        }
+      }
+    },
+    "Alarms Enabled" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התראות מופעלות"
           }
         }
       }
@@ -542,57 +591,8 @@
         }
       }
     },
-    "Enable alarms in Settings to ring on schedule" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשרו התראות בהגדרות כדי שהן יצלצלו בזמן"
-          }
-        }
-      }
-    },
-    "Enable alarms in Settings to let Shabbat Clock wake you" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשרו התראות בהגדרות כדי ששעון שבת יעיר אתכם"
-          }
-        }
-      }
-    },
-    "Enable alarms in Settings to let Shabbat Clock ring on schedule." : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשרו התראות בהגדרות כדי ששעון שבת יצלצל בזמן."
-          }
-        }
-      }
-    },
-    "Auto-stop up to 5 minutes (Free: 60 sec)" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "עצירה אוטומטית עד 5 דקות (חינם: 60 שנ׳)"
-          }
-        }
-      }
-    },
-    "Alarms Enabled" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "התראות מופעלות"
-          }
-        }
-      }
-    },
     "Alerts Enabled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -623,12 +623,33 @@
         }
       }
     },
+    "Allow Alarms" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אישור התראות מעורר"
+          }
+        }
+      }
+    },
     "Allow alarms and notifications in Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "אפשר התראות והתרעות בהגדרות"
+          }
+        }
+      }
+    },
+    "Allow Location" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אישור מיקום"
           }
         }
       }
@@ -639,6 +660,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "אישור התראות"
+          }
+        }
+      }
+    },
+    "Ambient Music" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מוזיקת רקע"
           }
         }
       }
@@ -706,11 +738,22 @@
       }
     },
     "Auto-stop up to 5 minutes" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "עצירה אוטומטית עד 5 דקות"
+          }
+        }
+      }
+    },
+    "Auto-stop up to 5 minutes (Free: 60 sec)" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עצירה אוטומטית עד 5 דקות (חינם: 60 שנ׳)"
           }
         }
       }
@@ -886,6 +929,16 @@
         }
       }
     },
+    "Copied" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הועתק"
+          }
+        }
+      }
+    },
     "Cowbell" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1013,6 +1066,7 @@
       }
     },
     "Debug" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1021,9 +1075,6 @@
           }
         }
       }
-    },
-    "DEBUG" : {
-
     },
     "Default Auto-Stop" : {
       "localizations" : {
@@ -1241,6 +1292,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "הפעלת התראות"
+          }
+        }
+      }
+    },
+    "Enable alarms in Settings to let Shabbat Clock ring on schedule." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשרו התראות בהגדרות כדי ששעון שבת יצלצל בזמן."
+          }
+        }
+      }
+    },
+    "Enable alarms in Settings to let Shabbat Clock wake you" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשרו התראות בהגדרות כדי ששעון שבת יעיר אתכם"
+          }
+        }
+      }
+    },
+    "Enable alarms in Settings to ring on schedule" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשרו התראות בהגדרות כדי שהן יצלצלו בזמן"
           }
         }
       }
@@ -1505,6 +1588,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שדרוג לפרימיום"
+          }
+        }
+      }
+    },
+    "Got it" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הבנתי"
           }
         }
       }
@@ -1855,6 +1948,7 @@
       }
     },
     "Location Enabled" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1863,6 +1957,9 @@
           }
         }
       }
+    },
+    "Location is turned off. Enable it in Settings → Shabbat Clock → Location, or choose your city manually from the main screen." : {
+
     },
     "Location Required" : {
       "localizations" : {
@@ -2007,6 +2104,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "בוקר"
+          }
+        }
+      }
+    },
+    "Music" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מוזיקה"
+          }
+        }
+      }
+    },
+    "Mute music" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השתק מוזיקה"
           }
         }
       }
@@ -2244,6 +2363,7 @@
       }
     },
     "Not Now" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2262,6 +2382,9 @@
           }
         }
       }
+    },
+    "Notifications are turned off. Enable them in Settings → Shabbat Clock → Notifications to get your pre-Shabbat reminder." : {
+
     },
     "O'clock" : {
       "extractionState" : "manual",
@@ -2286,6 +2409,7 @@
       }
     },
     "Off" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2317,6 +2441,7 @@
       }
     },
     "Onboarding" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2430,12 +2555,6 @@
         }
       }
     },
-    "Override fire time" : {
-
-    },
-    "Override Premium" : {
-
-    },
     "Parashat" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2458,6 +2577,7 @@
       }
     },
     "Permission Prompts" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2468,6 +2588,7 @@
       }
     },
     "Permission States" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2499,6 +2620,17 @@
         }
       }
     },
+    "Play Shalom Aleichem softly while using the app" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נגן שלום עליכם ברקע בזמן שימוש באפליקציה"
+          }
+        }
+      }
+    },
     "Pluck" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2521,22 +2653,22 @@
         }
       }
     },
-    "Prayer Times" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "זמני תפילה"
-          }
-        }
-      }
-    },
     "Pre-Shabbat Reminder" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "תזכורת לפני שבת"
+          }
+        }
+      }
+    },
+    "Precise times\nfor your location." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמנים מדויקים\nלמיקום שלך."
           }
         }
       }
@@ -2553,6 +2685,7 @@
       }
     },
     "Premium" : {
+      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2571,9 +2704,6 @@
           }
         }
       }
-    },
-    "Premium State" : {
-
     },
     "Preview" : {
       "localizations" : {
@@ -3211,6 +3341,30 @@
         }
       }
     },
+    "Shabbat Times" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמני שבת"
+          }
+        }
+      }
+    },
+    "Shalom Aleichem" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שלום עליכם"
+          }
+        }
+      }
+    },
+    "Silencer ID" : {
+
+    },
     "Silent Mode is on" : {
       "localizations" : {
         "he" : {
@@ -3230,12 +3384,6 @@
           }
         }
       }
-    },
-    "Simulate Friday" : {
-
-    },
-    "Simulation" : {
-
     },
     "Sitar" : {
       "extractionState" : "manual",
@@ -3277,9 +3425,6 @@
           }
         }
       }
-    },
-    "Sound Duration Test" : {
-
     },
     "Sounds & Haptics" : {
       "extractionState" : "stale",
@@ -3528,6 +3673,17 @@
         }
       }
     },
+    "Tap to enable in Shabbat Clock Settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקישו כדי להפעיל בהגדרות שעון שבת"
+          }
+        }
+      }
+    },
     "Tap to review your alarms and confirm your phone is ready for Shabbat." : {
       "comment" : "Body of the pre-Shabbat reminder notification.",
       "extractionState" : "stale",
@@ -3656,6 +3812,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "יום חמישי"
+          }
+        }
+      }
+    },
+    "Time Format" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פורמט שעה"
           }
         }
       }
@@ -3810,6 +3977,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "פתחו עם פרימיום"
+          }
+        }
+      }
+    },
+    "Unmute music" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעל מוזיקה"
           }
         }
       }
@@ -4098,6 +4276,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ההתראות שלך"
+          }
+        }
+      }
+    },
+    "Your User ID" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מזהה משתמש"
           }
         }
       }

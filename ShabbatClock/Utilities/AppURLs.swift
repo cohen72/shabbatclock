@@ -65,6 +65,12 @@ enum AppURLs {
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"
         let os = ProcessInfo.processInfo.operatingSystemVersionString
-        return "---\nVersion: \(version) (\(build))\niOS: \(os)"
+        let userID = cachedInstallID ?? "(pending)"
+        return "---\nVersion: \(version) (\(build))\niOS: \(os)\nUser ID: \(userID)"
     }
+
+    /// Cached Firebase Installation ID for inclusion in support emails.
+    /// Populated at launch by `Analytics.configure()`; nil only if the user opens
+    /// a mailto link before the async FID fetch completes (rare; first launch only).
+    nonisolated(unsafe) static var cachedInstallID: String?
 }

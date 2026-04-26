@@ -54,9 +54,7 @@ final class ZmanimService: ObservableObject {
     let description: String
     
     var timeString: String {
-      let formatter = DateFormatter()
-      formatter.dateFormat = "h:mm a"
-      return formatter.string(from: time)
+      TimeFormatter.fullTime(time)
     }
   }
   
@@ -348,11 +346,9 @@ final class ZmanimService: ObservableObject {
     return todayZmanim.first { $0.time > now }
   }
 
-  /// Format a date as a short time string (e.g., "5:12 PM").
+  /// Format a date as a short time string ("5:12 PM" in 12h mode, "17:12" in 24h).
   func shortTimeString(from date: Date?) -> String {
     guard let date = date else { return "--:--" }
-    let formatter = DateFormatter()
-    formatter.dateFormat = "h:mm a"
-    return formatter.string(from: date)
+    return TimeFormatter.fullTime(date)
   }
 }

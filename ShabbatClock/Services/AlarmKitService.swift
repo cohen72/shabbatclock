@@ -80,12 +80,29 @@ final class AlarmKitService: NSObject {
         observeAuthorizationChanges()
         observeAlarmUpdates()
 
+        validateDefaultSoundPreference()
+
         if isAuthorized {
             reconcileOrphanedAlarms()
             syncAllAlarms()
         }
 
         updateNextAlarmDate()
+    }
+
+    /// Ensure `@AppStorage("defaultSound")` doesn't point at a missing custom recording.
+    /// If the user previously picked a custom sound as the app default and the recording
+    /// has since been deleted (or never migrated across App Group boundaries), reset the
+    /// preference to the bundled default so newly-created alarms get a valid sound.
+    private func validateDefaultSoundPreference() {
+        let key = "defaultSound"
+        let stored = UserDefaults.standard.string(forKey: key) ?? AlarmSound.defaultSound.name
+        guard AlarmSound.isCustomSoundName(stored) else { return }
+        guard let fileName = AlarmSound.customFileName(from: stored) else { return }
+        if !CustomSoundStore.fileExists(fileName: fileName) {
+            print("[AlarmKitService] Resetting defaultSound from stale custom '\(stored)' to bundled default")
+            UserDefaults.standard.set(AlarmSound.defaultSound.name, forKey: key)
+        }
     }
 
     /// Set up the notification delegate so the system can deliver our notifications.
@@ -118,6 +135,24 @@ final class AlarmKitService: NSObject {
                 self.isNotificationAuthorized = settings.authorizationStatus == .authorized
                 self.isNotificationDenied = settings.authorizationStatus == .denied
             }
+        }
+    }
+
+    /// Re-check AlarmKit authorization status without prompting.
+    /// Call on foreground return so the UI reflects the user toggling the permission
+    /// in iOS Settings. `authorizationUpdates` is not reliable while the app is
+    /// backgrounded, so this is the authoritative path after a Settings round-trip.
+    func refreshAlarmAuthorization() {
+        let state = AlarmManager.shared.authorizationState
+        let wasAuthorized = isAuthorized
+        isAuthorized = state == .authorized
+        isAlarmDenied = state == .denied
+
+        // If the user just granted permission, re-attach any existing alarms that
+        // lost their AlarmKit registration while access was denied.
+        if !wasAuthorized && isAuthorized {
+            reconcileOrphanedAlarms()
+            syncAllAlarms()
         }
     }
 
@@ -338,44 +373,75 @@ final class AlarmKitService: NSObject {
 
         let alarmKitID = UUID()
 
-        // Build schedule
-        let time = AlarmKit.Alarm.Schedule.Relative.Time(hour: alarm.hour, minute: alarm.minute)
-        let recurrence: AlarmKit.Alarm.Schedule.Relative.Recurrence
+        // Build schedule. One-time and recurring use different schedule types to match
+        // the silencer's shape — the two alarms are a pair, so keeping their schedule
+        // types symmetric avoids any risk of AlarmKit resolving them to different days.
+        let schedule: AlarmKit.Alarm.Schedule
         if alarm.repeatDays.isEmpty {
-            recurrence = .never
+            // One-time: pin to the absolute fire moment computed from today's wall-clock.
+            // If `nextFireDate` can't be computed (shouldn't happen for an enabled alarm),
+            // we can't schedule reliably.
+            guard let mainFireDate = alarm.nextFireDate() else {
+                print("[AlarmKitService] ⚠️ Could not compute fire date for one-time alarm '\(alarm.label)'")
+                return nil
+            }
+            schedule = .fixed(mainFireDate)
         } else {
-            recurrence = .weekly(alarm.repeatDays.compactMap { weekday(from: $0) })
+            let time = AlarmKit.Alarm.Schedule.Relative.Time(hour: alarm.hour, minute: alarm.minute)
+            schedule = .relative(.init(
+                time: time,
+                repeats: .weekly(alarm.repeatDays.compactMap { weekday(from: $0) })
+            ))
         }
-        let schedule = AlarmKit.Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
 
-        // Build presentation
-        let snoozeButton = alarm.snoozeEnabled
-            ? AlarmButton(text: "Snooze", textColor: .white, systemImageName: "zzz")
-            : nil
-        let stopButton = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.fill")
+        // Build presentation. Snooze is intentionally disabled app-wide for now — we
+        // keep the model fields so we can re-enable easily later (e.g., weekday alarms).
+        // Ignore `alarm.snoozeEnabled` here and always omit the secondary button.
+        //
+        // The Stop button text becomes "slide to <text>" when iOS renders it as a slider.
+        // Using the alarm's label here ties the dismissal action to the specific event
+        // ("slide to Shabbat Mincha") with a flame icon for warmth.
+        let stopButton = AlarmButton(
+            text: LocalizedStringResource(stringLiteral: alarm.label),
+            textColor: .white,
+            systemImageName: "flame.fill"
+        )
         let alert = AlarmPresentation.Alert(
             title: LocalizedStringResource(stringLiteral: alarm.label),
             stopButton: stopButton,
-            secondaryButton: snoozeButton,
-            secondaryButtonBehavior: alarm.snoozeEnabled ? .countdown : nil
+            secondaryButton: nil,
+            secondaryButtonBehavior: nil
         )
         let presentation = AlarmPresentation(alert: alert)
 
-        // Build metadata
+        // Resolve the sound with a repair step: if the stored soundName references a
+        // custom recording whose file is missing (e.g., recording was deleted, or the
+        // @AppStorage("defaultSound") stuck on a stale custom reference), fall back
+        // to the bundled default and rewrite the alarm's soundName so future edits
+        // see a valid value.
+        let storedIsCustom = AlarmSound.isCustomSoundName(alarm.soundName)
+        let customFileMissing = storedIsCustom
+            && (AlarmSound.customFileName(from: alarm.soundName).map { !CustomSoundStore.fileExists(fileName: $0) } ?? true)
+        if customFileMissing {
+            print("[AlarmKitService] ⚠️ Custom sound file missing for alarm '\(alarm.label)' — repairing to default sound")
+            alarm.soundName = AlarmSound.defaultSound.name
+        }
+
         let isCustom = AlarmSound.isCustomSoundName(alarm.soundName)
-        let sound = isCustom ? nil : AlarmSound.sound(named: alarm.soundName)
+        let sound: AlarmSound? = {
+            if isCustom { return nil }
+            return AlarmSound.sound(named: alarm.soundName) ?? AlarmSound.defaultSound
+        }()
         let metadata = ShabbatAlarmMetadata(
             label: alarm.label,
             isShabbatAlarm: alarm.isShabbatAlarm,
             soundCategory: sound?.category.rawValue ?? (isCustom ? "Custom" : "Shabbat Melodies")
         )
 
-        // Build duration — postAlert handles snooze countdown only.
-        // Auto-stop is handled by the silencer alarm (a separate silent AlarmKit alarm
-        // scheduled at fireTime + alarmDurationSeconds — see scheduleSilencerAlarm).
-        let duration: AlarmKit.Alarm.CountdownDuration? = alarm.snoozeEnabled
-            ? AlarmKit.Alarm.CountdownDuration(preAlert: nil, postAlert: TimeInterval(alarm.snoozeDurationSeconds))
-            : nil
+        // Build duration — AlarmKit's `postAlert` drives the snooze countdown; with
+        // snooze disabled app-wide, we pass nil. Auto-stop is handled by the silencer
+        // alarm (scheduled separately at fireTime + alarmDurationSeconds).
+        let duration: AlarmKit.Alarm.CountdownDuration? = nil
 
         // Build sound — bundled sound uses "Sounds/..." prefix;
         // user-recorded sounds live in the App Group and use a bare filename.
@@ -386,7 +452,21 @@ final class AlarmKitService: NSObject {
         } else if let sound {
             alertSound = .named("Sounds/\(sound.fileName).\(sound.fileExtension)")
         } else {
+            // Should be unreachable with the sound-fallback above, but logged defensively
+            // so we can investigate if it ever happens in production.
+            print("[AlarmKitService] ⚠️ Falling back to default iOS alarm sound for alarm '\(alarm.label)' (soundName='\(alarm.soundName)')")
             alertSound = .default
+        }
+
+        // Schedule the silencer FIRST so we can bake its ID into the main alarm's
+        // StopAlarmIntent. When the user slides Stop, iOS runs the intent directly
+        // (even if our app is suspended) and the intent cancels both alarms — no
+        // ghost silencer firing seconds later.
+        let silencerID = await scheduleSilencerAlarm(for: alarm, mainAlarmHour: alarm.hour, mainAlarmMinute: alarm.minute)
+        if silencerID == nil {
+            // Main alarm will be scheduled below, but with no silencer → no auto-stop.
+            // Logged loudly so we can diagnose if it ever happens.
+            print("[AlarmKitService] 🚨 Alarm '\(alarm.label)' scheduled WITHOUT a silencer — will ring until manually stopped")
         }
 
         let config = AlarmManager.AlarmConfiguration(
@@ -397,17 +477,13 @@ final class AlarmKitService: NSObject {
                 metadata: metadata,
                 tintColor: .accentPurple
             ),
-            stopIntent: StopAlarmIntent(alarmID: alarmKitID),
+            stopIntent: StopAlarmIntent(alarmID: alarmKitID, silencerID: silencerID),
             sound: alertSound
         )
 
         do {
             _ = try await AlarmManager.shared.schedule(id: alarmKitID, configuration: config)
-
-            // Schedule the silent "silencer" alarm at fireTime + duration. When the
-            // silencer fires, iOS transitions out of the main alarm's alerting state,
-            // silencing it at the system level — without needing our process to run.
-            if let silencerID = await scheduleSilencerAlarm(for: alarm, mainAlarmHour: alarm.hour, mainAlarmMinute: alarm.minute) {
+            if let silencerID {
                 alarm.silencerAlarmKitID = silencerID
             }
 
@@ -424,11 +500,16 @@ final class AlarmKitService: NSObject {
     /// main alarm's alerting state, silencing the original alarm without needing our
     /// process to run code.
     ///
-    /// Uses `Schedule.relative` with the same weekday recurrence as the main alarm (or
-    /// `.never` for one-time alarms), shifted forward by `duration/60` minutes. Duration
-    /// is required to be a whole number of minutes (enforced upstream — the UI offers
-    /// only 60-second multiples). If adding minutes crosses midnight, the weekdays are
-    /// rolled forward by one day so the silencer fires on the correct next day.
+    /// Schedule strategy:
+    /// - **One-time alarms** (`repeatDays.isEmpty`): use `.fixed(mainFireDate + duration)`.
+    ///   This is the most reliable pairing — AlarmKit fires at that exact moment, and
+    ///   there's no ambiguity around "next occurrence of this hour/minute" or midnight
+    ///   rollover.
+    /// - **Recurring alarms**: use `.relative(silencerHour:silencerMinute, weekly:[…])`
+    ///   shifted forward by `duration/60` minutes, with weekdays rolled forward one day
+    ///   when the silencer time crosses midnight. AlarmKit can't express sub-minute
+    ///   offsets in `.relative`, so duration is rounded up to whole minutes (enforced
+    ///   upstream by the UI's 60-second minimum).
     ///
     /// Returns the silencer's AlarmKit ID so the caller can store it for cancellation.
     private func scheduleSilencerAlarm(
@@ -436,43 +517,59 @@ final class AlarmKitService: NSObject {
         mainAlarmHour: Int,
         mainAlarmMinute: Int
     ) async -> UUID? {
-        // Compute silencer hour/minute with midnight rollover tracking.
-        let durationMinutes = max(1, alarm.alarmDurationSeconds / 60)
-        let totalMinutes = mainAlarmHour * 60 + mainAlarmMinute + durationMinutes
-        let silencerHour = (totalMinutes / 60) % 24
-        let silencerMinute = totalMinutes % 60
-        let crossesMidnight = (totalMinutes / 60) >= 24
-
-        let silencerRecurrence: AlarmKit.Alarm.Schedule.Relative.Recurrence
+        let schedule: AlarmKit.Alarm.Schedule
         if alarm.repeatDays.isEmpty {
-            silencerRecurrence = .never
+            // One-time alarm: pin silencer to the main alarm's actual fire instant +
+            // duration. This sidesteps every "next-occurrence" ambiguity (including
+            // past-today and midnight rollover). If we can't compute the main alarm's
+            // fire date, bail rather than schedule something wrong.
+            guard let mainFireDate = alarm.nextFireDate() else {
+                print("[AlarmKitService] ⚠️ Silencer: could not compute main fire date for one-time alarm '\(alarm.label)'")
+                return nil
+            }
+            let silencerFireDate = mainFireDate.addingTimeInterval(TimeInterval(alarm.alarmDurationSeconds))
+            schedule = .fixed(silencerFireDate)
         } else {
+            // Recurring alarm: compute silencer hour/minute from main's hour/minute,
+            // with midnight rollover rolling the weekdays forward by one.
+            let durationMinutes = max(1, alarm.alarmDurationSeconds / 60)
+            let totalMinutes = mainAlarmHour * 60 + mainAlarmMinute + durationMinutes
+            let silencerHour = (totalMinutes / 60) % 24
+            let silencerMinute = totalMinutes % 60
+            let crossesMidnight = (totalMinutes / 60) >= 24
             let shiftedDays = crossesMidnight
                 ? alarm.repeatDays.map { ($0 + 1) % 7 }
                 : alarm.repeatDays
-            silencerRecurrence = .weekly(shiftedDays.compactMap { weekday(from: $0) })
+            let silencerTime = AlarmKit.Alarm.Schedule.Relative.Time(
+                hour: silencerHour,
+                minute: silencerMinute
+            )
+            schedule = .relative(.init(
+                time: silencerTime,
+                repeats: .weekly(shiftedDays.compactMap { weekday(from: $0) })
+            ))
         }
-
-        let silencerTime = AlarmKit.Alarm.Schedule.Relative.Time(
-            hour: silencerHour,
-            minute: silencerMinute
-        )
-        let schedule = AlarmKit.Alarm.Schedule.relative(
-            .init(time: silencerTime, repeats: silencerRecurrence)
-        )
 
         let silencerID = UUID()
 
-        // Minimal presentation — the silencer should be invisible to the user.
-        let stopButton = AlarmButton(text: " ", textColor: .clear, systemImageName: "stop.fill")
+        // Silencer presentation. The silencer plays a silent sound — it's not really
+        // an alarm in the user-facing sense, it's a system-level mechanism for
+        // dismissing the main alarm. But since iOS still surfaces it briefly when it
+        // fires, we use the title to communicate "your alarm was auto-stopped" so the
+        // user understands what they're seeing instead of a confusing blank alert.
+        let stopButton = AlarmButton(
+            text: "Got it",
+            textColor: .white,
+            systemImageName: "checkmark"
+        )
         let alert = AlarmPresentation.Alert(
-            title: " ",
+            title: "Alarm auto-stopped",
             stopButton: stopButton
         )
         let presentation = AlarmPresentation(alert: alert)
 
         let metadata = ShabbatAlarmMetadata(
-            label: " ",
+            label: "Alarm auto-stopped",
             isShabbatAlarm: false,
             soundCategory: "Silent"
         )
@@ -485,7 +582,7 @@ final class AlarmKitService: NSObject {
             attributes: AlarmAttributes<ShabbatAlarmMetadata>(
                 presentation: presentation,
                 metadata: metadata,
-                tintColor: .clear
+                tintColor: .accentPurple
             ),
             stopIntent: StopAlarmIntent(alarmID: silencerID),
             sound: alertSound
@@ -493,9 +590,10 @@ final class AlarmKitService: NSObject {
 
         do {
             _ = try await AlarmManager.shared.schedule(id: silencerID, configuration: config)
+            print("[AlarmKitService] 🤫 Silencer scheduled for '\(alarm.label)' (duration: \(alarm.alarmDurationSeconds)s, id: \(silencerID))")
             return silencerID
         } catch {
-            print("[AlarmKitService] Failed to schedule silencer: \(error)")
+            print("[AlarmKitService] ⚠️ Failed to schedule silencer for '\(alarm.label)' (duration: \(alarm.alarmDurationSeconds)s): \(error)")
             return nil
         }
     }
