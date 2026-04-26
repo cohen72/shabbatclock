@@ -33,20 +33,37 @@ enum Analytics {
 
         // `trackAutomaticEvents: false` — we only send events we explicitly declare.
         // This keeps the privacy surface small and matches our "no automatic tracking" stance.
+        // The default `serverURL` (api.mixpanel.com) targets the US cluster, which
+        // matches our project's data residency. If the project is ever migrated
+        // to EU/India, pass `serverURL: "https://api-eu.mixpanel.com"` (or `-in.`).
         Mixpanel.initialize(token: token, trackAutomaticEvents: false)
+
+        #if DEBUG
+        // Verbose console output: every track/flush call is logged. Useful for
+        // verifying events fire during development. Never enabled in Release.
+        // Mixpanel's `loggingEnabled = true` flips log levels but doesn't attach
+        // a destination — we register a print-based logger so the messages
+        // actually appear in Xcode's console.
+        MixpanelLogger.addLogging(MixpanelPrintLogger())
+        Mixpanel.mainInstance().loggingEnabled = true
+        #endif
 
         // Opt-out of session replay / surveys etc. by default — product analytics only.
         // `optOutTracking` is OFF (we DO want our explicit events), but automatic
         // IDFA/ad-network integrations are not enabled on this SDK path.
         configured = true
 
-        // Mirror the Firebase Installation ID as a user property so Remote Config
-        // audience conditions can target individual installs (e.g. "give this
-        // user a higher free_alarm_limit"). Async; user property is set when ready.
-        // Also cached for inclusion in support email footers (AppURLs).
+        // Mirror the Firebase Installation ID across analytics providers and
+        // surfaces. Async; everything below runs when the FID arrives.
+        // - Firebase: user property `install_id` so Remote Config audience
+        //   conditions can target individual installs.
+        // - Mixpanel: identify the user with the same FID so both providers
+        //   share a stable, cross-referenceable user identifier.
+        // - AppURLs: cached for support-email footers.
         Installations.installations().installationID { id, _ in
             guard let id else { return }
             FirebaseAnalytics.Analytics.setUserProperty(id, forName: "install_id")
+            Mixpanel.mainInstance().identify(distinctId: id)
             AppURLs.cachedInstallID = id
         }
     }
@@ -118,6 +135,11 @@ enum Analytics {
     static func track(_ event: AnalyticsEvent) {
         guard configured else { return }
         Mixpanel.mainInstance().track(event: event.name, properties: event.properties)
+        #if DEBUG
+        // Force-flush in development so events appear in Mixpanel within seconds
+        // rather than waiting for the default 60s flush timer or app-backgrounding.
+        Mixpanel.mainInstance().flush(performFullFlush: true)
+        #endif
         FirebaseAnalytics.Analytics.logEvent(event.name, parameters: firebaseParameters(from: event.properties))
     }
 
@@ -147,6 +169,20 @@ enum Analytics {
         return out
     }
 }
+
+// MARK: - Mixpanel Logger
+
+#if DEBUG
+/// Pipes Mixpanel SDK log messages to stdout via `print` so they show up in
+/// Xcode's debug console. The SDK has its own log-level switch but does not
+/// attach a destination by default; without this, `loggingEnabled = true` is
+/// silent.
+private final class MixpanelPrintLogger: MixpanelLogging {
+    func addMessage(message: MixpanelLogMessage) {
+        print("[Mixpanel] \(message.level.rawValue): \(message.text)")
+    }
+}
+#endif
 
 // MARK: - Secrets Loader
 

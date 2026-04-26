@@ -421,7 +421,6 @@
       }
     },
     "Actions" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -534,6 +533,9 @@
           }
         }
       }
+    },
+    "AlarmKit" : {
+
     },
     "Alarms" : {
       "localizations" : {
@@ -1066,7 +1068,6 @@
       }
     },
     "Debug" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1075,6 +1076,9 @@
           }
         }
       }
+    },
+    "DEBUG" : {
+
     },
     "Default Auto-Stop" : {
       "localizations" : {
@@ -2409,7 +2413,6 @@
       }
     },
     "Off" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2441,7 +2444,6 @@
       }
     },
     "Onboarding" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2555,6 +2557,12 @@
         }
       }
     },
+    "Override fire time" : {
+
+    },
+    "Override Premium" : {
+
+    },
     "Parashat" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2577,7 +2585,6 @@
       }
     },
     "Permission Prompts" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2588,7 +2595,6 @@
       }
     },
     "Permission States" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2685,7 +2691,6 @@
       }
     },
     "Premium" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2704,6 +2709,9 @@
           }
         }
       }
+    },
+    "Premium State" : {
+
     },
     "Preview" : {
       "localizations" : {
@@ -3385,6 +3393,12 @@
         }
       }
     },
+    "Simulate Friday" : {
+
+    },
+    "Simulation" : {
+
+    },
     "Sitar" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3425,6 +3439,9 @@
           }
         }
       }
+    },
+    "Sound Duration Test" : {
+
     },
     "Sounds & Haptics" : {
       "extractionState" : "stale",
