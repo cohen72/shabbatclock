@@ -13,21 +13,34 @@ struct AlarmSettingsSection: View {
   @State private var showingRingSetup = false
   @State private var showingPremium = false
   
-  /// The only duration available to free users. Anything longer requires Premium.
-  private static let freeDurationSeconds = 60
+  /// The single duration available to free users, gated by composer-flag state:
+  /// - flag ON → 15s (composer can produce sub-minute durations precisely)
+  /// - flag OFF → 60s (silencer can't honor sub-minute durations)
+  /// All other durations require Premium. Static helper so SettingsView and the
+  /// commitSave clamp can reuse the same rule.
+  static func freeDurationSeconds(composerEnabled: Bool) -> Int {
+    composerEnabled ? 15 : 60
+  }
 
   private var alarmDurationOptions: [(String, Int)] {
-    [
+    var options: [(String, Int)] = []
+    if RemoteConfigService.shared.isComposedSoundsEnabled {
+      options.append(("15 sec", 15))
+      options.append(("30 sec", 30))
+    }
+    options.append(contentsOf: [
       ("60 sec", 60),
       ("2 min", 120),
       ("3 min", 180),
       ("4 min", 240),
       ("5 min", 300),
-    ]
+    ])
+    return options
   }
 
   private func isLocked(_ seconds: Int) -> Bool {
-    !storeManager.isPremium && seconds > Self.freeDurationSeconds
+    let composerOn = RemoteConfigService.shared.isComposedSoundsEnabled
+    return !storeManager.isPremium && seconds != Self.freeDurationSeconds(composerEnabled: composerOn)
   }
   
   var body: some View {
@@ -54,7 +67,7 @@ struct AlarmSettingsSection: View {
       // If a previously-premium user is now on free and lands on a gated value,
       // clamp down to the free tier so the saved alarm matches what's allowed.
       if isLocked(alarmDuration) {
-        alarmDuration = Self.freeDurationSeconds
+        alarmDuration = Self.freeDurationSeconds(composerEnabled: RemoteConfigService.shared.isComposedSoundsEnabled)
       }
     }
     .sheet(isPresented: $showingPremium) {

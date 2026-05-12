@@ -338,9 +338,13 @@ struct AlarmEditView: View {
     alarm.snoozeDurationSeconds = 0
     alarm.isEnabled = true
 
-    // Free tier is capped at 60s auto-stop; longer durations are premium-only.
-    if !StoreManager.shared.isPremium && draftAlarmDuration > 60 {
-      alarm.alarmDurationSeconds = 60
+    // Free tier gets exactly one duration: 15s when composer flag is on, 60s otherwise.
+    // Anything else collapses to the free value to keep saved alarms in sync with the
+    // tier even if the user found a way around the picker (e.g. flag toggled mid-session).
+    let composerOn = RemoteConfigService.shared.isComposedSoundsEnabled
+    let freeSeconds = AlarmSettingsSection.freeDurationSeconds(composerEnabled: composerOn)
+    if !StoreManager.shared.isPremium && draftAlarmDuration != freeSeconds {
+      alarm.alarmDurationSeconds = freeSeconds
     } else {
       alarm.alarmDurationSeconds = draftAlarmDuration
     }
@@ -359,9 +363,13 @@ struct AlarmEditView: View {
       Analytics.track(.alarmEdited(source: .manual))
     }
 
+    // Dismiss immediately. AlarmKit registration (which now includes off-main
+    // sound composition for the composed-sound path) continues in the background
+    // — the SwiftData write above is what the user cares about; the system-level
+    // scheduling is bookkeeping that shouldn't block the UI.
+    dismiss()
     Task {
       await alarmService.enable(alarm)
-      dismiss()
     }
   }
   

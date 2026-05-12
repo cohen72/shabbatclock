@@ -22,6 +22,7 @@
 		AAA00023 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00023 /* LocationManager.swift */; };
 		AAA00024 /* ZmanimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00024 /* ZmanimService.swift */; };
 		AAA00025 /* AlarmKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00025 /* AlarmKitService.swift */; };
+		AAA00099 /* AlarmSoundComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00099 /* AlarmSoundComposer.swift */; };
 		AAA00026 /* StopAlarmIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00026 /* StopAlarmIntent.swift */; };
 		AAA00027 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00027 /* StoreManager.swift */; };
 		AAA00030 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00030 /* Theme.swift */; };
@@ -108,6 +109,7 @@
 		BBB00023 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		BBB00024 /* ZmanimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZmanimService.swift; sourceTree = "<group>"; };
 		BBB00025 /* AlarmKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmKitService.swift; sourceTree = "<group>"; };
+		BBB00099 /* AlarmSoundComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundComposer.swift; sourceTree = "<group>"; };
 		BBB00026 /* StopAlarmIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopAlarmIntent.swift; sourceTree = "<group>"; };
 		BBB00027 /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
 		BBB00028 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
@@ -260,6 +262,7 @@
 			children = (
 				BBB00021 /* AudioManager.swift */,
 				BBB00025 /* AlarmKitService.swift */,
+				BBB00099 /* AlarmSoundComposer.swift */,
 				BBB00401 /* CustomSoundStore.swift */,
 				BBB00402 /* AudioRecordingManager.swift */,
 				BBB00405 /* CustomSoundDeletion.swift */,
@@ -537,6 +540,7 @@
 				AAA00406 /* CustomSoundsSettingsView.swift in Sources */,
 				AAA00021 /* AudioManager.swift in Sources */,
 				AAA00025 /* AlarmKitService.swift in Sources */,
+				AAA00099 /* AlarmSoundComposer.swift in Sources */,
 				AAA00026 /* StopAlarmIntent.swift in Sources */,
 				AAA00027 /* StoreManager.swift in Sources */,
 				AAANALY01 /* AnalyticsService.swift in Sources */,
@@ -593,7 +597,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widgets/widgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = widgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = widgets;
@@ -624,7 +628,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widgets/widgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = widgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = widgets;
@@ -779,7 +783,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ShabbatClock/ShabbatClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShabbatClock/Info.plist;
@@ -814,7 +818,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ShabbatClock/ShabbatClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShabbatClock/Info.plist;

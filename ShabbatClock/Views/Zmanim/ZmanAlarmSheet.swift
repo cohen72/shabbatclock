@@ -390,9 +390,13 @@ struct ZmanAlarmSheet: View {
         }
         #endif
 
-        // Free tier is capped at 60s auto-stop; longer durations are premium-only.
-        if !StoreManager.shared.isPremium && draftAlarmDuration > 60 {
-            alarm.alarmDurationSeconds = 60
+        // Free tier gets exactly one duration (15s when composer flag is on, 60s
+        // otherwise). Mirrors the clamp in AlarmEditView.commitSave so both creation
+        // paths agree on what the free tier allows.
+        let composerOn = RemoteConfigService.shared.isComposedSoundsEnabled
+        let freeSeconds = AlarmSettingsSection.freeDurationSeconds(composerEnabled: composerOn)
+        if !StoreManager.shared.isPremium && draftAlarmDuration != freeSeconds {
+            alarm.alarmDurationSeconds = freeSeconds
         } else {
             alarm.alarmDurationSeconds = draftAlarmDuration
         }
@@ -411,9 +415,13 @@ struct ZmanAlarmSheet: View {
             Analytics.track(.alarmEdited(source: .zman))
         }
 
+        // Dismiss immediately. AlarmKit registration (which now includes off-main
+        // sound composition for the composed-sound path) continues in the background
+        // — the SwiftData write above is what the user cares about; the system-level
+        // scheduling is bookkeeping that shouldn't block the UI.
+        dismiss()
         Task {
             await alarmService.enable(alarm)
-            dismiss()
         }
     }
 }

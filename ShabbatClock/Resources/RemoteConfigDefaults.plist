@@ -4,6 +4,8 @@
 <dict>
 	<key>ff_enable_zmanim_tab</key>
 	<string>false</string>
+	<key>ff_use_composed_sounds</key>
+	<string>false</string>
 	<key>free_alarm_limit</key>
 	<string>1</string>
 </dict>

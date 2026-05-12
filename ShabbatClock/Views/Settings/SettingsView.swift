@@ -496,7 +496,7 @@ struct SettingsView: View {
         }
     }
 
-    private static let defaultDurationOptions: [(String, Int)] = [
+    private static let baseDurationOptions: [(String, Int)] = [
         ("60 sec", 60),
         ("2 min", 120),
         ("3 min", 180),
@@ -504,12 +504,26 @@ struct SettingsView: View {
         ("5 min", 300),
     ]
 
+    /// 15s/30s are exposed only when the composed-sounds flag is on; the silencer
+    /// path can't honor sub-minute durations so we hide them in that mode.
+    private var defaultDurationOptions: [(String, Int)] {
+        var options: [(String, Int)] = []
+        if RemoteConfigService.shared.isComposedSoundsEnabled {
+            options.append(("15 sec", 15))
+            options.append(("30 sec", 30))
+        }
+        options.append(contentsOf: Self.baseDurationOptions)
+        return options
+    }
+
     private func isDurationLocked(_ seconds: Int) -> Bool {
-        !StoreManager.shared.isPremium && seconds > 60
+        let composerOn = RemoteConfigService.shared.isComposedSoundsEnabled
+        let freeSeconds = AlarmSettingsSection.freeDurationSeconds(composerEnabled: composerOn)
+        return !StoreManager.shared.isPremium && seconds != freeSeconds
     }
 
     private var defaultDurationLabel: String {
-        Self.defaultDurationOptions.first(where: { $0.1 == defaultAlarmDuration })?.0 ?? "60 sec"
+        defaultDurationOptions.first(where: { $0.1 == defaultAlarmDuration })?.0 ?? "60 sec"
     }
 
     private var defaultDurationRowContent: some View {
@@ -517,7 +531,7 @@ struct SettingsView: View {
             Text("Default Auto-Stop")
             Spacer()
             Menu {
-                ForEach(Self.defaultDurationOptions, id: \.1) { option in
+                ForEach(defaultDurationOptions, id: \.1) { option in
                     Button {
                         if isDurationLocked(option.1) {
                             showingPremium = true

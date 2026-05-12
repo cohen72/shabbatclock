@@ -23,6 +23,7 @@ struct DebugView: View {
 
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("debugSimulateFriday") private var simulateFriday = false
+    @AppStorage("debug.composedSoundsOverride") private var composedSoundsOverride: String = ComposedSoundsDebugOverride.useRemote.rawValue
 
     var body: some View {
         ZStack {
@@ -48,6 +49,9 @@ struct DebugView: View {
 
                     // AlarmKit State
                     alarmKitStateSection
+
+                    // Composed Sounds Override
+                    composedSoundsSection
 
                     // Actions
                     actionsSection
@@ -293,6 +297,15 @@ struct DebugView: View {
                 debugButton("Test 60s Sound (rings in 20s)") {
                     scheduleLongSoundTest()
                 }
+                debugButton("Test 15min Sound (rings in 20s)") {
+                    scheduleVeryLongSoundTest()
+                }
+                debugButton("Test 30min Sound (rings in 20s)") {
+                    scheduleTest30MinSoundTest()
+                }
+                debugButton("Test Composer (rings in 20s, 30s audible)") {
+                    scheduleComposedSoundTest()
+                }
                 if let status = testAlarmStatus {
                     stateRow("Test Alarm", value: status)
                 }
@@ -314,6 +327,122 @@ struct DebugView: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(Color.surfaceBorder, lineWidth: 0.5)
             )
+        }
+    }
+
+    // MARK: - Composed Sounds
+
+    /// Local override for the `ff_use_composed_sounds` Remote Config flag. Lets us
+    /// flip the composed-sounds path on/off in dev builds without touching Firebase.
+    /// Production users never see this — DEBUG only.
+    private var composedSoundsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Composed Sounds Flag", icon: "waveform.badge.plus")
+
+            VStack(spacing: 1) {
+                Picker("Override", selection: $composedSoundsOverride) {
+                    Text("Use Remote").tag(ComposedSoundsDebugOverride.useRemote.rawValue)
+                    Text("Force On").tag(ComposedSoundsDebugOverride.forceOn.rawValue)
+                    Text("Force Off").tag(ComposedSoundsDebugOverride.forceOff.rawValue)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 11)
+                .background(Color.surfaceCard)
+
+                stateRow(
+                    "Effective",
+                    value: RemoteConfigService.shared.isComposedSoundsEnabled ? "ON" : "OFF"
+                )
+                stateRow(
+                    "Remote value",
+                    value: RemoteConfigService.shared.useComposedSoundsRemote ? "true" : "false"
+                )
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
+        }
+    }
+
+    /// Composes a sound on the fly (Lecha Dodi melody, 30-second audible portion + silence
+    /// to 30 minutes total) and schedules an AlarmKit alarm 20 seconds out using the
+    /// composed file. End-to-end smoke test for the composer + AlarmKit integration.
+    ///
+    /// What to listen for:
+    /// - **First ~30s**: Lecha Dodi melody, fading out near the end
+    /// - **After 30s**: silence — alarm UI keeps showing alerting until you tap Stop
+    ///   or the system audio cap kicks in
+    /// - **iOS default chime**: composition or file resolution failed; check console
+    private func scheduleComposedSoundTest() {
+        let lechaDodi = AlarmSound.defaultSound
+        guard let sourceURL = Bundle.main.url(
+            forResource: "Sounds/\(lechaDodi.fileName)",
+            withExtension: lechaDodi.fileExtension
+        ) else {
+            testAlarmStatus = "Failed: source file not found in bundle"
+            return
+        }
+
+        let cacheKey = "debug_\(lechaDodi.fileName)_30s"
+        testAlarmStatus = "Composing…"
+
+        Task {
+            // Composition is CPU-bound; run off-main so the picker UI stays responsive.
+            let composedURL = await Task.detached(priority: .userInitiated) {
+                AlarmSoundComposer.compose(
+                    sourceURL: sourceURL,
+                    audibleDurationSeconds: 30,
+                    cacheKey: cacheKey
+                )
+            }.value
+
+            guard let composedURL else {
+                testAlarmStatus = "Failed: composer returned nil"
+                return
+            }
+
+            let fireDate = Date().addingTimeInterval(20)
+            let schedule = AlarmKit.Alarm.Schedule.fixed(fireDate)
+
+            let stopButton = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.fill")
+            let alert = AlarmPresentation.Alert(
+                title: "Composer Test (30s audible)",
+                stopButton: stopButton
+            )
+            let presentation = AlarmPresentation(alert: alert)
+
+            let metadata = ShabbatAlarmMetadata(
+                label: "Composer Test",
+                isShabbatAlarm: false,
+                soundCategory: "Test"
+            )
+
+            let alertSound: ActivityKit.AlertConfiguration.AlertSound = .named(composedURL.lastPathComponent)
+
+            let id = UUID()
+            let config = AlarmManager.AlarmConfiguration(
+                countdownDuration: nil,
+                schedule: schedule,
+                attributes: AlarmAttributes<ShabbatAlarmMetadata>(
+                    presentation: presentation,
+                    metadata: metadata,
+                    tintColor: .accentPurple
+                ),
+                stopIntent: StopAlarmIntent(alarmID: id),
+                sound: alertSound
+            )
+
+            do {
+                _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
+                let attrs = try? FileManager.default.attributesOfItem(atPath: composedURL.path)
+                let size = (attrs?[.size] as? Int).map { "\($0 / 1024) KB" } ?? "?"
+                testAlarmStatus = "Rings in 20s · composed file \(size) · \(composedURL.lastPathComponent)"
+            } catch {
+                testAlarmStatus = "Failed: \(error.localizedDescription)"
+            }
         }
     }
 
@@ -359,6 +488,109 @@ struct DebugView: View {
             do {
                 _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
                 testAlarmStatus = "Rings in 20s · TestTone60 (60s pulsing tone)"
+            } catch {
+                testAlarmStatus = "Failed: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    /// Schedules a raw AlarmKit alarm 20 seconds from now using TestTone15min.m4a (a
+    /// 15-minute pulsing tone). Tests whether iOS will play a custom alert sound longer
+    /// than the documented 30-second cap, or whether it falls back to the iOS default.
+    ///
+    /// What to listen for:
+    /// - **Plays full 15 min of pulsing**: 30s cap is not enforced for AlarmKit (great).
+    ///   We could craft sounds that go silent before the alarm-state ends.
+    /// - **Plays ~30s of pulsing then iOS default chime**: cap enforced as documented.
+    /// - **Plays ~30s then silence (alarm UI stays up)**: cap enforced, file is truncated.
+    /// - **iOS default chime from t=0**: file rejected outright before playback.
+    private func scheduleVeryLongSoundTest() {
+        let fireDate = Date().addingTimeInterval(20)
+        let schedule = AlarmKit.Alarm.Schedule.fixed(fireDate)
+
+        let stopButton = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.fill")
+        let alert = AlarmPresentation.Alert(
+            title: "Sound Duration Test (15 min)",
+            stopButton: stopButton
+        )
+        let presentation = AlarmPresentation(alert: alert)
+
+        let metadata = ShabbatAlarmMetadata(
+            label: "Sound Duration Test (15 min)",
+            isShabbatAlarm: false,
+            soundCategory: "Test"
+        )
+
+        let alertSound: ActivityKit.AlertConfiguration.AlertSound = .named("Sounds/TestTone15min.m4a")
+
+        let id = UUID()
+        let config = AlarmManager.AlarmConfiguration(
+            countdownDuration: nil,
+            schedule: schedule,
+            attributes: AlarmAttributes<ShabbatAlarmMetadata>(
+                presentation: presentation,
+                metadata: metadata,
+                tintColor: .accentPurple
+            ),
+            stopIntent: StopAlarmIntent(alarmID: id),
+            sound: alertSound
+        )
+
+        Task {
+            do {
+                _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
+                testAlarmStatus = "Rings in 20s · TestTone15min (15-min pulsing tone)"
+            } catch {
+                testAlarmStatus = "Failed: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    /// Schedules a raw AlarmKit alarm 20 seconds from now using test30Tone.m4a (a
+    /// ~30-minute tone). Probes whether AlarmKit will play sound files longer than the
+    /// 15-minute mark we observed previously, or whether the system imposes its own
+    /// audio cap before the file ends.
+    ///
+    /// What to listen for:
+    /// - **Plays well past 15 min**: file length is the limit, not a system cap.
+    /// - **Audio stops at ~15 min, UI keeps alerting**: system audio cap, independent of file.
+    /// - **Audio stops earlier (e.g. ~30s) then default/silence**: stricter cap than expected.
+    private func scheduleTest30MinSoundTest() {
+        let fireDate = Date().addingTimeInterval(20)
+        let schedule = AlarmKit.Alarm.Schedule.fixed(fireDate)
+
+        let stopButton = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.fill")
+        let alert = AlarmPresentation.Alert(
+            title: "Sound Duration Test (30 min)",
+            stopButton: stopButton
+        )
+        let presentation = AlarmPresentation(alert: alert)
+
+        let metadata = ShabbatAlarmMetadata(
+            label: "Sound Duration Test (30 min)",
+            isShabbatAlarm: false,
+            soundCategory: "Test"
+        )
+
+        let alertSound: ActivityKit.AlertConfiguration.AlertSound = .named("Sounds/test30Tone.m4a")
+
+        let id = UUID()
+        let config = AlarmManager.AlarmConfiguration(
+            countdownDuration: nil,
+            schedule: schedule,
+            attributes: AlarmAttributes<ShabbatAlarmMetadata>(
+                presentation: presentation,
+                metadata: metadata,
+                tintColor: .accentPurple
+            ),
+            stopIntent: StopAlarmIntent(alarmID: id),
+            sound: alertSound
+        )
+
+        Task {
+            do {
+                _ = try await AlarmManager.shared.schedule(id: id, configuration: config)
+                testAlarmStatus = "Rings in 20s · test30Tone (30-min tone)"
             } catch {
                 testAlarmStatus = "Failed: \(error.localizedDescription)"
             }

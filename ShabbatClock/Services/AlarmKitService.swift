@@ -87,7 +87,38 @@ final class AlarmKitService: NSObject {
             syncAllAlarms()
         }
 
+        pruneOrphanedComposedSounds()
         updateNextAlarmDate()
+    }
+
+    /// Walk the App Group's `ComposedSounds/` directory and delete any composed file
+    /// whose cache key isn't referenced by a currently-stored alarm. Catches files left
+    /// behind when an alarm is deleted, when its sound/duration changes, or when the
+    /// flag was toggled off and the file is no longer in use.
+    private func pruneOrphanedComposedSounds() {
+        guard let modelContext else { return }
+        guard let alarms = try? modelContext.fetch(FetchDescriptor<Alarm>()) else { return }
+
+        var activeKeys: Set<String> = []
+        for alarm in alarms where alarm.isEnabled {
+            guard let key = composedCacheKey(for: alarm) else { continue }
+            activeKeys.insert(key)
+        }
+        AlarmSoundComposer.pruneOrphans(activeCacheKeys: activeKeys)
+    }
+
+    /// Compute the cache key the composer would use for a given alarm.
+    /// Mirrors the logic in `composeSound(for:sound:)` — kept in sync so prune
+    /// doesn't accidentally delete files still in use.
+    private func composedCacheKey(for alarm: Alarm) -> String? {
+        let durationSec = alarm.alarmDurationSeconds
+        guard durationSec > 0 else { return nil }
+        if let customFileName = AlarmSound.customFileName(from: alarm.soundName),
+           CustomSoundStore.fileExists(fileName: customFileName) {
+            return "custom_\(customFileName)_\(durationSec)s"
+        }
+        let sound = AlarmSound.sound(named: alarm.soundName) ?? AlarmSound.defaultSound
+        return "bundled_\(sound.fileName)_\(durationSec)s"
     }
 
     /// Ensure `@AppStorage("defaultSound")` doesn't point at a missing custom recording.
@@ -294,11 +325,27 @@ final class AlarmKitService: NSObject {
         alarmsBeingScheduled.insert(alarm.id)
         defer { alarmsBeingScheduled.remove(alarm.id) }
 
+        // Yield once before doing any synchronous AlarmKit work. AlarmManager.cancel
+        // is a synchronous XPC round-trip with alarmsd that can take a noticeable
+        // chunk of time; if the caller dismissed a sheet right before invoking us,
+        // this yield lets SwiftUI render that dismiss before we block the MainActor.
+        await Task.yield()
+
         // Clear any prior state — prior AlarmKit alarm and silencer alarm.
-        if let priorID = alarm.alarmKitID {
-            try? AlarmManager.shared.cancel(id: priorID)
+        // These are sync XPC calls; run them off-main so the MainActor stays free.
+        let priorAlarmKitID = alarm.alarmKitID
+        let priorSilencerID = alarm.silencerAlarmKitID
+        await Task.detached(priority: .userInitiated) {
+            if let priorAlarmKitID {
+                try? AlarmManager.shared.cancel(id: priorAlarmKitID)
+            }
+            if let priorSilencerID {
+                try? AlarmManager.shared.cancel(id: priorSilencerID)
+            }
+        }.value
+        if alarm.silencerAlarmKitID != nil {
+            alarm.silencerAlarmKitID = nil
         }
-        cancelSilencerIfAny(for: alarm)
 
         alarm.isEnabled = true
 
@@ -365,11 +412,32 @@ final class AlarmKitService: NSObject {
             return nil
         }
 
-        // Cancel existing AlarmKit alarm if re-scheduling
-        if let existingID = alarm.alarmKitID {
-            try? AlarmManager.shared.cancel(id: existingID)
+        // Sub-minute durations (15s, 30s) are only honor-able by the composed-sound
+        // path. If the flag is off — including the case where it was on when the
+        // alarm was created and has since been flipped off — bump the saved duration
+        // up to the silencer's minimum so the alarm still rings reliably (longer than
+        // the user wanted, but never silent or broken).
+        if !RemoteConfigService.shared.isComposedSoundsEnabled,
+           alarm.alarmDurationSeconds < 60 {
+            print("[AlarmKitService] Flag off — bumping sub-minute duration \(alarm.alarmDurationSeconds)s up to 60s for silencer compatibility ('\(alarm.label)')")
+            alarm.alarmDurationSeconds = 60
         }
-        cancelSilencerIfAny(for: alarm)
+
+        // Cancel existing AlarmKit alarm if re-scheduling. AlarmManager.cancel is a
+        // synchronous XPC round-trip; run off-main so we don't block the UI thread.
+        let existingID = alarm.alarmKitID
+        let existingSilencerID = alarm.silencerAlarmKitID
+        if existingID != nil || existingSilencerID != nil {
+            await Task.detached(priority: .userInitiated) {
+                if let existingID {
+                    try? AlarmManager.shared.cancel(id: existingID)
+                }
+                if let existingSilencerID {
+                    try? AlarmManager.shared.cancel(id: existingSilencerID)
+                }
+            }.value
+            alarm.silencerAlarmKitID = nil
+        }
 
         let alarmKitID = UUID()
 
@@ -443,10 +511,29 @@ final class AlarmKitService: NSObject {
         // alarm (scheduled separately at fireTime + alarmDurationSeconds).
         let duration: AlarmKit.Alarm.CountdownDuration? = nil
 
-        // Build sound — bundled sound uses "Sounds/..." prefix;
-        // user-recorded sounds live in the App Group and use a bare filename.
+        // Decide architecture: composed-sound (single AlarmKit alarm with audible portion
+        // followed by silence) vs. silencer (paired alarm). When the flag is on we attempt
+        // composition; if anything fails we fall back to the silencer path so the alarm
+        // is still scheduled and audible.
+        //
+        // Composition is dispatched off the main actor — AVAssetReader/Writer for a 30-min
+        // file takes 1-3 seconds, which would otherwise stall the UI thread that called
+        // scheduleAlarm (typically Save in AlarmEditView).
+        let useComposed = RemoteConfigService.shared.isComposedSoundsEnabled
+        let composedSoundURL: URL? = await { () async -> URL? in
+            guard useComposed else { return nil }
+            return await composeSoundOffMain(for: alarm, sound: sound)
+        }()
+
+        // Build sound. Three paths:
+        //   1. Composed sound (flag on, composition succeeded) — bare filename,
+        //      AlarmKit resolves it from the App Group's ComposedSounds dir.
+        //   2. Custom recording — bare filename in the App Group's Sounds dir.
+        //   3. Bundled sound — "Sounds/..." prefix, resolved from main bundle.
         let alertSound: ActivityKit.AlertConfiguration.AlertSound
-        if let customFileName = AlarmSound.customFileName(from: alarm.soundName),
+        if let composedURL = composedSoundURL {
+            alertSound = .named(composedURL.lastPathComponent)
+        } else if let customFileName = AlarmSound.customFileName(from: alarm.soundName),
            CustomSoundStore.fileExists(fileName: customFileName) {
             alertSound = .named(CustomSoundStore.alertSoundName(for: customFileName))
         } else if let sound {
@@ -458,16 +545,32 @@ final class AlarmKitService: NSObject {
             alertSound = .default
         }
 
-        // Schedule the silencer FIRST so we can bake its ID into the main alarm's
-        // StopAlarmIntent. When the user slides Stop, iOS runs the intent directly
-        // (even if our app is suspended) and the intent cancels both alarms — no
-        // ghost silencer firing seconds later.
-        let silencerID = await scheduleSilencerAlarm(for: alarm, mainAlarmHour: alarm.hour, mainAlarmMinute: alarm.minute)
-        if silencerID == nil {
-            // Main alarm will be scheduled below, but with no silencer → no auto-stop.
-            // Logged loudly so we can diagnose if it ever happens.
-            print("[AlarmKitService] 🚨 Alarm '\(alarm.label)' scheduled WITHOUT a silencer — will ring until manually stopped")
+        // Silencer scheduling: skipped when composition succeeded — the silent tail
+        // built into the composed file IS the auto-stop. For composition failure or
+        // flag-off, fall through to the existing silencer path.
+        let silencerID: UUID?
+        if composedSoundURL != nil {
+            silencerID = nil
+        } else {
+            // Schedule the silencer FIRST so we can (for one-time alarms) bake its ID
+            // into the main alarm's StopAlarmIntent. When the user slides Stop, iOS
+            // runs the intent directly (even if our app is suspended) and the intent
+            // cancels both alarms — no ghost silencer firing seconds later.
+            silencerID = await scheduleSilencerAlarm(for: alarm, mainAlarmHour: alarm.hour, mainAlarmMinute: alarm.minute)
+            if silencerID == nil {
+                // Main alarm will be scheduled below, but with no silencer → no auto-stop.
+                // Logged loudly so we can diagnose if it ever happens.
+                print("[AlarmKitService] 🚨 Alarm '\(alarm.label)' scheduled WITHOUT a silencer — will ring until manually stopped")
+            }
         }
+
+        // CRITICAL: only bake the silencer ID into the intent for ONE-TIME alarms.
+        // For recurring alarms, the silencer is also recurring (e.g. every Saturday).
+        // If the intent cancels it, it's cancelled forever — next week's silencer
+        // never fires. The "ghost silencer minute later" UX is the price we pay for
+        // reliability week-over-week. (For one-time alarms, cancellation is correct
+        // because both main and silencer are single-shot anyway.)
+        let intentSilencerID: UUID? = alarm.repeatDays.isEmpty ? silencerID : nil
 
         let config = AlarmManager.AlarmConfiguration(
             countdownDuration: duration,
@@ -477,7 +580,7 @@ final class AlarmKitService: NSObject {
                 metadata: metadata,
                 tintColor: .accentPurple
             ),
-            stopIntent: StopAlarmIntent(alarmID: alarmKitID, silencerID: silencerID),
+            stopIntent: StopAlarmIntent(alarmID: alarmKitID, silencerID: intentSilencerID),
             sound: alertSound
         )
 
@@ -493,6 +596,55 @@ final class AlarmKitService: NSObject {
             print("[AlarmKitService] Failed to schedule alarm: \(error)")
             return nil
         }
+    }
+
+    /// Resolve the source sound URL (bundled or custom recording) and run the
+    /// composer to produce a 30-min file with an audible portion of `alarmDurationSeconds`
+    /// followed by silence. Returns nil on any failure — caller falls back to silencer.
+    ///
+    /// Cache key includes a sound identifier + duration so multiple alarms sharing
+    /// the same melody+duration share one composed file on disk.
+    ///
+    /// Composition is dispatched to a detached task to keep the main actor responsive;
+    /// inputs are resolved on the main actor first to avoid shipping the SwiftData
+    /// model across actor boundaries.
+    private func composeSoundOffMain(for alarm: Alarm, sound: AlarmSound?) async -> URL? {
+        let durationSec = alarm.alarmDurationSeconds
+        guard durationSec > 0 else { return nil }
+
+        // Resolve source URL on main actor.
+        let sourceURL: URL?
+        let sourceID: String
+        if let customFileName = AlarmSound.customFileName(from: alarm.soundName),
+           CustomSoundStore.fileExists(fileName: customFileName) {
+            sourceURL = CustomSoundStore.url(for: customFileName)
+            sourceID = "custom_\(customFileName)"
+        } else if let sound {
+            sourceURL = Bundle.main.url(
+                forResource: "Sounds/\(sound.fileName)",
+                withExtension: sound.fileExtension
+            )
+            sourceID = "bundled_\(sound.fileName)"
+        } else {
+            return nil
+        }
+
+        guard let sourceURL else {
+            print("[AlarmKitService] ⚠️ composeSoundOffMain: source URL not resolvable for '\(alarm.label)'")
+            return nil
+        }
+
+        let cacheKey = "\(sourceID)_\(durationSec)s"
+
+        // AVAssetReader/Writer is CPU-bound for a few hundred ms to a few seconds;
+        // dispatch off-main so the caller (scheduleAlarm) doesn't block the UI thread.
+        return await Task.detached(priority: .userInitiated) {
+            AlarmSoundComposer.compose(
+                sourceURL: sourceURL,
+                audibleDurationSeconds: durationSec,
+                cacheKey: cacheKey
+            )
+        }.value
     }
 
     /// Schedule a silent AlarmKit alarm that fires `alarmDurationSeconds` after the main
