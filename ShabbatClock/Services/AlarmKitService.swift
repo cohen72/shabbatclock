@@ -736,7 +736,7 @@ final class AlarmKitService: NSObject {
                 metadata: metadata,
                 tintColor: .accentPurple
             ),
-            stopIntent: StopAlarmIntent(alarmID: silencerID),
+            stopIntent: StopAlarmIntent(alarmID: silencerID, isSilencer: true),
             sound: alertSound
         )
 
@@ -779,7 +779,16 @@ final class AlarmKitService: NSObject {
         let storedIDs: Set<UUID>
         do {
             let alarms = try modelContext.fetch(FetchDescriptor<Alarm>())
-            storedIDs = Set(alarms.compactMap { $0.alarmKitID })
+            // Include BOTH the main alarm ID and the silencer ID. Earlier versions of
+            // this function only collected `alarmKitID`, which meant every recurring
+            // silencer was seen as an orphan and cancelled on launch — and worse, any
+            // silencer that did survive (because of timing or auth state) would have
+            // no parent to mark it as "ours" if the parent had since been deleted or
+            // re-scheduled with a new UUID. Result: zombie weekly silencers that fire
+            // with no way to dismiss them permanently.
+            storedIDs = Set(alarms.flatMap { alarm -> [UUID] in
+                [alarm.alarmKitID, alarm.silencerAlarmKitID].compactMap { $0 }
+            })
         } catch {
             print("[AlarmKitService] Reconcile: failed to fetch stored alarms: \(error)")
             return
@@ -793,6 +802,45 @@ final class AlarmKitService: NSObject {
         }
 
         print("[AlarmKitService] Reconcile: cancelled \(orphaned.count) orphaned alarm(s)")
+    }
+
+    /// Nuclear cleanup: cancel every AlarmKit alarm currently registered with
+    /// alarmsd, regardless of whether SwiftData knows about it. Then clear the
+    /// SwiftData ID fields so the next launch/sync starts from a clean slate.
+    /// Intended for emergency recovery from zombie alarms — exposed via DebugView.
+    @discardableResult
+    func cancelAllSystemAlarms() -> Int {
+        let alarms: [AlarmKit.Alarm]
+        do {
+            alarms = try AlarmManager.shared.alarms
+        } catch {
+            print("[AlarmKitService] cancelAllSystemAlarms: failed to fetch system alarms: \(error)")
+            return 0
+        }
+        var cancelled = 0
+        for alarm in alarms {
+            do {
+                try AlarmManager.shared.cancel(id: alarm.id)
+                cancelled += 1
+            } catch {
+                print("[AlarmKitService] cancelAllSystemAlarms: failed to cancel \(alarm.id): \(error)")
+            }
+        }
+        // Clear stale UUID references in SwiftData so the next sync re-schedules
+        // from scratch rather than thinking it's already done.
+        if let modelContext {
+            if let stored = try? modelContext.fetch(FetchDescriptor<Alarm>()) {
+                for alarm in stored {
+                    alarm.alarmKitID = nil
+                    alarm.silencerAlarmKitID = nil
+                }
+                try? modelContext.save()
+            }
+        }
+        activeAlarms = []
+        updateNextAlarmDate()
+        print("[AlarmKitService] 🔥 Cancelled \(cancelled) system alarm(s) — SwiftData IDs cleared")
+        return cancelled
     }
 
     /// Sync all enabled SwiftData alarms to AlarmKit.

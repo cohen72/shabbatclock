@@ -1,5 +1,6 @@
 #if DEBUG
 import SwiftUI
+import SwiftData
 import AlarmKit
 import ActivityKit
 import CoreLocation
@@ -12,12 +13,23 @@ struct DebugView: View {
     @StateObject private var locationManager = LocationManager.shared
     @ObservedObject private var storeManager = StoreManager.shared
 
+    /// Live snapshot of every SwiftData Alarm row — used by the diagnostics section
+    /// to cross-reference against what alarmsd actually has scheduled.
+    @Query(sort: \Alarm.hour) private var storedAlarms: [Alarm]
+
+    /// Manually-refreshed snapshot of `AlarmManager.shared.alarms`. Not live —
+    /// the debug Refresh button repopulates it, plus on-appear.
+    @State private var systemAlarmsSnapshot: [AlarmKit.Alarm] = []
+    @State private var diagnosticsRefreshError: String?
+
     @State private var showingLocationPrompt = false
     @State private var showingAlarmPrompt = false
     @State private var showingNotificationPrompt = false
     @State private var showingOnboarding = false
     @State private var showingShabbatChecklist = false
     @State private var testAlarmStatus: String?
+    @State private var showingNukeConfirmation = false
+    @State private var nukeStatus: String?
 
     @Environment(\.dismiss) private var dismiss
 
@@ -49,6 +61,9 @@ struct DebugView: View {
 
                     // AlarmKit State
                     alarmKitStateSection
+
+                    // Alarm Diagnostics — system vs SwiftData cross-reference
+                    alarmDiagnosticsSection
 
                     // Composed Sounds Override
                     composedSoundsSection
@@ -96,6 +111,19 @@ struct DebugView: View {
         .sheet(isPresented: $showingShabbatChecklist) {
             ShabbatChecklistView()
                 .applyLanguageOverride(AppLanguage.current)
+        }
+        .alert("Cancel ALL AlarmKit alarms?", isPresented: $showingNukeConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Cancel All", role: .destructive) {
+                let count = alarmService.cancelAllSystemAlarms()
+                nukeStatus = "Cancelled \(count) system alarm(s)"
+                refreshSystemAlarmsSnapshot()
+            }
+        } message: {
+            Text("This cancels every AlarmKit alarm currently scheduled with iOS, including any orphans. SwiftData alarm rows remain but their alarmKitID/silencerAlarmKitID fields are cleared. Enabled alarms will re-schedule via the next sync.")
+        }
+        .onAppear {
+            refreshSystemAlarmsSnapshot()
         }
     }
 
@@ -267,12 +295,47 @@ struct DebugView: View {
 
             VStack(spacing: 1) {
                 stateRow("Authorized", value: alarmService.isAuthorized ? "Yes" : "No")
-                stateRow("Active Alarms", value: "\(alarmService.activeAlarms.count)")
+                stateRow("Observed alerting", value: "\(alarmService.activeAlarms.count)")
                 stateRow("Next Alarm", value: alarmService.nextAlarmDate.map { dateString($0) } ?? "None")
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
+        }
+    }
 
-                if !alarmService.activeAlarms.isEmpty {
-                    ForEach(alarmService.activeAlarms, id: \.id) { alarm in
-                        stateRow("  \(alarm.id.uuidString.prefix(8))...", value: "\(alarm.state)")
+    // MARK: - Alarm Diagnostics (system vs SwiftData)
+
+    /// Comprehensive cross-reference between what `alarmsd` thinks is scheduled
+    /// (via `AlarmManager.shared.alarms`) and what our SwiftData layer believes.
+    /// Mismatches here are the ground truth for zombie/orphan alarm hunting.
+    private var alarmDiagnosticsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                SectionHeader(title: "Alarm Diagnostics", icon: "stethoscope")
+                Spacer()
+                Button {
+                    refreshSystemAlarmsSnapshot()
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.goldAccent)
+                }
+            }
+
+            // System (alarmsd) section
+            VStack(spacing: 1) {
+                stateRow("System alarms (alarmsd)", value: "\(systemAlarmsSnapshot.count)")
+                if let err = diagnosticsRefreshError {
+                    stateRow("Refresh error", value: err)
+                }
+                if systemAlarmsSnapshot.isEmpty {
+                    stateRow("(empty)", value: "—")
+                } else {
+                    ForEach(systemAlarmsSnapshot, id: \.id) { systemAlarm in
+                        systemAlarmRow(systemAlarm)
                     }
                 }
             }
@@ -281,6 +344,114 @@ struct DebugView: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(Color.surfaceBorder, lineWidth: 0.5)
             )
+
+            // SwiftData section
+            VStack(spacing: 1) {
+                stateRow("SwiftData alarms", value: "\(storedAlarms.count)")
+                if storedAlarms.isEmpty {
+                    stateRow("(empty)", value: "—")
+                } else {
+                    ForEach(storedAlarms, id: \.id) { alarm in
+                        storedAlarmRow(alarm)
+                    }
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
+
+            // Nuclear cleanup
+            VStack(spacing: 1) {
+                debugButton("🔥 Cancel ALL system alarms") {
+                    showingNukeConfirmation = true
+                }
+                if let status = nukeStatus {
+                    stateRow("Last nuke", value: status)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
+        }
+    }
+
+    private func systemAlarmRow(_ systemAlarm: AlarmKit.Alarm) -> some View {
+        let role = classifyRole(of: systemAlarm.id)
+        let schedule = scheduleDescription(systemAlarm.schedule)
+        let stateText = "\(systemAlarm.state)"
+        let idShort = systemAlarm.id.uuidString.prefix(8)
+        let valueText = "\(stateText) · \(schedule)"
+        return stateRow("[\(role)] \(idShort)…", value: valueText)
+    }
+
+    private func storedAlarmRow(_ alarm: Alarm) -> some View {
+        let mainID = alarm.alarmKitID.map { $0.uuidString.prefix(8) + "…" } ?? "nil"
+        let silencerID = alarm.silencerAlarmKitID.map { $0.uuidString.prefix(8) + "…" } ?? "nil"
+        let enabledMark = alarm.isEnabled ? "●" : "○"
+        let label = "\(enabledMark) \(alarm.label) \(alarm.hour):\(String(format: "%02d", alarm.minute))"
+        let value = "main=\(mainID) silencer=\(silencerID)"
+        return stateRow(label, value: value)
+    }
+
+    /// Map a system-alarm UUID to a human-readable role:
+    /// "MAIN: <label>" — found as `alarmKitID` on a SwiftData row
+    /// "SILENCER: <label>" — found as `silencerAlarmKitID` on a SwiftData row
+    /// "ORPHAN" — no SwiftData row references this UUID (zombie alarm — the bug class)
+    private func classifyRole(of id: UUID) -> String {
+        if let mainOwner = storedAlarms.first(where: { $0.alarmKitID == id }) {
+            return "MAIN: \(mainOwner.label)"
+        }
+        if let silencerOwner = storedAlarms.first(where: { $0.silencerAlarmKitID == id }) {
+            return "SILENCER: \(silencerOwner.label)"
+        }
+        return "⚠️ ORPHAN"
+    }
+
+    /// Human-readable summary of an AlarmKit schedule (fixed date or recurring weekly).
+    private func scheduleDescription(_ schedule: AlarmKit.Alarm.Schedule?) -> String {
+        guard let schedule else { return "no schedule" }
+        switch schedule {
+        case .fixed(let date):
+            return "fixed \(dateString(date))"
+        case .relative(let relative):
+            let time = String(format: "%02d:%02d", relative.time.hour, relative.time.minute)
+            switch relative.repeats {
+            case .never:
+                return "relative \(time) once"
+            case .weekly(let days):
+                let dayList = days.map { shortName(of: $0) }.joined(separator: ",")
+                return "weekly \(time) [\(dayList)]"
+            @unknown default:
+                return "relative \(time) ?"
+            }
+        @unknown default:
+            return "unknown schedule"
+        }
+    }
+
+    private func shortName(of weekday: Locale.Weekday) -> String {
+        switch weekday {
+        case .sunday: return "Su"
+        case .monday: return "Mo"
+        case .tuesday: return "Tu"
+        case .wednesday: return "We"
+        case .thursday: return "Th"
+        case .friday: return "Fr"
+        case .saturday: return "Sa"
+        @unknown default: return "?"
+        }
+    }
+
+    private func refreshSystemAlarmsSnapshot() {
+        do {
+            systemAlarmsSnapshot = try AlarmManager.shared.alarms
+            diagnosticsRefreshError = nil
+        } catch {
+            diagnosticsRefreshError = error.localizedDescription
         }
     }
 
