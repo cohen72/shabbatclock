@@ -8,6 +8,7 @@ final class RemoteConfigService: ObservableObject {
     @Published private(set) var isZmanimTabEnabled: Bool = false
     @Published private(set) var freeAlarmLimit: Int = RemoteConfigService.freeAlarmLimitDefault
     @Published private(set) var useComposedSoundsRemote: Bool = false
+    @Published private(set) var useNotificationEngineRemote: Bool = false
 
     fileprivate static let freeAlarmLimitDefault = 1
     fileprivate static let freeAlarmLimitRange = 1...10
@@ -23,6 +24,21 @@ final class RemoteConfigService: ObservableObject {
         }
         #else
         return useComposedSoundsRemote
+        #endif
+    }
+
+    /// Resolved flag: when true, alarms schedule via local notifications (burst of
+    /// time-sensitive UNNotifications) instead of AlarmKit. Debug override wins in
+    /// DEBUG builds.
+    var isNotificationEngineEnabled: Bool {
+        #if DEBUG
+        switch AlarmEngineDebugOverride.current {
+        case .forceNotifications: return true
+        case .forceAlarmKit: return false
+        case .useRemote: return useNotificationEngineRemote
+        }
+        #else
+        return useNotificationEngineRemote
         #endif
     }
 
@@ -71,6 +87,7 @@ final class RemoteConfigService: ObservableObject {
     private func republishFlags() {
         isZmanimTabEnabled = remoteConfig[Flag.zmanimTab.rawValue].boolValue
         useComposedSoundsRemote = remoteConfig[Flag.useComposedSounds.rawValue].boolValue
+        useNotificationEngineRemote = remoteConfig[Flag.useNotificationEngine.rawValue].boolValue
 
         let raw = remoteConfig[Flag.freeAlarmLimit.rawValue].numberValue.intValue
         freeAlarmLimit = Self.freeAlarmLimitRange.contains(raw) ? raw : Self.freeAlarmLimitDefault
@@ -79,6 +96,7 @@ final class RemoteConfigService: ObservableObject {
     enum Flag: String {
         case zmanimTab = "ff_enable_zmanim_tab"
         case useComposedSounds = "ff_use_composed_sounds"
+        case useNotificationEngine = "ff_use_notification_engine"
         case freeAlarmLimit = "free_alarm_limit"
     }
 }
@@ -98,6 +116,25 @@ enum ComposedSoundsDebugOverride: String {
         get {
             let raw = UserDefaults.standard.string(forKey: key) ?? ""
             return ComposedSoundsDebugOverride(rawValue: raw) ?? .useRemote
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: key)
+        }
+    }
+}
+
+/// Local override for the alarm-engine flag (AlarmKit vs notifications), DEBUG only.
+enum AlarmEngineDebugOverride: String {
+    case useRemote
+    case forceAlarmKit
+    case forceNotifications
+
+    private static let key = "debug.alarmEngineOverride"
+
+    static var current: AlarmEngineDebugOverride {
+        get {
+            let raw = UserDefaults.standard.string(forKey: key) ?? ""
+            return AlarmEngineDebugOverride(rawValue: raw) ?? .useRemote
         }
         set {
             UserDefaults.standard.set(newValue.rawValue, forKey: key)

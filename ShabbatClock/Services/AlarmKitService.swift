@@ -26,10 +26,15 @@ final class AlarmKitService: NSObject {
     private(set) var activeAlarms: [AlarmKit.Alarm] = []
     private(set) var nextAlarmDate: Date?
 
-    /// Whether the user has been prompted for AlarmKit authorization at least once.
+    /// Whether the user has been prompted for the active engine's authorization.
+    /// AlarmKit: reads its authorizationState. Notification engine: approximated as
+    /// "authorized or explicitly denied" (i.e. not still .notDetermined), derived from
+    /// the notification permission flags we refresh on launch/foreground.
     var hasBeenAskedForAuthorization: Bool {
-        // If state is not .notDetermined, user has been asked
-        AlarmManager.shared.authorizationState != .notDetermined
+        if RemoteConfigService.shared.isNotificationEngineEnabled {
+            return isNotificationAuthorized || isNotificationDenied
+        }
+        return AlarmManager.shared.authorizationState != .notDetermined
     }
 
     private var modelContext: ModelContext?
@@ -82,7 +87,19 @@ final class AlarmKitService: NSObject {
 
         validateDefaultSoundPreference()
 
-        if isAuthorized {
+        if RemoteConfigService.shared.isNotificationEngineEnabled {
+            // Notification engine: re-arm the rolling window of notifications and mirror
+            // notification permission into isAuthorized once we've read it.
+            let context = modelContext // the non-optional parameter
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                Task { @MainActor in
+                    self.isAuthorized = settings.authorizationStatus == .authorized
+                    self.isAlarmDenied = settings.authorizationStatus == .denied
+                    await NotificationAlarmEngine.shared.syncAll(modelContext: context)
+                    self.updateNextAlarmDate()
+                }
+            }
+        } else if isAuthorized {
             reconcileOrphanedAlarms()
             syncAllAlarms()
         }
@@ -143,8 +160,21 @@ final class AlarmKitService: NSObject {
 
     // MARK: - Authorization
 
-    /// Request AlarmKit permission. Call contextually (e.g., when user creates first alarm), not at launch.
+    /// Request the permission the active engine needs. In notification-engine mode
+    /// that's notification permission; otherwise AlarmKit authorization. Call
+    /// contextually (e.g., when user creates first alarm), not at launch.
     func requestAuthorization() async {
+        if RemoteConfigService.shared.isNotificationEngineEnabled {
+            // Notification engine: the "alarm permission" IS notification permission.
+            await requestNotificationAuthorization()
+            // Mirror into isAuthorized so shared UI (banners, save gates) reflects it.
+            isAuthorized = isNotificationAuthorized
+            isAlarmDenied = isNotificationDenied
+            if isNotificationAuthorized {
+                syncAllAlarms()
+            }
+            return
+        }
         do {
             let state = try await AlarmManager.shared.requestAuthorization()
             isAuthorized = state == .authorized
@@ -174,6 +204,23 @@ final class AlarmKitService: NSObject {
     /// in iOS Settings. `authorizationUpdates` is not reliable while the app is
     /// backgrounded, so this is the authoritative path after a Settings round-trip.
     func refreshAlarmAuthorization() {
+        // Notification engine: "alarm" authorization mirrors notification permission.
+        if RemoteConfigService.shared.isNotificationEngineEnabled {
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                Task { @MainActor in
+                    let wasAuthorized = self.isAuthorized
+                    self.isAuthorized = settings.authorizationStatus == .authorized
+                    self.isAlarmDenied = settings.authorizationStatus == .denied
+                    self.isNotificationAuthorized = settings.authorizationStatus == .authorized
+                    self.isNotificationDenied = settings.authorizationStatus == .denied
+                    if !wasAuthorized && self.isAuthorized {
+                        self.syncAllAlarms()
+                    }
+                }
+            }
+            return
+        }
+
         let state = AlarmManager.shared.authorizationState
         let wasAuthorized = isAuthorized
         isAuthorized = state == .authorized
@@ -258,7 +305,17 @@ final class AlarmKitService: NSObject {
         guard let alarms = try? modelContext.fetch(descriptor) else { return }
 
         guard let mainAlarm = alarms.first(where: { $0.silencerAlarmKitID == alarmKitID }) else {
-            // Not a silencer — just a main alarm firing. Nothing to do here.
+            // Not a silencer — main alarm firing.
+            // In composer mode (no silencer scheduled), iOS wakes our process via the
+            // alarmUpdates stream as the alarm transitions to .alerting. We use this
+            // wake to schedule an in-process auto-stop at fireTime + alarmDurationSeconds,
+            // wrapped in a UIBackgroundTask to keep the app alive past the brief grace
+            // window. If iOS suspends us anyway during a long sleep, the worst case is
+            // the alarm rings to the system 15min audio cap and then sticks .alerting
+            // until the user opens the app.
+            if let firingAlarm = alarms.first(where: { $0.alarmKitID == alarmKitID }) {
+                scheduleInProcessAutoStop(for: firingAlarm)
+            }
             return
         }
 
@@ -304,6 +361,52 @@ final class AlarmKitService: NSObject {
         }
     }
 
+    /// In-process auto-stop: when a composer-mode main alarm fires, iOS gives us a
+    /// brief wake via the alarmUpdates stream. We schedule a Task.sleep for the
+    /// alarm's duration, then call AlarmManager.stop() to cleanly exit `.alerting`.
+    ///
+    /// Wrapped in a `beginBackgroundTask` to extend our wake past iOS's natural
+    /// ~30s grace. For durations within that window (≤30s), reliable. For longer
+    /// durations (1-5min) iOS MAY suspend us mid-sleep — in that case the alarm
+    /// rings until the system 15-min audio cap and then sits .alerting until the
+    /// user opens the app. Test on device to characterize behavior.
+    private func scheduleInProcessAutoStop(for alarm: Alarm) {
+        guard let alarmKitID = alarm.alarmKitID else { return }
+        let durationSec = alarm.alarmDurationSeconds
+        let label = alarm.label
+
+        var bgTaskID: UIBackgroundTaskIdentifier = .invalid
+        bgTaskID = UIApplication.shared.beginBackgroundTask(withName: "composer-autostop-\(alarmKitID)") {
+            if bgTaskID != .invalid {
+                UIApplication.shared.endBackgroundTask(bgTaskID)
+                bgTaskID = .invalid
+            }
+        }
+
+        print("[AlarmKitService] ⏱️ In-process auto-stop scheduled for '\(label)' — sleep \(durationSec)s")
+
+        Task {
+            do {
+                try await Task.sleep(nanoseconds: UInt64(durationSec) * 1_000_000_000)
+            } catch {
+                // Task cancelled (app terminated). Background task ends in defer.
+                print("[AlarmKitService] ⚠️ Auto-stop sleep cancelled for '\(label)': \(error)")
+                if bgTaskID != .invalid {
+                    UIApplication.shared.endBackgroundTask(bgTaskID)
+                    bgTaskID = .invalid
+                }
+                return
+            }
+            try? AlarmManager.shared.stop(id: alarmKitID)
+            try? AlarmManager.shared.cancel(id: alarmKitID)
+            print("[AlarmKitService] ⏱️✅ In-process auto-stop fired for '\(label)' — alarm stopped + cancelled")
+            if bgTaskID != .invalid {
+                UIApplication.shared.endBackgroundTask(bgTaskID)
+                bgTaskID = .invalid
+            }
+        }
+    }
+
     // MARK: - Centralized Lifecycle
     //
     // All alarm mutations from views flow through enable/disable/delete.
@@ -324,6 +427,18 @@ final class AlarmKitService: NSObject {
         }
         alarmsBeingScheduled.insert(alarm.id)
         defer { alarmsBeingScheduled.remove(alarm.id) }
+
+        // Notification-engine path: schedule via local notifications instead of AlarmKit.
+        if RemoteConfigService.shared.isNotificationEngineEnabled {
+            alarm.isEnabled = true
+            // Clear any stale AlarmKit IDs so a later engine switch reconciles cleanly.
+            alarm.alarmKitID = nil
+            alarm.silencerAlarmKitID = nil
+            await NotificationAlarmEngine.shared.schedule(for: alarm)
+            try? alarm.modelContext?.save()
+            updateNextAlarmDate()
+            return
+        }
 
         // Yield once before doing any synchronous AlarmKit work. AlarmManager.cancel
         // is a synchronous XPC round-trip with alarmsd that can take a noticeable
@@ -367,6 +482,10 @@ final class AlarmKitService: NSObject {
     /// Turn an alarm off without deleting the model.
     /// Idempotent: safe to call even if already disabled.
     func disable(_ alarm: Alarm) {
+        // Always clear notification-engine state too, regardless of current flag, so
+        // toggling the flag never leaves stragglers from the other engine.
+        NotificationAlarmEngine.shared.cancelNotifications(forAlarmID: alarm.id)
+
         if let id = alarm.alarmKitID {
             try? AlarmManager.shared.cancel(id: id)
             alarm.alarmKitID = nil
@@ -387,6 +506,9 @@ final class AlarmKitService: NSObject {
         let alarmKitID = alarm.alarmKitID
         let silencerID = alarm.silencerAlarmKitID
         let repeatDays = alarm.repeatDays
+
+        // Cancel notification-engine notifications (no-op if AlarmKit path was used).
+        NotificationAlarmEngine.shared.cancelNotifications(forAlarmID: alarm.id)
 
         if let id = alarmKitID {
             try? AlarmManager.shared.cancel(id: id)
@@ -520,6 +642,9 @@ final class AlarmKitService: NSObject {
         // file takes 1-3 seconds, which would otherwise stall the UI thread that called
         // scheduleAlarm (typically Save in AlarmEditView).
         let useComposed = RemoteConfigService.shared.isComposedSoundsEnabled
+        #if DEBUG
+        print("[AlarmKitService] 🎵 Composed sounds flag: \(useComposed) (override: \(ComposedSoundsDebugOverride.current), remote: \(RemoteConfigService.shared.useComposedSoundsRemote))")
+        #endif
         let composedSoundURL: URL? = await { () async -> URL? in
             guard useComposed else { return nil }
             return await composeSoundOffMain(for: alarm, sound: sound)
@@ -532,11 +657,16 @@ final class AlarmKitService: NSObject {
         //   3. Bundled sound — "Sounds/..." prefix, resolved from main bundle.
         let alertSound: ActivityKit.AlertConfiguration.AlertSound
         if let composedURL = composedSoundURL {
+            let exists = FileManager.default.fileExists(atPath: composedURL.path)
+            let size = (try? FileManager.default.attributesOfItem(atPath: composedURL.path)[.size] as? Int) ?? 0
+            print("[AlarmKitService] ✅ Using composed sound: \(composedURL.lastPathComponent) (exists: \(exists), size: \(size) bytes)")
+            print("[AlarmKitService] 📍 Full path: \(composedURL.path)")
             alertSound = .named(composedURL.lastPathComponent)
         } else if let customFileName = AlarmSound.customFileName(from: alarm.soundName),
            CustomSoundStore.fileExists(fileName: customFileName) {
             alertSound = .named(CustomSoundStore.alertSoundName(for: customFileName))
         } else if let sound {
+            print("[AlarmKitService] 📁 Using bundled sound (composed failed or flag off): Sounds/\(sound.fileName).\(sound.fileExtension)")
             alertSound = .named("Sounds/\(sound.fileName).\(sound.fileExtension)")
         } else {
             // Should be unreachable with the sound-fallback above, but logged defensively
@@ -545,11 +675,19 @@ final class AlarmKitService: NSObject {
             alertSound = .default
         }
 
-        // Silencer scheduling: skipped when composition succeeded — the silent tail
-        // built into the composed file IS the auto-stop. For composition failure or
-        // flag-off, fall through to the existing silencer path.
+        // Silencer scheduling: only needed when NOT using composed sounds.
+        // With composed sounds, the audio file itself handles auto-stop — it plays the
+        // selected sound for the chosen duration, fades out, then continues with silence
+        // for the remainder of the 30-minute file. The user perceives this as "auto-stop"
+        // even though the alarm technically continues (silently). The UI (Live Activity)
+        // will persist until the user dismisses it, which is an acceptable tradeoff for
+        // the simplicity of not needing a paired silencer alarm.
+        //
+        // Without composed sounds, we schedule a silencer alarm that fires at
+        // fireTime + duration to transition AlarmKit out of the alerting state.
         let silencerID: UUID?
         if composedSoundURL != nil {
+            // Composed sounds handle auto-stop via the silent tail — no silencer needed.
             silencerID = nil
         } else {
             // Schedule the silencer FIRST so we can (for one-time alarms) bake its ID
@@ -610,7 +748,10 @@ final class AlarmKitService: NSObject {
     /// model across actor boundaries.
     private func composeSoundOffMain(for alarm: Alarm, sound: AlarmSound?) async -> URL? {
         let durationSec = alarm.alarmDurationSeconds
-        guard durationSec > 0 else { return nil }
+        guard durationSec > 0 else {
+            print("[AlarmKitService] ⚠️ composeSoundOffMain: duration is 0 for '\(alarm.label)'")
+            return nil
+        }
 
         // Resolve source URL on main actor.
         let sourceURL: URL?
@@ -619,13 +760,16 @@ final class AlarmKitService: NSObject {
            CustomSoundStore.fileExists(fileName: customFileName) {
             sourceURL = CustomSoundStore.url(for: customFileName)
             sourceID = "custom_\(customFileName)"
+            print("[AlarmKitService] 🎵 composeSoundOffMain: using custom sound '\(customFileName)'")
         } else if let sound {
             sourceURL = Bundle.main.url(
                 forResource: "Sounds/\(sound.fileName)",
                 withExtension: sound.fileExtension
             )
             sourceID = "bundled_\(sound.fileName)"
+            print("[AlarmKitService] 🎵 composeSoundOffMain: using bundled sound '\(sound.fileName)' -> \(sourceURL?.path ?? "nil")")
         } else {
+            print("[AlarmKitService] ⚠️ composeSoundOffMain: no sound resolved for '\(alarm.label)'")
             return nil
         }
 
@@ -635,16 +779,24 @@ final class AlarmKitService: NSObject {
         }
 
         let cacheKey = "\(sourceID)_\(durationSec)s"
+        print("[AlarmKitService] 🎵 composeSoundOffMain: composing with cacheKey '\(cacheKey)', duration \(durationSec)s")
 
         // AVAssetReader/Writer is CPU-bound for a few hundred ms to a few seconds;
         // dispatch off-main so the caller (scheduleAlarm) doesn't block the UI thread.
-        return await Task.detached(priority: .userInitiated) {
+        let result = await Task.detached(priority: .userInitiated) {
             AlarmSoundComposer.compose(
                 sourceURL: sourceURL,
                 audibleDurationSeconds: durationSec,
                 cacheKey: cacheKey
             )
         }.value
+        
+        if let result {
+            print("[AlarmKitService] ✅ composeSoundOffMain: composition succeeded -> \(result.lastPathComponent)")
+        } else {
+            print("[AlarmKitService] ❌ composeSoundOffMain: composition returned nil")
+        }
+        return result
     }
 
     /// Schedule a silent AlarmKit alarm that fires `alarmDurationSeconds` after the main
@@ -838,6 +990,9 @@ final class AlarmKitService: NSObject {
             }
         }
         activeAlarms = []
+        // Also nuke notification-engine notifications so the nuclear button clears
+        // both engines regardless of which is active.
+        Task { await NotificationAlarmEngine.shared.cancelAll() }
         updateNextAlarmDate()
         print("[AlarmKitService] 🔥 Cancelled \(cancelled) system alarm(s) — SwiftData IDs cleared")
         return cancelled
@@ -848,6 +1003,15 @@ final class AlarmKitService: NSObject {
     /// when activeAlarms hasn't been populated yet from the async alarmUpdates stream.
     func syncAllAlarms() {
         guard let modelContext else { return }
+
+        // Notification-engine path: delegate to the rolling-window scheduler.
+        if RemoteConfigService.shared.isNotificationEngineEnabled {
+            Task {
+                await NotificationAlarmEngine.shared.syncAll(modelContext: modelContext)
+                updateNextAlarmDate()
+            }
+            return
+        }
 
         let descriptor = FetchDescriptor<Alarm>(
             predicate: #Predicate { $0.isEnabled }
@@ -989,6 +1153,15 @@ extension AlarmKitService: UNUserNotificationCenterDelegate {
         if let action = userInfo["action"] as? String, action == "openShabbatChecklist" {
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: .openShabbatChecklist, object: nil)
+            }
+        }
+        // Notification-engine alarm tapped/dismissed: cancel the rest of this alarm's
+        // burst so the user isn't pestered by remaining slots after acknowledging.
+        if let kind = userInfo["kind"] as? String, kind == "alarm",
+           let alarmIDString = userInfo["alarmID"] as? String,
+           let alarmID = UUID(uuidString: alarmIDString) {
+            Task { @MainActor in
+                NotificationAlarmEngine.shared.cancelNotifications(forAlarmID: alarmID)
             }
         }
         completionHandler()

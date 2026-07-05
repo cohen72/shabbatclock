@@ -4,6 +4,7 @@ import SwiftData
 import AlarmKit
 import ActivityKit
 import CoreLocation
+import UserNotifications
 
 /// Debug-only settings screen. Only visible in DEBUG builds.
 /// Provides tools for testing permission prompts, alarm states, and other internals.
@@ -36,6 +37,9 @@ struct DebugView: View {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("debugSimulateFriday") private var simulateFriday = false
     @AppStorage("debug.composedSoundsOverride") private var composedSoundsOverride: String = ComposedSoundsDebugOverride.useRemote.rawValue
+    @AppStorage("debug.alarmEngineOverride") private var alarmEngineOverride: String = AlarmEngineDebugOverride.useRemote.rawValue
+
+    @State private var pendingNotificationCount: Int = 0
 
     var body: some View {
         ZStack {
@@ -67,6 +71,9 @@ struct DebugView: View {
 
                     // Composed Sounds Override
                     composedSoundsSection
+
+                    // Alarm Engine Override (AlarmKit vs Notifications)
+                    alarmEngineSection
 
                     // Actions
                     actionsSection
@@ -124,6 +131,7 @@ struct DebugView: View {
         }
         .onAppear {
             refreshSystemAlarmsSnapshot()
+            refreshPendingNotificationCount()
         }
     }
 
@@ -506,6 +514,60 @@ struct DebugView: View {
     /// Local override for the `ff_use_composed_sounds` Remote Config flag. Lets us
     /// flip the composed-sounds path on/off in dev builds without touching Firebase.
     /// Production users never see this — DEBUG only.
+    /// Local override for the alarm-engine flag, plus a live count of pending alarm
+    /// notifications (only meaningful when the notification engine is active).
+    private var alarmEngineSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                SectionHeader(title: "Alarm Engine", icon: "bell.badge")
+                Spacer()
+                Button {
+                    refreshPendingNotificationCount()
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.goldAccent)
+                }
+            }
+
+            VStack(spacing: 1) {
+                Picker("Engine", selection: $alarmEngineOverride) {
+                    Text("Use Remote").tag(AlarmEngineDebugOverride.useRemote.rawValue)
+                    Text("AlarmKit").tag(AlarmEngineDebugOverride.forceAlarmKit.rawValue)
+                    Text("Notifications").tag(AlarmEngineDebugOverride.forceNotifications.rawValue)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 11)
+                .background(Color.surfaceCard)
+
+                stateRow(
+                    "Effective engine",
+                    value: RemoteConfigService.shared.isNotificationEngineEnabled ? "Notifications" : "AlarmKit"
+                )
+                stateRow(
+                    "Remote value",
+                    value: RemoteConfigService.shared.useNotificationEngineRemote ? "notifications" : "alarmkit"
+                )
+                stateRow("Pending alarm notifs", value: "\(pendingNotificationCount)")
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color.surfaceBorder, lineWidth: 0.5)
+            )
+        }
+    }
+
+    private func refreshPendingNotificationCount() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let count = requests.filter { $0.identifier.hasPrefix(NotificationAlarmEngine.idPrefix) }.count
+            Task { @MainActor in
+                self.pendingNotificationCount = count
+            }
+        }
+    }
+
     private var composedSoundsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionHeader(title: "Composed Sounds Flag", icon: "waveform.badge.plus")

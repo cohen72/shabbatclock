@@ -37,6 +37,7 @@
 		AAA00072 /* SoundPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00072 /* SoundPickerView.swift */; };
 		AAA00090 /* ZmanimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00090 /* ZmanimView.swift */; };
 		AAA00099 /* AlarmSoundComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00099 /* AlarmSoundComposer.swift */; };
+		AAA00098 /* NotificationAlarmEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00098 /* NotificationAlarmEngine.swift */; };
 		AAA00100 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00100 /* SettingsView.swift */; };
 		AAA00101 /* PremiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00101 /* PremiumView.swift */; };
 		AAA00102 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00102 /* DebugView.swift */; };
@@ -58,6 +59,7 @@
 		DD112236 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112235 /* InfoPlist.xcstrings */; };
 		DD8859E3 /* LocationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBA /* LocationRow.swift */; };
 		DD8859E4 /* PermissionPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBB /* PermissionPromptView.swift */; };
+		AAA00097 /* AlarmPreparingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00097 /* AlarmPreparingOverlay.swift */; };
 		DD8859E5 /* SwipeToDelete.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBC /* SwipeToDelete.swift */; };
 		DDAB2E76 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4824B /* CitySearchView.swift */; };
 		ED823EEC2F9B8C9C0084B452 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = ED823EEB2F9B8C9C0084B452 /* Mixpanel */; };
@@ -126,6 +128,7 @@
 		BBB00072 /* SoundPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPickerView.swift; sourceTree = "<group>"; };
 		BBB00090 /* ZmanimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZmanimView.swift; sourceTree = "<group>"; };
 		BBB00099 /* AlarmSoundComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundComposer.swift; sourceTree = "<group>"; };
+		BBB00098 /* NotificationAlarmEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationAlarmEngine.swift; sourceTree = "<group>"; };
 		BBB00100 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		BBB00101 /* PremiumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumView.swift; sourceTree = "<group>"; };
 		BBB00102 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
@@ -145,6 +148,7 @@
 		C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatReminderService.swift; sourceTree = "<group>"; };
 		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
 		CC27FEBB /* PermissionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPromptView.swift; sourceTree = "<group>"; };
+		BBB00097 /* AlarmPreparingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmPreparingOverlay.swift; sourceTree = "<group>"; };
 		CC27FEBC /* SwipeToDelete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeToDelete.swift; sourceTree = "<group>"; };
 		CCC00001 /* ShabbatClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShabbatClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCE4824B /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
@@ -263,6 +267,7 @@
 				BBB00021 /* AudioManager.swift */,
 				BBB00025 /* AlarmKitService.swift */,
 				BBB00099 /* AlarmSoundComposer.swift */,
+				BBB00098 /* NotificationAlarmEngine.swift */,
 				BBB00401 /* CustomSoundStore.swift */,
 				BBB00402 /* AudioRecordingManager.swift */,
 				BBB00405 /* CustomSoundDeletion.swift */,
@@ -321,6 +326,7 @@
 				CCE4824B /* CitySearchView.swift */,
 				CC27FEBA /* LocationRow.swift */,
 				CC27FEBB /* PermissionPromptView.swift */,
+				BBB00097 /* AlarmPreparingOverlay.swift */,
 				CC27FEBC /* SwipeToDelete.swift */,
 				D53680684A0330FB9B8F8E8D /* AlarmSettingsSection.swift */,
 				D53680694A0330FB9B8F8E8E /* RingSetupView.swift */,
@@ -541,6 +547,7 @@
 				AAA00021 /* AudioManager.swift in Sources */,
 				AAA00025 /* AlarmKitService.swift in Sources */,
 				AAA00099 /* AlarmSoundComposer.swift in Sources */,
+				AAA00098 /* NotificationAlarmEngine.swift in Sources */,
 				AAA00026 /* StopAlarmIntent.swift in Sources */,
 				AAA00027 /* StoreManager.swift in Sources */,
 				AAANALY01 /* AnalyticsService.swift in Sources */,
@@ -554,6 +561,7 @@
 				DDAB2E76 /* CitySearchView.swift in Sources */,
 				DD8859E3 /* LocationRow.swift in Sources */,
 				DD8859E4 /* PermissionPromptView.swift in Sources */,
+				AAA00097 /* AlarmPreparingOverlay.swift in Sources */,
 				DD8859E5 /* SwipeToDelete.swift in Sources */,
 				AAA00050 /* AnalogClockView.swift in Sources */,
 				AAA00051 /* MainClockView.swift in Sources */,
@@ -597,7 +605,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widgets/widgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = widgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = widgets;
@@ -608,7 +616,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -628,7 +636,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = widgets/widgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = widgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = widgets;
@@ -639,7 +647,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -783,7 +791,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ShabbatClock/ShabbatClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShabbatClock/Info.plist;
@@ -799,7 +807,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -818,7 +826,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = ShabbatClock/ShabbatClock.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ShabbatClock/Info.plist;
@@ -834,7 +842,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.3;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = works.delicious.shabbatclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

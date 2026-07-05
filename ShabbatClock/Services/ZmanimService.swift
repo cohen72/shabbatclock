@@ -302,7 +302,9 @@ final class ZmanimService: ObservableObject {
     }
 
     // Parasha for the upcoming Shabbat
+    let inIsrael = locationManager.locationTimeZone.identifier == "Asia/Jerusalem"
     let jewishCal = JewishCalendar()
+    jewishCal.inIsrael = inIsrael
     jewishCal.workingDate = nextSaturday
     let parsha = jewishCal.getParshah()
 
@@ -315,6 +317,7 @@ final class ZmanimService: ObservableObject {
 
     // Hebrew date for today
     let todayJewish = JewishCalendar()
+    todayJewish.inIsrael = inIsrael
     todayJewish.workingDate = today
     let hdf = HebrewDateFormatter()
     hdf.hebrewFormat = true

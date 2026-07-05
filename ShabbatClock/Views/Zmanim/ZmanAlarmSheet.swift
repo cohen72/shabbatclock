@@ -28,6 +28,7 @@ struct ZmanAlarmSheet: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingAlarmPermission = false
     @State private var showingNotificationPermission = false
+    @State private var isPreparingAlarm = false
 
     #if DEBUG
     /// When set, overrides computedFireTime with this date (debug builds only).
@@ -137,6 +138,7 @@ struct ZmanAlarmSheet: View {
                         }
                         .foregroundStyle(.accentPurple)
                         .fontWeight(.bold)
+                        .disabled(isPreparingAlarm)
                     }
                 }
             }
@@ -179,6 +181,9 @@ struct ZmanAlarmSheet: View {
                     }
                 }
             )
+        }
+        .overlay {
+            AlarmPreparingOverlay(isPresented: $isPreparingAlarm)
         }
     }
 
@@ -415,13 +420,23 @@ struct ZmanAlarmSheet: View {
             Analytics.track(.alarmEdited(source: .zman))
         }
 
-        // Dismiss immediately. AlarmKit registration (which now includes off-main
-        // sound composition for the composed-sound path) continues in the background
-        // — the SwiftData write above is what the user cares about; the system-level
-        // scheduling is bookkeeping that shouldn't block the UI.
-        dismiss()
-        Task {
-            await alarmService.enable(alarm)
+        // Two save paths — composer needs a deliberate "Preparing your alarm" hand-off
+        // because composition can take 1-3s off-main; non-composer is fast enough to
+        // dismiss immediately and let scheduling finish in the background.
+        if composerOn {
+            isPreparingAlarm = true
+            Task {
+                async let scheduling: Void = alarmService.enable(alarm)
+                async let minDelay: Void = Task.sleep(nanoseconds: 800_000_000)
+                _ = await (scheduling, try? minDelay)
+                isPreparingAlarm = false
+                dismiss()
+            }
+        } else {
+            dismiss()
+            Task {
+                await alarmService.enable(alarm)
+            }
         }
     }
 }

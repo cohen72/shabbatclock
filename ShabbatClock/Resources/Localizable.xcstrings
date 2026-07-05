@@ -421,7 +421,6 @@
       }
     },
     "Actions" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -472,6 +471,12 @@
           }
         }
       }
+    },
+    "Alarm Diagnostics" : {
+
+    },
+    "Alarm Engine" : {
+
     },
     "Alarm ID" : {
       "localizations" : {
@@ -534,6 +539,9 @@
           }
         }
       }
+    },
+    "AlarmKit" : {
+
     },
     "Alarms" : {
       "localizations" : {
@@ -832,6 +840,12 @@
         }
       }
     },
+    "Cancel All" : {
+
+    },
+    "Cancel ALL AlarmKit alarms?" : {
+
+    },
     "Candle Lighting" : {
       "localizations" : {
         "he" : {
@@ -915,6 +929,15 @@
           }
         }
       }
+    },
+    "Composed Sounds Flag" : {
+
+    },
+    "Composer Test (30s audible)" : {
+
+    },
+    "Composing your sound…" : {
+
     },
     "Contact Support" : {
 
@@ -1066,7 +1089,6 @@
       }
     },
     "Debug" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -1075,6 +1097,9 @@
           }
         }
       }
+    },
+    "DEBUG" : {
+
     },
     "Default Auto-Stop" : {
       "localizations" : {
@@ -1404,6 +1429,9 @@
         }
       }
     },
+    "Engine" : {
+
+    },
     "English" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1497,6 +1525,12 @@
           }
         }
       }
+    },
+    "Force Off" : {
+
+    },
+    "Force On" : {
+
     },
     "Free users can create up to %lld alarms. Upgrade to Premium for unlimited alarms and more sounds!" : {
       "localizations" : {
@@ -2376,6 +2410,9 @@
         }
       }
     },
+    "Notifications" : {
+
+    },
     "Notifications allow Shabbat Clock to automatically stop your alarm after the duration you set — so you don't need to touch your phone on Shabbat." : {
       "localizations" : {
         "he" : {
@@ -2412,7 +2449,6 @@
       }
     },
     "Off" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2444,7 +2480,6 @@
       }
     },
     "Onboarding" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2558,6 +2593,15 @@
         }
       }
     },
+    "Override" : {
+
+    },
+    "Override fire time" : {
+
+    },
+    "Override Premium" : {
+
+    },
     "Parashat" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2580,7 +2624,6 @@
       }
     },
     "Permission Prompts" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2591,7 +2634,6 @@
       }
     },
     "Permission States" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2688,7 +2730,6 @@
       }
     },
     "Premium" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2707,6 +2748,12 @@
           }
         }
       }
+    },
+    "Premium State" : {
+
+    },
+    "Preparing your alarm" : {
+
     },
     "Preview" : {
       "localizations" : {
@@ -3388,6 +3435,12 @@
         }
       }
     },
+    "Simulate Friday" : {
+
+    },
+    "Simulation" : {
+
+    },
     "Sitar" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3428,6 +3481,15 @@
           }
         }
       }
+    },
+    "Sound Duration Test" : {
+
+    },
+    "Sound Duration Test (15 min)" : {
+
+    },
+    "Sound Duration Test (30 min)" : {
+
     },
     "Sounds & Haptics" : {
       "extractionState" : "stale",
@@ -3760,6 +3822,9 @@
         }
       }
     },
+    "This cancels every AlarmKit alarm currently scheduled with iOS, including any orphans. SwiftData alarm rows remain but their alarmKitID/silencerAlarmKitID fields are cleared. Enabled alarms will re-schedule via the next sync." : {
+
+    },
     "This Friday Evening" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3818,6 +3883,9 @@
           }
         }
       }
+    },
+    "Time for your alarm" : {
+
     },
     "Time Format" : {
       "extractionState" : "manual",
@@ -4051,6 +4119,9 @@
           }
         }
       }
+    },
+    "Use Remote" : {
+
     },
     "Use the silent switch on the side of your phone before Shabbat." : {
       "comment" : "Onboarding ring-setup callout subtitle.",

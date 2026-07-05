@@ -23,6 +23,7 @@ struct AlarmEditView: View {
   @State private var showingDeleteConfirmation = false
   @State private var showingAlarmPermission = false
   @State private var showingNotificationPermission = false
+  @State private var isPreparingAlarm = false
 
   @AppStorage("isPremium") private var isPremium = false
   @AppStorage("defaultSound") private var defaultSound = "Shalom Aleichem"
@@ -85,6 +86,7 @@ struct AlarmEditView: View {
           }
           .foregroundStyle(.accentPurple)
           .fontWeight(.bold)
+          .disabled(isPreparingAlarm)
         }
       }
     }
@@ -140,8 +142,11 @@ struct AlarmEditView: View {
         }
       )
     }
+    .overlay {
+      AlarmPreparingOverlay(isPresented: $isPreparingAlarm)
+    }
   }
-  
+
   // MARK: - Time Picker
   
   private var timePickerSection: some View {
@@ -363,13 +368,28 @@ struct AlarmEditView: View {
       Analytics.track(.alarmEdited(source: .manual))
     }
 
-    // Dismiss immediately. AlarmKit registration (which now includes off-main
-    // sound composition for the composed-sound path) continues in the background
-    // — the SwiftData write above is what the user cares about; the system-level
-    // scheduling is bookkeeping that shouldn't block the UI.
-    dismiss()
-    Task {
-      await alarmService.enable(alarm)
+    // Two save paths:
+    //   - Non-composer (silencer / notification engine): enable() returns quickly;
+    //     dismiss immediately and let scheduling finish in the background.
+    //   - Composer: enable() runs the off-main file composition which takes 1–3s.
+    //     Show a polished "Preparing your alarm" overlay, block the UI, and dismiss
+    //     only when scheduling is fully done so the user gets a deliberate hand-off.
+    if composerOn {
+      isPreparingAlarm = true
+      Task {
+        async let scheduling: Void = alarmService.enable(alarm)
+        // Minimum on-screen time so the overlay never flashes by faster than
+        // perception (cache hits can return instantly).
+        async let minDelay: Void = Task.sleep(nanoseconds: 800_000_000)
+        _ = await (scheduling, try? minDelay)
+        isPreparingAlarm = false
+        dismiss()
+      }
+    } else {
+      dismiss()
+      Task {
+        await alarmService.enable(alarm)
+      }
     }
   }
   
