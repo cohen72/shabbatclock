@@ -373,6 +373,22 @@ xcodebuild -project ShabbatClock.xcodeproj -scheme ShabbatClock -destination 'pl
 - Special handling may be needed for Shabbat compliance
 - Audio and background tasks respect Jewish law considerations
 
+## Lessons Learned
+
+### Version bumps must also touch `ShabbatClock/Info.plist`
+- `ShabbatClock/Info.plist` has `CFBundleVersion` / `CFBundleShortVersionString` hardcoded
+  as literal values rather than the usual `$(CURRENT_PROJECT_VERSION)` / `$(MARKETING_VERSION)`
+  build-setting variables — this is inconsistent with `widgets/Info.plist`, which has no
+  version keys at all and correctly inherits from build settings.
+- Bumping only `project.pbxproj` (`CURRENT_PROJECT_VERSION`, `MARKETING_VERSION`) leaves the
+  shipped app Info.plist on the old version, while the widget extension picks up the new one —
+  causing a `CFBundleVersion` mismatch between app and extension at archive/validate time
+  (`embeddedBinaryValidationUtility` warning, and a likely App Store Connect upload rejection).
+- **When bumping version/build**: update `project.pbxproj` AND run
+  `/usr/libexec/PlistBuddy -c "Set :CFBundleVersion <build>" ShabbatClock/Info.plist` and
+  `-c "Set :CFBundleShortVersionString <version>"`. Verify with a clean build — no mismatch
+  warning during `ValidateEmbeddedBinary` means both are in sync.
+
 ## Future Enhancements
 
 ### Planned Features
