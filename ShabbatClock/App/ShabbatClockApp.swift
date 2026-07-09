@@ -1,16 +1,42 @@
 import SwiftUI
 import SwiftData
 import FirebaseCore
+import FirebaseAppCheck
+import DeliciousKitFirebase
+
+/// Name of the secondary FirebaseApp instance used only for the shared
+/// Delicious-apps newsletter backend's App Check verification. Kept separate
+/// from the default FirebaseApp (ShabbatClock's own "shabbat-clock" project,
+/// used for Analytics + Remote Config) since App Check tokens are scoped to
+/// a specific Firebase project + app registration.
+let deliciousAppsFirebaseAppName = "deliciousapps"
 
 @main
 struct ShabbatClockApp: App {
   let container: ModelContainer
   @State private var alarmService = AlarmKitService.shared
   @StateObject private var storeManager = StoreManager.shared
-  
+
   init() {
 
+    // Must be set before any FirebaseApp.configure() call.
+    #if DEBUG
+    AppCheck.setAppCheckProviderFactory(AppCheckDebugProviderFactory())
+    #else
+    AppCheck.setAppCheckProviderFactory(AppAttestCheckProviderFactory())
+    #endif
+
     FirebaseApp.configure()
+
+    // Secondary named app, purely for the shared newsletter backend's App
+    // Check — does not touch ShabbatClock's own default Firebase project.
+    if let path = Bundle.main.path(forResource: "GoogleService-Info-DeliciousApps", ofType: "plist"),
+       let options = FirebaseOptions(contentsOfFile: path) {
+      FirebaseApp.configure(name: deliciousAppsFirebaseAppName, options: options)
+    } else {
+      assertionFailure("GoogleService-Info-DeliciousApps.plist missing or invalid — newsletter signup will fail App Check verification.")
+    }
+
     RemoteConfigService.shared.configure()
     // Apply language bundle override before any UI loads
     AppLanguage.applyBundleOverride()

@@ -13,6 +13,7 @@
 		27A8F7D8C4375871A26FD7D7 /* ShabbatChecklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */; };
 		27A8F7E1C4375871A26FD7E1 /* AlarmPermissionBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680714A0330FB9B8F8E91 /* AlarmPermissionBanner.swift */; };
 		33F7B9474DB1A09C8CA5F9FE /* DeliciousKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8807234A18D133D701F49619 /* DeliciousKit */; };
+		A8F8F58EED77AEC48A16BB27 /* GoogleService-Info-DeliciousApps.plist in Resources */ = {isa = PBXBuildFile; fileRef = DCDF7EFE56156D66A87E9FEE /* GoogleService-Info-DeliciousApps.plist */; };
 		AAA00001 /* ShabbatClockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00001 /* ShabbatClockApp.swift */; };
 		AAA00001A0330FB9B8F8E901 /* ShabbatWeekArcCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA00001A0330FB9B8F8E902 /* ShabbatWeekArcCard.swift */; };
 		AAA00002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00002 /* ContentView.swift */; };
@@ -55,6 +56,7 @@
 		AAANALY01 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBANALY01 /* AnalyticsService.swift */; };
 		AAASECRE01 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = BBBSECRE01 /* Secrets.plist */; };
 		AARMTCFG01 /* RemoteConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBBRMTCFG01 /* RemoteConfigService.swift */; };
+		BF5715525F6895981638F77E /* DeliciousKitFirebase in Frameworks */ = {isa = PBXBuildFile; productRef = 960D7526FA6553331606971B /* DeliciousKitFirebase */; };
 		BF7213DF338B8C9C1EB62A43 /* ZmanAlarmSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */; };
 		D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A4226EB6DEE08BEB8E2C17 /* ZmanAlarmSheet.swift */; };
 		DD112234 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112233 /* Localizable.xcstrings */; };
@@ -158,6 +160,7 @@
 		D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatChecklistView.swift; sourceTree = "<group>"; };
 		D53680704A0330FB9B8F8E90 /* ZmanArcCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZmanArcCard.swift; sourceTree = "<group>"; };
 		D53680714A0330FB9B8F8E91 /* AlarmPermissionBanner.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AlarmPermissionBanner.swift; sourceTree = "<group>"; };
+		DCDF7EFE56156D66A87E9FEE /* GoogleService-Info-DeliciousApps.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-DeliciousApps.plist"; sourceTree = "<group>"; };
 		DD112233 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		DD112235 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		ED823F912F9D39F30084B452 /* RemoteConfigDefaults.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = RemoteConfigDefaults.plist; sourceTree = "<group>"; };
@@ -203,6 +206,7 @@
 				ED823F892F9D36E60084B452 /* FirebaseAnalytics in Frameworks */,
 				ED823F8B2F9D36E60084B452 /* FirebaseRemoteConfig in Frameworks */,
 				33F7B9474DB1A09C8CA5F9FE /* DeliciousKit in Frameworks */,
+				BF5715525F6895981638F77E /* DeliciousKitFirebase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,6 +254,7 @@
 				ED823FBF2F9D3B850084B452 /* GoogleService-Info.plist */,
 				BBB00028 /* Products.storekit */,
 				EDF6A1E42F23BA5C0052797F /* Media.xcassets */,
+				DCDF7EFE56156D66A87E9FEE /* GoogleService-Info-DeliciousApps.plist */,
 			);
 			path = ShabbatClock;
 			sourceTree = "<group>";
@@ -462,6 +467,7 @@
 				ED823F882F9D36E60084B452 /* FirebaseAnalytics */,
 				ED823F8A2F9D36E60084B452 /* FirebaseRemoteConfig */,
 				8807234A18D133D701F49619 /* DeliciousKit */,
+				960D7526FA6553331606971B /* DeliciousKitFirebase */,
 			);
 			productName = ShabbatClock;
 			productReference = CCC00001 /* ShabbatClock.app */;
@@ -530,6 +536,7 @@
 				DD112236 /* InfoPlist.xcstrings in Resources */,
 				ED823FC02F9D3B850084B452 /* GoogleService-Info.plist in Resources */,
 				AAASECRE01 /* Secrets.plist in Resources */,
+				A8F8F58EED77AEC48A16BB27 /* GoogleService-Info-DeliciousApps.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -939,6 +946,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2DCE0138ACC10E5B83A43D5D /* XCLocalSwiftPackageReference "deliciouskit" */;
 			productName = DeliciousKit;
+		};
+		960D7526FA6553331606971B /* DeliciousKitFirebase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2DCE0138ACC10E5B83A43D5D /* XCLocalSwiftPackageReference "deliciouskit" */;
+			productName = DeliciousKitFirebase;
 		};
 		ED823EEB2F9B8C9C0084B452 /* Mixpanel */ = {
 			isa = XCSwiftPackageProductDependency;
