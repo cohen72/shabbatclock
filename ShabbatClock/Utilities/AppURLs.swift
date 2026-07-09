@@ -13,10 +13,11 @@ enum AppURLs {
     static var termsOfUse: URL { URL(string: "\(websiteRoot)/terms")! }
     static var support: URL { URL(string: "\(websiteRoot)/support")! }
 
-    /// Per-channel contact addresses — forwarded to the developer inbox via Namecheap email forwarding.
-    private static let contactEmail = "shabbatclock-contact@delicious.works"
-    private static let featureRequestEmail = "shabbatclock-feature@delicious.works"
-    private static let bugReportEmail = "shabbatclock-bug@delicious.works"
+    /// Per-channel contact addresses — direct to the developer inbox (Namecheap
+    /// forwarding for @delicious.works addresses was removed).
+    private static let contactEmail = "cohen72@gmail.com"
+    private static let featureRequestEmail = "cohen72@gmail.com"
+    private static let bugReportEmail = "cohen72@gmail.com"
 
     /// General contact address (kept for backward compatibility with any remaining call sites).
     static var supportMailto: URL { mailto(to: contactEmail, subject: "Shabbat Clock — Contact", body: diagnosticsFooter()) }
