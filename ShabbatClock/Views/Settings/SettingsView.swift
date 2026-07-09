@@ -26,6 +26,7 @@ struct SettingsView: View {
     @State private var showingPremium = false
     @State private var showingAbout = false
     @State private var showingCitySearch = false
+    @State private var showingWhatsNew = false
     @State private var installID: String?
     @State private var didCopyInstallID = false
     #if DEBUG
@@ -90,6 +91,10 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingCitySearch) {
                 CitySearchView()
+                    .applyLanguageOverride(AppLanguage.current)
+            }
+            .sheet(isPresented: $showingWhatsNew) {
+                WhatsNewView(config: .current)
                     .applyLanguageOverride(AppLanguage.current)
             }
             #if DEBUG
@@ -658,7 +663,7 @@ struct SettingsView: View {
                 settingsRow {
                     Text("Version")
                     Spacer()
-                    Text("1.0.0")
+                    Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "")
                         .font(AppFont.body(14))
                         .foregroundStyle(.textSecondary)
                 }
@@ -669,6 +674,20 @@ struct SettingsView: View {
                     } label: {
                         HStack {
                             Text("About Shabbat Clock")
+                            Spacer()
+                            Image(systemName: "chevron.forward")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.textSecondary)
+                        }
+                    }
+                }
+
+                settingsRow {
+                    Button {
+                        showingWhatsNew = true
+                    } label: {
+                        HStack {
+                            Text("What's New")
                             Spacer()
                             Image(systemName: "chevron.forward")
                                 .font(.system(size: 14))

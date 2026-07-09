@@ -4326,6 +4326,16 @@
         }
       }
     },
+    "What's New" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה חדש"
+          }
+        }
+      }
+    },
     "Wind" : {
       "extractionState" : "manual",
       "localizations" : {
