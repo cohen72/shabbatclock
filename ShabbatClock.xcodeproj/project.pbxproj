@@ -12,6 +12,7 @@
 		27A8F7D7C4375871A26FD7D6 /* ZmanArcCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680704A0330FB9B8F8E90 /* ZmanArcCard.swift */; };
 		27A8F7D8C4375871A26FD7D7 /* ShabbatChecklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */; };
 		27A8F7E1C4375871A26FD7E1 /* AlarmPermissionBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680714A0330FB9B8F8E91 /* AlarmPermissionBanner.swift */; };
+		2C1C01A14D54D9BAF9BD8492 /* Review.swift in Sources */ = {isa = PBXBuildFile; fileRef = 392EBB8C40A9E231FBCA95BC /* Review.swift */; };
 		33F7B9474DB1A09C8CA5F9FE /* DeliciousKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8807234A18D133D701F49619 /* DeliciousKit */; };
 		A4FE6D1E091D9597C505E014 /* WhatsNewContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1187F6DDA387598A0E52B97 /* WhatsNewContent.swift */; };
 		A8F8F58EED77AEC48A16BB27 /* GoogleService-Info-DeliciousApps.plist in Resources */ = {isa = PBXBuildFile; fileRef = DCDF7EFE56156D66A87E9FEE /* GoogleService-Info-DeliciousApps.plist */; };
@@ -106,6 +107,7 @@
 /* Begin PBXFileReference section */
 		028EB2C3066B848E89E860AB /* ZmanAlarmSyncService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZmanAlarmSyncService.swift; sourceTree = "<group>"; };
 		20A4226EB6DEE08BEB8E2C17 /* ZmanAlarmSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ZmanAlarmSheet.swift; sourceTree = "<group>"; };
+		392EBB8C40A9E231FBCA95BC /* Review.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Review.swift; sourceTree = "<group>"; };
 		AAA00001A0330FB9B8F8E902 /* ShabbatWeekArcCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatWeekArcCard.swift; sourceTree = "<group>"; };
 		B1187F6DDA387598A0E52B97 /* WhatsNewContent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WhatsNewContent.swift; sourceTree = "<group>"; };
 		BBB00001 /* ShabbatClockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShabbatClockApp.swift; sourceTree = "<group>"; };
@@ -299,6 +301,7 @@
 				C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */,
 				BBBANALY01 /* AnalyticsService.swift */,
 				BBBRMTCFG01 /* RemoteConfigService.swift */,
+				392EBB8C40A9E231FBCA95BC /* Review.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -610,6 +613,7 @@
 				D40E6C7B840ABF9C1F8D35F9 /* ZmanAlarmSheet.swift in Sources */,
 				FC9AFE400A4C3BA8F9DC6356 /* ShabbatReminderService.swift in Sources */,
 				A4FE6D1E091D9597C505E014 /* WhatsNewContent.swift in Sources */,
+				2C1C01A14D54D9BAF9BD8492 /* Review.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

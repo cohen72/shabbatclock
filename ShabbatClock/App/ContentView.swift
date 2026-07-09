@@ -75,6 +75,7 @@ struct ContentView: View {
             alarmService.configure(with: modelContext)
             ZmanAlarmSyncService.shared.configure(with: modelContext)
             ShabbatReminderService.shared.reschedule()
+            reviewPrompter.incrementSessionCount()
             if !hasCompletedOnboarding {
                 var transaction = Transaction()
                 transaction.disablesAnimations = true
@@ -116,6 +117,13 @@ struct ContentView: View {
                 // onboarding owns its own track via startBackgroundMusic there).
                 if !showingOnboarding {
                     updateAmbientMusic()
+                }
+                // Best moment to ask: the app just came back to the foreground,
+                // possibly right after an alarm fired and auto-stopped itself
+                // while the phone was away — exactly the "it worked" moment.
+                if !showingOnboarding,
+                   let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+                    reviewPrompter.promptIfAppropriate(in: scene)
                 }
             } else if newPhase == .background {
                 AudioManager.shared.stopBackgroundMusic(fadeOutDuration: 0.3)
