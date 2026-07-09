@@ -2145,6 +2145,16 @@
         }
       }
     },
+    "More Accurate for Israel" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מדויק יותר עבור ישראל"
+          }
+        }
+      }
+    },
     "Morning" : {
       "localizations" : {
         "he" : {
@@ -3432,6 +3442,16 @@
         }
       }
     },
+    "Sign in with Apple in Settings to get occasional product updates and offers by email." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היכנסו עם Apple בהגדרות כדי לקבל עדכוני מוצר והצעות מדי פעם באימייל."
+          }
+        }
+      }
+    },
     "Silencer ID" : {
 
     },
@@ -3523,6 +3543,16 @@
       }
     },
     "Stay in the Loop" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הישארו מעודכנים"
+          }
+        }
+      }
+    },
+    "Stay Updated" : {
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -3827,6 +3857,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שעון המעורר שתוכנן\nעבור שומרי שבת"
+          }
+        }
+      }
+    },
+    "The weekly Torah portion and Hebrew date now correctly follow Israel's calendar when you're there." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פרשת השבוע והתאריך העברי עוקבים כעת נכון אחר לוח השנה של ישראל כשאתם שם."
           }
         }
       }

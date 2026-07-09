@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import DeliciousKit
 
 /// Main content view with tab navigation.
 struct ContentView: View {
@@ -16,6 +17,7 @@ struct ContentView: View {
     @State private var selectedTab: Int = 0
     @State private var showingOnboarding = false
     @State private var showingShabbatChecklist = false
+    @State private var showingWhatsNew = false
 
     private var resolvedColorScheme: ColorScheme? {
         AppearanceMode(rawValue: appearanceMode)?.colorScheme
@@ -79,6 +81,10 @@ struct ContentView: View {
                 withTransaction(transaction) {
                     showingOnboarding = true
                 }
+            } else if WhatsNewView.shouldShow(config: .current) {
+                // Only for existing users updating to a new version — a
+                // fresh install just saw everything in onboarding already.
+                showingWhatsNew = true
             }
             // Set analytics super properties now that services are configured.
             // These attach to every subsequent event until they change.
@@ -137,6 +143,10 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingShabbatChecklist) {
             ShabbatChecklistView()
+                .applyLanguageOverride(resolvedLanguage)
+        }
+        .sheet(isPresented: $showingWhatsNew) {
+            WhatsNewView(config: .current)
                 .applyLanguageOverride(resolvedLanguage)
         }
         .onReceive(NotificationCenter.default.publisher(for: .openShabbatChecklist)) { _ in
