@@ -151,14 +151,16 @@ subscribeToUpdates ── HTTPS Cloud Function (2nd gen), shared Firebase projec
   `shabbat-clock`, `sixthings-f25ae`). Create a dedicated `delicious-shared` project to
   host the function + Firestore + secrets. **Provisioning is a setup step, confirmed
   with the operator before creation.**
-- **Sending domain: `deliciousapps.com`, not `delicious.works`.** `delicious.works` is
-  the DeliciousKit *product* site — B2B, developers buying the SDK. Newsletter
-  recipients are consumer end-users of individual apps (ShabbatClock, Snowball, etc.)
-  who don't know or care what DeliciousKit is. `deliciousapps.com` (verified
-  unregistered, 2026-07-09) is the consumer-facing identity: doubles as a public
-  portfolio page listing the apps and as the Loops-verified sending domain
-  (`hello@deliciousapps.com` / `updates@deliciousapps.com`). Two audiences, two
-  domains, same parent brand — doesn't reopen [[naming-identity-model]].
+- **Sending domain: a subdomain of `delicious.works`** (e.g. `mail.delicious.works`),
+  **not a new domain purchase.** `deliciousapps.com` was considered (verified
+  unregistered, 2026-07-09) for a cleaner consumer-facing "From" address, but
+  deliberately deferred — validate the newsletter itself first with infrastructure
+  already owned rather than buying new domains before there's a proven need (see
+  the operator's own standing MVP-scope-discipline preference: ship on what you
+  have, invest further only where signal exists). Revisit a dedicated consumer
+  domain later if/when the newsletter proves out. Loops recommends a subdomain
+  over the root domain regardless (isolates sending reputation + DNS records from
+  the website), so `mail.delicious.works` is the concrete pick either way.
 
 ## Error handling
 
