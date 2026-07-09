@@ -71,10 +71,16 @@ release. Shown once on first launch after the app version changes.
 Adopt DeliciousKit's `ReviewPrompter` (already built: `minSessions=3`,
 `maxPromptsPerYear=3`, per-version cap, only fires after a recorded positive event).
 
-- **Positive-event trigger:** the user **stops a fired alarm** — i.e. the app did its
-  job on Shabbat morning. This is a far stronger signal than raw session count.
-  Wire `recordPositiveEvent()` at the alarm-stop site, then
-  `promptIfAppropriate(in: scene)`.
+- **Positive-event trigger:** an alarm **fires and auto-stops successfully on its
+  own** — i.e. the full cycle (scheduled → rang → cleanly silenced) completed with
+  no user intervention. This is the app's actual core promise (auto-shut-off), so
+  it's a genuine "it worked" signal — unlike a manual stop-button tap, which this
+  app deliberately has almost no path to, or raw session count, which says nothing
+  about whether an alarm ever fired correctly.
+  Wire `recordPositiveEvent()` at the existing auto-stop completion points in
+  `AlarmKitService` (in-process auto-stop firing, silencer alarm firing, or
+  composed-sound tail completing — whichever path the alarm took), then call
+  `promptIfAppropriate(in: scene)` on next foreground.
 - **No backend.**
 
 ### Feature 3 — Newsletter signup (needs shared backend)
