@@ -325,7 +325,6 @@ final class AlarmKitService: NSObject {
         // scheduled for next week.
         guard mainAlarm.repeatDays.isEmpty else {
             print("[AlarmKitService] 🤫 Silencer fired for recurring alarm '\(mainAlarm.label)' — leaving both scheduled")
-            reviewPrompter.recordPositiveEvent()
             return
         }
 
@@ -352,7 +351,6 @@ final class AlarmKitService: NSObject {
         }
 
         print("[AlarmKitService] 🤫 Silencer fired — cancelled one-time alarm '\(label)'")
-        reviewPrompter.recordPositiveEvent()
 
         mainAlarm.silencerAlarmKitID = nil
         try? modelContext.save()
@@ -402,7 +400,6 @@ final class AlarmKitService: NSObject {
             try? AlarmManager.shared.stop(id: alarmKitID)
             try? AlarmManager.shared.cancel(id: alarmKitID)
             print("[AlarmKitService] ⏱️✅ In-process auto-stop fired for '\(label)' — alarm stopped + cancelled")
-            reviewPrompter.recordPositiveEvent()
             if bgTaskID != .invalid {
                 UIApplication.shared.endBackgroundTask(bgTaskID)
                 bgTaskID = .invalid
