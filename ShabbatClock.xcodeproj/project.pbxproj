@@ -12,6 +12,7 @@
 		27A8F7D7C4375871A26FD7D6 /* ZmanArcCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680704A0330FB9B8F8E90 /* ZmanArcCard.swift */; };
 		27A8F7D8C4375871A26FD7D7 /* ShabbatChecklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D536806A4A0330FB9B8F8E8F /* ShabbatChecklistView.swift */; };
 		27A8F7E1C4375871A26FD7E1 /* AlarmPermissionBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D53680714A0330FB9B8F8E91 /* AlarmPermissionBanner.swift */; };
+		33F7B9474DB1A09C8CA5F9FE /* DeliciousKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8807234A18D133D701F49619 /* DeliciousKit */; };
 		AAA00001 /* ShabbatClockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00001 /* ShabbatClockApp.swift */; };
 		AAA00001A0330FB9B8F8E901 /* ShabbatWeekArcCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA00001A0330FB9B8F8E902 /* ShabbatWeekArcCard.swift */; };
 		AAA00002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00002 /* ContentView.swift */; };
@@ -36,8 +37,9 @@
 		AAA00071 /* RepeatDaysPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00071 /* RepeatDaysPicker.swift */; };
 		AAA00072 /* SoundPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00072 /* SoundPickerView.swift */; };
 		AAA00090 /* ZmanimView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00090 /* ZmanimView.swift */; };
-		AAA00099 /* AlarmSoundComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00099 /* AlarmSoundComposer.swift */; };
+		AAA00097 /* AlarmPreparingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00097 /* AlarmPreparingOverlay.swift */; };
 		AAA00098 /* NotificationAlarmEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00098 /* NotificationAlarmEngine.swift */; };
+		AAA00099 /* AlarmSoundComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00099 /* AlarmSoundComposer.swift */; };
 		AAA00100 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00100 /* SettingsView.swift */; };
 		AAA00101 /* PremiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00101 /* PremiumView.swift */; };
 		AAA00102 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00102 /* DebugView.swift */; };
@@ -59,7 +61,6 @@
 		DD112236 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DD112235 /* InfoPlist.xcstrings */; };
 		DD8859E3 /* LocationRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBA /* LocationRow.swift */; };
 		DD8859E4 /* PermissionPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBB /* PermissionPromptView.swift */; };
-		AAA00097 /* AlarmPreparingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBB00097 /* AlarmPreparingOverlay.swift */; };
 		DD8859E5 /* SwipeToDelete.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC27FEBC /* SwipeToDelete.swift */; };
 		DDAB2E76 /* CitySearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4824B /* CitySearchView.swift */; };
 		ED823EEC2F9B8C9C0084B452 /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = ED823EEB2F9B8C9C0084B452 /* Mixpanel */; };
@@ -127,8 +128,9 @@
 		BBB00071 /* RepeatDaysPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatDaysPicker.swift; sourceTree = "<group>"; };
 		BBB00072 /* SoundPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPickerView.swift; sourceTree = "<group>"; };
 		BBB00090 /* ZmanimView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZmanimView.swift; sourceTree = "<group>"; };
-		BBB00099 /* AlarmSoundComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundComposer.swift; sourceTree = "<group>"; };
+		BBB00097 /* AlarmPreparingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmPreparingOverlay.swift; sourceTree = "<group>"; };
 		BBB00098 /* NotificationAlarmEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationAlarmEngine.swift; sourceTree = "<group>"; };
+		BBB00099 /* AlarmSoundComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmSoundComposer.swift; sourceTree = "<group>"; };
 		BBB00100 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		BBB00101 /* PremiumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PremiumView.swift; sourceTree = "<group>"; };
 		BBB00102 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
@@ -148,7 +150,6 @@
 		C5037BE5C6470E9A17CA8F51 /* ShabbatReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShabbatReminderService.swift; sourceTree = "<group>"; };
 		CC27FEBA /* LocationRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRow.swift; sourceTree = "<group>"; };
 		CC27FEBB /* PermissionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionPromptView.swift; sourceTree = "<group>"; };
-		BBB00097 /* AlarmPreparingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmPreparingOverlay.swift; sourceTree = "<group>"; };
 		CC27FEBC /* SwipeToDelete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeToDelete.swift; sourceTree = "<group>"; };
 		CCC00001 /* ShabbatClock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShabbatClock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCE4824B /* CitySearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitySearchView.swift; sourceTree = "<group>"; };
@@ -168,7 +169,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		EDE72F4C2F8BFB3200E40DFF /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		EDE72F4C2F8BFB3200E40DFF /* Exceptions for "widgets" folder in "widgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -178,7 +179,18 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		EDE72F3F2F8BFB3100E40DFF /* widgets */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (EDE72F4C2F8BFB3200E40DFF /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = widgets; sourceTree = "<group>"; };
+		EDE72F3F2F8BFB3100E40DFF /* widgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EDE72F4C2F8BFB3200E40DFF /* Exceptions for "widgets" folder in "widgetsExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = widgets;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +202,7 @@
 				EDF6A1E02F23A6860052797F /* KosherSwift in Frameworks */,
 				ED823F892F9D36E60084B452 /* FirebaseAnalytics in Frameworks */,
 				ED823F8B2F9D36E60084B452 /* FirebaseRemoteConfig in Frameworks */,
+				33F7B9474DB1A09C8CA5F9FE /* DeliciousKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -448,6 +461,7 @@
 				ED823EEB2F9B8C9C0084B452 /* Mixpanel */,
 				ED823F882F9D36E60084B452 /* FirebaseAnalytics */,
 				ED823F8A2F9D36E60084B452 /* FirebaseRemoteConfig */,
+				8807234A18D133D701F49619 /* DeliciousKit */,
 			);
 			productName = ShabbatClock;
 			productReference = CCC00001 /* ShabbatClock.app */;
@@ -485,6 +499,7 @@
 				EDF6A1DE2F23A6860052797F /* XCRemoteSwiftPackageReference "KosherSwift" */,
 				ED823EEA2F9B8C9C0084B452 /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 				ED823F872F9D36E60084B452 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				2DCE0138ACC10E5B83A43D5D /* XCLocalSwiftPackageReference "deliciouskit" */,
 			);
 			productRefGroup = EEE00999 /* Products */;
 			projectDirPath = "";
@@ -885,6 +900,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		2DCE0138ACC10E5B83A43D5D /* XCLocalSwiftPackageReference "deliciouskit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../deliciouskit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		ED823EEA2F9B8C9C0084B452 /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -913,6 +935,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8807234A18D133D701F49619 /* DeliciousKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2DCE0138ACC10E5B83A43D5D /* XCLocalSwiftPackageReference "deliciouskit" */;
+			productName = DeliciousKit;
+		};
 		ED823EEB2F9B8C9C0084B452 /* Mixpanel */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = ED823EEA2F9B8C9C0084B452 /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
