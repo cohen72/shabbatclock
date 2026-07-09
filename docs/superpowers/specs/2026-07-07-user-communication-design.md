@@ -151,6 +151,14 @@ subscribeToUpdates ── HTTPS Cloud Function (2nd gen), shared Firebase projec
   `shabbat-clock`, `sixthings-f25ae`). Create a dedicated `delicious-shared` project to
   host the function + Firestore + secrets. **Provisioning is a setup step, confirmed
   with the operator before creation.**
+- **Sending domain: `deliciousapps.com`, not `delicious.works`.** `delicious.works` is
+  the DeliciousKit *product* site — B2B, developers buying the SDK. Newsletter
+  recipients are consumer end-users of individual apps (ShabbatClock, Snowball, etc.)
+  who don't know or care what DeliciousKit is. `deliciousapps.com` (verified
+  unregistered, 2026-07-09) is the consumer-facing identity: doubles as a public
+  portfolio page listing the apps and as the Loops-verified sending domain
+  (`hello@deliciousapps.com` / `updates@deliciousapps.com`). Two audiences, two
+  domains, same parent brand — doesn't reopen [[naming-identity-model]].
 
 ## Error handling
 
