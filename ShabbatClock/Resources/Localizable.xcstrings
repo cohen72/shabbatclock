@@ -1616,6 +1616,16 @@
         }
       }
     },
+    "Get updates and tips\nby email." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קבלו עדכונים וטיפים\nבאימייל."
+          }
+        }
+      }
+    },
     "Go Premium" : {
       "localizations" : {
         "he" : {
@@ -2444,6 +2454,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "אוקיינוס"
+          }
+        }
+      }
+    },
+    "Occasional product updates and offers. Unsubscribe anytime." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עדכוני מוצר והצעות מדי פעם. ניתן לבטל את המנוי בכל עת."
           }
         }
       }
@@ -3502,6 +3522,16 @@
         }
       }
     },
+    "Stay in the Loop" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הישארו מעודכנים"
+          }
+        }
+      }
+    },
     "Step 1" : {
       "localizations" : {
         "he" : {
@@ -4110,6 +4140,16 @@
         }
       }
     },
+    "Updates" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עדכונים"
+          }
+        }
+      }
+    },
     "Use Current Location" : {
       "localizations" : {
         "he" : {
@@ -4319,6 +4359,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "הכל מוכן!"
+          }
+        }
+      }
+    },
+    "You're subscribed to updates" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נרשמת לעדכונים"
           }
         }
       }

@@ -1,8 +1,10 @@
 import SwiftUI
+import DeliciousKit
 
 /// App settings view.
 struct SettingsView: View {
     @Environment(\.requestReview) private var requestReview
+    @EnvironmentObject private var newsletterController: NewsletterController
     @AppStorage("isPremium") private var isPremium = false
     @AppStorage("defaultSound") private var defaultSound = "Shalom Aleichem"
     @AppStorage("defaultAlarmDuration") private var defaultAlarmDuration = 60
@@ -60,6 +62,9 @@ struct SettingsView: View {
 
                         // Language section
                         languageSection
+
+                        // Newsletter section
+                        newsletterSection
 
                         // Defaults section
                         defaultsSection
@@ -344,6 +349,79 @@ struct SettingsView: View {
             .pickerStyle(.segmented)
             .padding(16)
             .settingsCard()
+        }
+    }
+
+    // MARK: - Newsletter Section
+
+    private var newsletterSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: "Updates", icon: "envelope.fill")
+
+            if newsletterController.isSubscribed {
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(.green)
+                    Text("You're subscribed to updates")
+                        .font(AppFont.body())
+                        .foregroundStyle(.textPrimary)
+                    Spacer()
+                }
+                .padding(16)
+                .settingsCard()
+            } else {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Occasional product updates and offers. Unsubscribe anytime.")
+                        .font(AppFont.caption(12))
+                        .foregroundStyle(.textSecondary)
+
+                    SignInWithAppleActionButton {
+                        Task { await signUpForNewsletter() }
+                    }
+                    .frame(height: 44)
+                    .disabled(newsletterController.isSubmitting)
+
+                    if let error = newsletterController.lastErrorMessage {
+                        Text(error)
+                            .font(AppFont.caption(11))
+                            .foregroundStyle(.red.opacity(0.8))
+                    }
+                }
+                .padding(16)
+                .settingsCard()
+            }
+        }
+        .onAppear {
+            if !newsletterController.isSubscribed {
+                Analytics.track(.newsletterSignupPrompted(source: .settings))
+            }
+        }
+    }
+
+    private func signUpForNewsletter() async {
+        do {
+            let provider = AppleAuthProvider()
+            let user = try await provider.signIn(method: .apple)
+            guard let email = user.email else {
+                Analytics.track(.newsletterSignupFailed(source: .settings, reason: "no_email"))
+                return
+            }
+            let success = await newsletterController.subscribe(
+                email: email,
+                isPremium: isPremium,
+                locale: AppLanguage.current.effectiveLocale.identifier,
+                appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+            )
+            if success {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                Analytics.track(.newsletterSignupCompleted(source: .settings))
+            } else {
+                let reason = newsletterController.lastErrorMessage ?? "unknown"
+                Analytics.track(.newsletterSignupFailed(source: .settings, reason: reason))
+            }
+        } catch {
+            Analytics.track(.newsletterSignupFailed(source: .settings, reason: error.localizedDescription))
         }
     }
 

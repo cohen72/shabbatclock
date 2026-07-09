@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import FirebaseCore
 import FirebaseAppCheck
+import DeliciousKit
 import DeliciousKitFirebase
 
 /// Name of the secondary FirebaseApp instance used only for the shared
@@ -16,6 +17,10 @@ struct ShabbatClockApp: App {
   let container: ModelContainer
   @State private var alarmService = AlarmKitService.shared
   @StateObject private var storeManager = StoreManager.shared
+  @StateObject private var newsletterController = NewsletterController(
+    app: "shabbatclock",
+    attest: FirebaseAppCheckAttestProvider(appName: deliciousAppsFirebaseAppName)
+  )
 
   init() {
 
@@ -66,6 +71,7 @@ struct ShabbatClockApp: App {
         .environment(alarmService)
         .environmentObject(storeManager)
         .environmentObject(RemoteConfigService.shared)
+        .environmentObject(newsletterController)
     }
     .modelContainer(container)
   }

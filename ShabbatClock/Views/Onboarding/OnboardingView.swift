@@ -1,13 +1,16 @@
 import SwiftUI
 import AlarmKit
+import DeliciousKit
 
 /// First-launch onboarding flow. Introduces the app and requests permissions in context.
 /// Shows once — tracked via @AppStorage("hasCompletedOnboarding").
 ///
-/// Order: Welcome → Alarms (core) → Ring Setup (vibration education) → Notifications (pre-Shabbat reminder) → Location (nice-to-have)
+/// Order: Welcome → Alarms (core) → Ring Setup (vibration education) → Notifications (pre-Shabbat reminder) → Location (nice-to-have) → Newsletter (optional)
 struct OnboardingView: View {
     @Environment(AlarmKitService.self) private var alarmService
     @StateObject private var locationManager = LocationManager.shared
+    @EnvironmentObject private var newsletterController: NewsletterController
+    @AppStorage("isPremium") private var isPremium = false
 
     let onComplete: () -> Void
 
@@ -17,7 +20,7 @@ struct OnboardingView: View {
     /// carries over if the user re-enters the flow (debug reset, reinstall).
     @AppStorage("onboardingMusicMuted") private var isMusicMuted = false
 
-    private let totalPages = 5
+    private let totalPages = 6
 
     /// Background music track played during onboarding.
     private var onboardingMusic: AlarmSound? {
@@ -35,6 +38,7 @@ struct OnboardingView: View {
                 ringSetupPage.tag(2)
                 notificationsPage.tag(3)
                 locationPage.tag(4)
+                newsletterPage.tag(5)
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.easeInOut(duration: 0.3), value: currentPage)
@@ -47,6 +51,7 @@ struct OnboardingView: View {
                 case 2: page = .ringSetup
                 case 3: page = .notifications
                 case 4: page = .location
+                case 5: page = .newsletter
                 default: return
                 }
                 Analytics.track(.onboardingPageViewed(page: page))
@@ -373,7 +378,7 @@ struct OnboardingView: View {
             buttonTitle: "Allow Location",
             action: {
                 if locationManager.isAuthorized {
-                    completeOnboarding()
+                    advanceTo(5)
                 } else {
                     Analytics.track(.onboardingPermissionPrompted(permission: .location))
                     locationManager.requestPermission()
@@ -383,8 +388,7 @@ struct OnboardingView: View {
                     // Granted/denied tracking happens via .onChange below.
                 }
             },
-            continueAction: { completeOnboarding() },
-            isFinal: true
+            continueAction: { advanceTo(5) }
         )
         .onChange(of: locationManager.authorizationStatus) { _, new in
             switch new {
@@ -394,6 +398,118 @@ struct OnboardingView: View {
                 Analytics.track(.onboardingPermissionDenied(permission: .location))
             default: break
             }
+        }
+    }
+
+    // MARK: - Page 6: Newsletter (optional)
+
+    private var newsletterPage: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            Image(systemName: "envelope.fill")
+                .font(.system(size: 72))
+                .foregroundStyle(.goldAccent)
+                .padding(.bottom, 28)
+
+            Text("Stay in the Loop")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundStyle(.textPrimary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 8)
+
+            Text("Get updates and tips\nby email.")
+                .font(.system(size: 22, weight: .medium))
+                .foregroundStyle(.textSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 20)
+
+            Text("Occasional product updates and offers. Unsubscribe anytime.")
+                .font(AppFont.body(15))
+                .foregroundStyle(.textSecondary.opacity(0.8))
+                .multilineTextAlignment(.center)
+                .lineSpacing(3)
+                .padding(.horizontal, 40)
+
+            Spacer()
+
+            if newsletterController.isSubscribed {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                    Text("Done")
+                }
+                .font(.system(size: 18, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(Color.green.opacity(0.8))
+                )
+                .padding(.horizontal, 32)
+                .onTapGesture { completeOnboarding() }
+            } else {
+                SignInWithAppleActionButton {
+                    Task { await signUpForNewsletter() }
+                }
+                .frame(height: 50)
+                .disabled(newsletterController.isSubmitting)
+                .padding(.horizontal, 32)
+            }
+
+            if let error = newsletterController.lastErrorMessage {
+                Text(error)
+                    .font(AppFont.body(13))
+                    .foregroundStyle(.red.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.top, 8)
+            }
+
+            Button {
+                Analytics.track(.newsletterSignupSkipped(source: .onboarding))
+                completeOnboarding()
+            } label: {
+                Text(newsletterController.isSubscribed ? "" : "Not Now")
+                    .font(AppFont.body(14))
+                    .foregroundStyle(.textSecondary)
+            }
+            .padding(.top, 14)
+            .opacity(newsletterController.isSubscribed ? 0 : 1)
+
+            Spacer()
+                .frame(height: 50)
+        }
+        .onAppear {
+            Analytics.track(.newsletterSignupPrompted(source: .onboarding))
+        }
+    }
+
+    private func signUpForNewsletter() async {
+        do {
+            let provider = AppleAuthProvider()
+            let user = try await provider.signIn(method: .apple)
+            guard let email = user.email else {
+                Analytics.track(.newsletterSignupFailed(source: .onboarding, reason: "no_email"))
+                return
+            }
+            let success = await newsletterController.subscribe(
+                email: email,
+                isPremium: isPremium,
+                locale: AppLanguage.current.effectiveLocale.identifier,
+                appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+            )
+            if success {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                Analytics.track(.newsletterSignupCompleted(source: .onboarding))
+            } else {
+                let reason = newsletterController.lastErrorMessage ?? "unknown"
+                Analytics.track(.newsletterSignupFailed(source: .onboarding, reason: reason))
+            }
+        } catch {
+            Analytics.track(.newsletterSignupFailed(source: .onboarding, reason: error.localizedDescription))
         }
     }
 

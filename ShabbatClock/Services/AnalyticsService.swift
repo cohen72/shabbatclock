@@ -223,6 +223,12 @@ enum AnalyticsEvent {
         locationAuthorized: Bool
     )
 
+    /// Newsletter opt-in (Sign in with Apple + consent), from onboarding or Settings.
+    case newsletterSignupPrompted(source: NewsletterSource)
+    case newsletterSignupCompleted(source: NewsletterSource)
+    case newsletterSignupSkipped(source: NewsletterSource)
+    case newsletterSignupFailed(source: NewsletterSource, reason: String)
+
     // MARK: Core engagement
 
     /// Fired when a user creates an alarm. `source` distinguishes manual vs zman.
@@ -265,7 +271,8 @@ enum AnalyticsEvent {
 
     // MARK: - Associated Types
 
-    enum OnboardingPage: String { case welcome, alarms, ringSetup, notifications, location }
+    enum OnboardingPage: String { case welcome, alarms, ringSetup, notifications, location, newsletter }
+    enum NewsletterSource: String { case onboarding, settings }
     enum Permission: String { case alarms, notifications, location }
     enum AlarmSource: String { case manual, zman }
     enum StopMethod: String { case auto, manual, snoozed }
@@ -312,6 +319,10 @@ enum AnalyticsEvent {
         case .onboardingPermissionGranted: return "onboarding_permission_granted"
         case .onboardingPermissionDenied: return "onboarding_permission_denied"
         case .onboardingCompleted: return "onboarding_completed"
+        case .newsletterSignupPrompted: return "newsletter_signup_prompted"
+        case .newsletterSignupCompleted: return "newsletter_signup_completed"
+        case .newsletterSignupSkipped: return "newsletter_signup_skipped"
+        case .newsletterSignupFailed: return "newsletter_signup_failed"
         case .alarmCreated: return "alarm_created"
         case .alarmEdited: return "alarm_edited"
         case .alarmDeleted: return "alarm_deleted"
@@ -353,6 +364,14 @@ enum AnalyticsEvent {
                 "notifications_authorized": notif,
                 "location_authorized": loc,
             ]
+
+        case .newsletterSignupPrompted(let source),
+             .newsletterSignupCompleted(let source),
+             .newsletterSignupSkipped(let source):
+            return ["source": source.rawValue]
+
+        case .newsletterSignupFailed(let source, let reason):
+            return ["source": source.rawValue, "reason": reason]
 
         case .alarmCreated(let source, let zmanType, let hasRepeat, let repeatCount, let soundCategory, let timeBucket):
             var props: Properties = [
