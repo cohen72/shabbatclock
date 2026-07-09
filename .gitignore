@@ -24,3 +24,7 @@ ShabbatClock/Resources/Secrets.plist
 # Claude Code
 .claude/
 /assets/sounds
+
+# Agent tooling caches
+.serena/
+*.log
