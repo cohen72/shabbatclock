@@ -94,7 +94,7 @@ Adopt DeliciousKit's `ReviewPrompter` (already built: `minSessions=3`,
   permission-page pattern.
 - Flow: tap → Sign in with Apple (`ASAuthorizationController` via DeliciousKit
   `AuthProvider` Apple adapter) → obtain email (Apple private-relay address is fine)
-  → POST to the shared Cloud Function → on success, persist a local `@AppStorage`
+  → POST to the shared backend endpoint → on success, persist a local `@AppStorage`
   flag so we never re-prompt. Failure keeps the Settings row available to retry.
 - **Capture-only:** no account/session is created. We only need the email + consent.
 - Segment tag: `isPremium` read from `StoreManager` at signup time is included so the
@@ -104,13 +104,14 @@ Adopt DeliciousKit's `ReviewPrompter` (already built: `minSessions=3`,
 
 ```
 App (any Delicious app)
-   │  POST /subscribeToUpdates
+   │  POST https://delicious.works/api/subscribe
    │  { email, app:"shabbatclock", locale, isPremium, appVersion, consent:true }
    │  Firebase App Check (App Attest, iOS 26) attests the request
    ▼
-subscribeToUpdates ── HTTPS Cloud Function (2nd gen), shared Firebase project ──
+/api/subscribe ── Vercel serverless function (existing delicious.works project) ──
    │  1. Validate: email format · app in allowlist · consent == true · App Check token
-   │  2. Write consent audit → Firestore
+   │     (verified via Firebase Admin SDK, works from any backend — not Functions-only)
+   │  2. Write consent audit → Firestore (project: deliciousapps, Spark/free plan)
    │        subscribers/{app}/contacts/{emailHash}
    │        { email, app, isPremium, locale, source, consentedAt, appVersion }
    │  3. Upsert contact → Loops.so API
@@ -119,8 +120,18 @@ subscribeToUpdates ── HTTPS Cloud Function (2nd gen), shared Firebase projec
    200 OK  (idempotent — re-subscribe is a safe upsert)
 ```
 
+- **Why Vercel instead of a Firebase Cloud Function:** Cloud Functions deployment
+  (1st or 2nd gen) requires the Blaze pay-as-you-go plan enabled — a payment method
+  on file — regardless of whether real usage stays within the free quota (verified,
+  not assumed: Blaze is required to deploy at all, since the build pipeline touches
+  billed services). Firestore itself has no such requirement on the Spark/free plan.
+  `delicious.works` is already hosted on Vercel's free Hobby tier, which runs
+  serverless functions with outbound network access at no cost and no card — so the
+  endpoint lives there instead, using the Firebase Admin SDK (service-account
+  credential, stored as a Vercel env var) purely to reach Firestore. Functionally
+  equivalent to the Cloud Function design; just a different, genuinely free host.
 - **Why a function in front of Loops (not app → Loops directly):**
-  - Loops API key stays server-side (Secret Manager) — not extractable from the binary.
+  - Loops API key stays server-side (Vercel env var) — not extractable from the binary.
   - ESP is swappable later without an app update; the app's contract is just the endpoint.
   - Central place to enforce consent + write the audit record + apply segment tags.
   - One integration reused by every Delicious app via the `app` tag.
@@ -128,8 +139,11 @@ subscribeToUpdates ── HTTPS Cloud Function (2nd gen), shared Firebase projec
   marketing email (GDPR/CAN-SPAM), independent of Loops (which holds live subscription
   state). `emailHash` (e.g. SHA-256 of lowercased email) is the doc id for idempotent
   upserts; the plaintext email is a field for export/debugging.
-- **Abuse prevention:** Firebase App Check (App Attest on iOS 26) gates the function so
-  only genuine app installs can call it. No shared secret needed.
+- **Abuse prevention:** Firebase App Check (App Attest on iOS 26) gates the endpoint
+  so only genuine app installs can call it. No shared secret needed.
+- **Reply handling:** newsletter campaigns set a Reply-To distinct from the verified
+  From address (e.g. From `hello@mail.delicious.works`, Reply-To the operator's
+  personal inbox) — Loops supports this natively, no extra infrastructure needed.
 - **Unsubscribe:** handled entirely by Loops (hosted page + list-unsubscribe header).
   The app builds nothing.
 
@@ -140,17 +154,17 @@ subscribeToUpdates ── HTTPS Cloud Function (2nd gen), shared Firebase projec
 | `WhatsNewConfig` content | ShabbatClock (per release) |
 | What's New / Review / Auth modules | DeliciousKit (already built) |
 | `Newsletter.swift` client | **New in DeliciousKit** (built post-refactor) |
-| `subscribeToUpdates` function + Firestore schema + Loops adapter | **New shared Delicious backend** |
+| `/api/subscribe` function + Firestore schema + Loops adapter | **New shared Delicious backend** (Vercel + Firestore) |
 | Pipeline capture | `delicious/CLAUDE.md` Lessons Learned + new `shared/skills/delicious-newsletter.md` |
 
 ## Infrastructure decisions (confirmed)
 
 - **ESP:** Loops.so.
 - **Backend scope:** one shared service for all Delicious apps, keyed by an `app` tag.
-- **Shared Firebase project:** none exists today (verified: only per-app projects like
-  `shabbat-clock`, `sixthings-f25ae`). Create a dedicated `delicious-shared` project to
-  host the function + Firestore + secrets. **Provisioning is a setup step, confirmed
-  with the operator before creation.**
+- **Shared Firebase project: `deliciousapps`** (created 2026-07-09, Spark/free plan —
+  hosts Firestore only, no Cloud Functions/Blaze needed since the endpoint runs on
+  Vercel instead). Name doubles as a nice match for the existing
+  `cohen72/delicious.apps` GitHub repo.
 - **Sending domain: a subdomain of `delicious.works`** (e.g. `mail.delicious.works`),
   **not a new domain purchase.** `deliciousapps.com` was considered (verified
   unregistered, 2026-07-09) for a cleaner consumer-facing "From" address, but
