@@ -69,6 +69,7 @@ struct ShabbatClockApp: App {
     WindowGroup {
       ContentView()
         .environment(alarmService)
+        .environment(\.designTokens, ShabbatClockTokens())
         .environmentObject(storeManager)
         .environmentObject(RemoteConfigService.shared)
         .environmentObject(newsletterController)

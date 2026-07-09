@@ -2420,7 +2420,6 @@
       }
     },
     "Not Now" : {
-      "extractionState" : "stale",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -2457,6 +2456,16 @@
         }
       }
     },
+    "Occasional product updates and offers. Unsubscribe anytime." : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עדכוני מוצר והצעות מדי פעם. ניתן לבטל את המנוי בכל עת."
+          }
+        }
+      }
+    },
     "Ocean" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2464,16 +2473,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "אוקיינוס"
-          }
-        }
-      }
-    },
-    "Occasional product updates and offers. Unsubscribe anytime." : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "עדכוני מוצר והצעות מדי פעם. ניתן לבטל את המנוי בכל עת."
           }
         }
       }
@@ -4133,6 +4132,16 @@
         }
       }
     },
+    "Updates" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עדכונים"
+          }
+        }
+      }
+    },
     "Upgrade" : {
       "localizations" : {
         "he" : {
@@ -4176,16 +4185,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שדרגו לפרימיום כדי להקליט צלילי התראה מותאמים"
-          }
-        }
-      }
-    },
-    "Updates" : {
-      "localizations" : {
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "עדכונים"
           }
         }
       }
