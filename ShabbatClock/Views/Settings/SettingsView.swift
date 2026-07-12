@@ -408,6 +408,7 @@ struct SettingsView: View {
         do {
             let provider = AppleAuthProvider()
             let user = try await provider.signIn(method: .apple)
+            Analytics.identifyUser(appleUserID: user.id)
             guard let email = user.email else {
                 Analytics.track(.newsletterSignupFailed(source: .settings, reason: "no_email"))
                 return

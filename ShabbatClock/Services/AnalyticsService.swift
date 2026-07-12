@@ -2,6 +2,7 @@ import Foundation
 import Mixpanel
 import FirebaseAnalytics
 import FirebaseInstallations
+import DeliciousKit
 
 /// Single funnel for every analytics event in the app.
 ///
@@ -53,17 +54,31 @@ enum Analytics {
         // IDFA/ad-network integrations are not enabled on this SDK path.
         configured = true
 
+        // If a previous session already signed in with Apple, that stable ID
+        // (persisted in Keychain, survives reinstalls) is the real identity —
+        // check this synchronously, before the FID arrives asynchronously
+        // below, so the FID branch can skip re-identifying and never race a
+        // later `identify()` call back over this one.
+        let alreadySignedIn = AppleAuthProvider().currentUser()
+        if let appleUser = alreadySignedIn {
+            identifyUser(appleUserID: appleUser.id)
+        }
+
         // Mirror the Firebase Installation ID across analytics providers and
         // surfaces. Async; everything below runs when the FID arrives.
         // - Firebase: user property `install_id` so Remote Config audience
-        //   conditions can target individual installs.
-        // - Mixpanel: identify the user with the same FID so both providers
-        //   share a stable, cross-referenceable user identifier.
+        //   conditions can target individual installs (kept even when
+        //   signed in — useful to correlate installs with accounts).
+        // - Mixpanel/Firebase identify: only when not already signed in with
+        //   Apple — otherwise this would overwrite the stable identity set
+        //   above with the anonymous, reinstall-resetting FID.
         // - AppURLs: cached for support-email footers.
         Installations.installations().installationID { id, _ in
             guard let id else { return }
             FirebaseAnalytics.Analytics.setUserProperty(id, forName: "install_id")
-            Mixpanel.mainInstance().identify(distinctId: id)
+            if alreadySignedIn == nil {
+                Mixpanel.mainInstance().identify(distinctId: id)
+            }
             AppURLs.cachedInstallID = id
         }
     }
@@ -111,6 +126,24 @@ enum Analytics {
         guard configured else { return }
         Mixpanel.mainInstance().registerSuperProperties([key: value])
         FirebaseAnalytics.Analytics.setUserProperty(firebaseUserPropertyString(value), forName: key)
+    }
+
+    /// Re-identifies analytics with Apple's stable per-app user ID once the
+    /// user signs in — the Firebase Installation ID used by default resets on
+    /// every reinstall, so it can't recognize a returning user; Apple's ID
+    /// (persisted in Keychain by `AppleAuthProvider`, per Apple's own design
+    /// for exactly this purpose) survives reinstalls. Call this right after a
+    /// successful sign-in, and once at launch if a session already exists —
+    /// `configure()` does the latter automatically.
+    ///
+    /// This is a first-party product-analytics identifier, not shared with
+    /// ad networks or data brokers, so it doesn't change the "Used to Track
+    /// You" / ATT posture documented at the top of this file.
+    static func identifyUser(appleUserID: String) {
+        guard configured else { return }
+        Mixpanel.mainInstance().identify(distinctId: appleUserID)
+        FirebaseAnalytics.Analytics.setUserID(appleUserID)
+        setSuperProperty("signed_in", value: true)
     }
 
     /// Convert a Mixpanel value to a Firebase user property string (max 36 chars).
