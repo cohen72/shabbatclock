@@ -1,5 +1,4 @@
-What's New in 1.0.4:
+What's New in 1.0.5:
 
-• Stay in the loop — opt in to occasional email updates from Shabbat Clock
-• New "What's New" screen in Settings to catch up on the latest updates
+• Behind-the-scenes improvements to help us better understand how the app is used
 • Small bug fixes and improvements
