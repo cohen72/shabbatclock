@@ -269,6 +269,14 @@ enum AnalyticsEvent {
     /// saw the paywall, then purchased?
     case freeLimitHit(feature: GatedFeature)
 
+    /// Subscription lifecycle, sourced from `StoreKit.Transaction.updates` in
+    /// `StoreManager` — the only reliable read on whether paying users stick around.
+    /// `purchaseCompleted` alone can't answer that; these fill in what happens after.
+    case subscriptionRenewed(plan: Plan)
+    case subscriptionCancelled(plan: Plan)
+    case subscriptionExpired(plan: Plan)
+    case subscriptionRefunded(plan: Plan)
+
     // MARK: - Associated Types
 
     enum OnboardingPage: String { case welcome, alarms, ringSetup, notifications, location, newsletter }
@@ -342,6 +350,10 @@ enum AnalyticsEvent {
         case .purchaseCancelled: return "purchase_cancelled"
         case .purchaseRestored: return "purchase_restored"
         case .freeLimitHit: return "free_limit_hit"
+        case .subscriptionRenewed: return "subscription_renewed"
+        case .subscriptionCancelled: return "subscription_cancelled"
+        case .subscriptionExpired: return "subscription_expired"
+        case .subscriptionRefunded: return "subscription_refunded"
         }
     }
 
@@ -406,7 +418,11 @@ enum AnalyticsEvent {
         case .paywallPlanSelected(let plan),
              .purchaseStarted(let plan),
              .purchaseCompleted(let plan),
-             .purchaseCancelled(let plan):
+             .purchaseCancelled(let plan),
+             .subscriptionRenewed(let plan),
+             .subscriptionCancelled(let plan),
+             .subscriptionExpired(let plan),
+             .subscriptionRefunded(let plan):
             return ["plan": plan.rawValue]
 
         case .purchaseFailed(let plan, let reason):

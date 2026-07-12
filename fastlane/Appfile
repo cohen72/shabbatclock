@@ -1,0 +1,4 @@
+# Reads from environment so the same config is portable across machines/people.
+app_identifier(ENV["APP_BUNDLE_ID"])      # e.g. works.delicious.shabbatclock
+apple_id(ENV["APPLE_ID"])                 # your Apple Developer account email
+team_id(ENV["APPLE_TEAM_ID"])             # 10-char Team ID

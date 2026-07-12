@@ -140,13 +140,24 @@ final class StoreManager: ObservableObject {
         if transaction.revocationDate != nil {
             // Refunded — revoke access
             purchasedProductIDs.remove(transaction.productID)
+            Analytics.track(.subscriptionRefunded(plan: plan(for: transaction.productID)))
         } else {
             await grantEntitlement(for: transaction)
+            // `.purchase` (the initial buy) is already tracked as `purchaseCompleted`
+            // at the call site in PremiumView, where the paywall context is known.
+            if transaction.reason == .renewal {
+                Analytics.track(.subscriptionRenewed(plan: plan(for: transaction.productID)))
+            }
         }
 
         await transaction.finish()
         await updatePurchasedProducts()
         syncAppStorage()
+    }
+
+    /// Maps a StoreKit product ID to the coarse plan used for analytics.
+    private func plan(for productID: String) -> AnalyticsEvent.Plan {
+        productID == Self.yearlyID ? .yearly : .weekly
     }
 
     // MARK: - Entitlements
@@ -187,6 +198,45 @@ final class StoreManager: ObservableObject {
 
         // Use the most favorable status
         subscriptionStatus = statuses.first?.state
+
+        for status in statuses {
+            guard let renewalInfo = try? status.renewalInfo.payloadValue else { continue }
+            trackLifecycleTransition(
+                productID: renewalInfo.currentProductID,
+                state: status.state,
+                willAutoRenew: renewalInfo.willAutoRenew
+            )
+        }
+    }
+
+    /// Fires `subscriptionCancelled`/`subscriptionExpired` the first time each
+    /// transition is observed, using UserDefaults (not just in-memory state) so a
+    /// transition that happened while the app was closed is still caught on next
+    /// launch, and each event fires exactly once rather than on every status refresh.
+    private func trackLifecycleTransition(
+        productID: String,
+        state: Product.SubscriptionInfo.RenewalState,
+        willAutoRenew: Bool
+    ) {
+        let defaults = UserDefaults.standard
+        let autoRenewOffKey = "sub.autoRenewOff.\(productID)"
+        let expiredKey = "sub.expired.\(productID)"
+
+        let wasAutoRenewOff = defaults.bool(forKey: autoRenewOffKey)
+        if !willAutoRenew && !wasAutoRenewOff {
+            defaults.set(true, forKey: autoRenewOffKey)
+            Analytics.track(.subscriptionCancelled(plan: plan(for: productID)))
+        } else if willAutoRenew && wasAutoRenewOff {
+            defaults.set(false, forKey: autoRenewOffKey)
+        }
+
+        let wasExpired = defaults.bool(forKey: expiredKey)
+        if state == .expired && !wasExpired {
+            defaults.set(true, forKey: expiredKey)
+            Analytics.track(.subscriptionExpired(plan: plan(for: productID)))
+        } else if state != .expired && wasExpired {
+            defaults.set(false, forKey: expiredKey)
+        }
     }
 
     // MARK: - AppStorage Sync
