@@ -1,4 +1,4 @@
-What's New in 1.0.5:
+What's New in 1.0.6:
 
 • Behind-the-scenes improvements to help us better understand how the app is used
 • Small bug fixes and improvements
